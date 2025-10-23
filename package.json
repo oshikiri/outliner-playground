@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "format": "prettier --write . --list-different",
     "pretest": "prettier --check .",
-    "test": "echo \"no test\""
+    "test": "tsc --noEmit"
   },
   "author": "oshikiri",
   "license": "ISC",
