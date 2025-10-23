@@ -1,12 +1,11 @@
 import Block from "./BlockEntity";
 
 const initialPage = new Block("", [
-  new Block("This is a playground for react-plaintext-outliner"),
+  new Block("This is a playground for outliner-playground"),
   new Block(""),
-  new Block(
-    "react-plaintext-outliner is a study of logseq-like outliner editors",
-    [new Block("This project aims to learn React, Zustand, and Tailwind CSS")],
-  ),
+  new Block("outliner-playground is a study of logseq-like outliner editors", [
+    new Block("This project aims to learn React, Zustand, and Tailwind CSS"),
+  ]),
   new Block("Features", [
     new Block("Create, edit, and delete blocks"),
     new Block("State management", [
