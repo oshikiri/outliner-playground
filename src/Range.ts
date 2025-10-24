@@ -12,14 +12,14 @@ export class RangeSet {
 }
 
 /**
- * [l, r] represents a range from l to r (inclusive).
+ * Range(l, r) represents a range from l to r.
  */
 export class Range {
   constructor(
     public l: number,
     public r: number,
   ) {}
-  contains(x: number): boolean {
+  containsInclusive(x: number): boolean {
     return this.l <= x && x <= this.r;
   }
 }
@@ -27,8 +27,8 @@ export class Range {
 /**
  * Example: content = "abc\ndef"
  *
- *  a|b|c|\n
- * 0 1 2 3
+ * |a|b|c|\n|
+ * 0 1 2 3  4
  *
  * |d|e|f|
  * 4 5 6 7

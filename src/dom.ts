@@ -36,7 +36,7 @@ export function isCaretAtLastLine(content: string): boolean {
   if (!lastlineRange) {
     return false;
   }
-  return lastlineRange.contains(caretOffset);
+  return lastlineRange.containsInclusive(caretOffset);
 }
 
 export function isCaretAtFirstLine(): boolean {
