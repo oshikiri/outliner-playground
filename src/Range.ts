@@ -1,8 +1,14 @@
 export class RangeSet {
   constructor(private ranges: Range[]) {}
+
+  getRanges(): Range[] {
+    return [...this.ranges];
+  }
+
   pushRange(l: number, r: number): void {
     this.ranges.push(new Range(l, r));
   }
+
   getLastRange(): Range | null {
     if (this.ranges.length === 0) {
       return null;
