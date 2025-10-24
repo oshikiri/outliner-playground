@@ -64,9 +64,9 @@ export default function BlockComponent({
       <div>・</div>
       <div className="flex-grow">
         <div
-          // Set px-2 for visibility when the cursor is at the beginning of the line.
+          // Set px-1 for visibility when the cursor is at the beginning of the line.
           className="
-            whitespace-pre-wrap break-all px-2
+            whitespace-pre-wrap break-all px-1
             empty:after:content-['\00a0']
           "
           key={block.id + "-content"}
@@ -78,7 +78,7 @@ export default function BlockComponent({
         >
           {block.content}
         </div>
-        <div className="ml-20" key={block.id + "-children"}>
+        <div className="ml-5" key={block.id + "-children"}>
           {block.children?.map((child) => (
             <BlockComponent key={child.id} block={child} />
           ))}

@@ -37,7 +37,7 @@ function Pane({ children }: { children: JSX.Element }) {
   return (
     <div
       className="border border-gray-300
-        rounded p-10 overflow-auto
+        rounded p-2 overflow-auto
         portrait:h-1/2 portrait:w-full
         landscape:w-1/2"
     >
