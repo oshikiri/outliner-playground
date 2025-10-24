@@ -1,13 +1,16 @@
-import { KeyboardEvent } from "react";
-import React from "react";
+import { RefObject } from "preact";
 import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
 import { getNewlineRangeset } from "../Range";
 
+type EditableDivKeyboardEvent = Omit<KeyboardEvent, "currentTarget"> & {
+  currentTarget: HTMLDivElement;
+};
+
 export class KeyDownEventHandlerGenerator {
   constructor(
     private block: BlockEntity,
-    private contentRef: React.RefObject<HTMLElement | null>,
+    private contentRef: RefObject<HTMLDivElement>,
     private getTextsAroundCursor: () => {
       beforeCursor: string | undefined;
       afterCursor: string | undefined;
@@ -23,7 +26,7 @@ export class KeyDownEventHandlerGenerator {
   ) {}
 
   public generate() {
-    return (event: KeyboardEvent) => {
+    return (event: EditableDivKeyboardEvent) => {
       const currentElement = this.contentRef.current;
       const currentInnerText: string = currentElement?.innerText || "";
 
@@ -49,7 +52,10 @@ export class KeyDownEventHandlerGenerator {
     };
   }
 
-  private handleEnter(event: KeyboardEvent, currentInnerText: string) {
+  private handleEnter(
+    event: EditableDivKeyboardEvent,
+    currentInnerText: string,
+  ) {
     event.preventDefault();
     const { beforeCursor, afterCursor } = this.getTextsAroundCursor();
     const newBlock = this.createNextBlock(
@@ -60,7 +66,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(newBlock.id, 0);
   }
 
-  private handleTab(event: KeyboardEvent, currentInnerText: string) {
+  private handleTab(event: EditableDivKeyboardEvent, currentInnerText: string) {
     event.preventDefault();
     this.block.content = currentInnerText;
     this.setBlockById(this.block.id, this.block);
@@ -85,7 +91,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   private handleArrowDown(
-    event: KeyboardEvent,
+    event: EditableDivKeyboardEvent,
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
@@ -111,7 +117,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   private handleArrowUp(
-    event: KeyboardEvent,
+    event: EditableDivKeyboardEvent,
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
@@ -136,7 +142,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, nextCaretOffset);
   }
 
-  private goToLineStart(event: KeyboardEvent) {
+  private goToLineStart(event: EditableDivKeyboardEvent) {
     event.preventDefault();
 
     const pos = dom.getCursorPositionInBlock(window.getSelection());
@@ -151,7 +157,10 @@ export class KeyDownEventHandlerGenerator {
     }
   }
 
-  private goToLineEnd(event: KeyboardEvent, currentInnerText: string) {
+  private goToLineEnd(
+    event: EditableDivKeyboardEvent,
+    currentInnerText: string,
+  ) {
     event.preventDefault();
 
     const pos = dom.getCursorPositionInBlock(window.getSelection());
@@ -166,7 +175,10 @@ export class KeyDownEventHandlerGenerator {
     }
   }
 
-  private handleBackspace(event: KeyboardEvent, currentInnerText: string) {
+  private handleBackspace(
+    event: EditableDivKeyboardEvent,
+    currentInnerText: string,
+  ) {
     this.block.content = currentInnerText;
 
     if (this.block.children.length > 0 || !dom.caretIsAtHeadOfBlock()) {
@@ -186,7 +198,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, prevContentLength);
   }
 
-  private handlerArrowLeft(event: KeyboardEvent) {
+  private handlerArrowLeft(event: EditableDivKeyboardEvent) {
     if (!dom.caretIsAtHeadOfBlock()) {
       return;
     }
@@ -200,7 +212,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, prevBlock.content.length);
   }
 
-  private handlerArrowRight(event: KeyboardEvent) {
+  private handlerArrowRight(event: EditableDivKeyboardEvent) {
     const position = dom.getCursorPositionInBlock(window.getSelection());
     if (position.anchorOffset != position?.wholeText?.length) {
       return;
