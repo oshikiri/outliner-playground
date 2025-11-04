@@ -1,4 +1,4 @@
-import { JSX, StrictMode } from "react";
+import { JSX, StrictMode, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 
 import BlockEntity from "./block/BlockEntity";
@@ -38,7 +38,7 @@ function Root(): JSX.Element {
   );
 }
 
-function Pane({ children }: { children: JSX.Element }) {
+function Pane({ children }: { children: ReactNode }) {
   return (
     <div
       className="border border-gray-300
