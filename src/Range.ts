@@ -1,3 +1,4 @@
+// [P2] @owner: DOM の `Range` と名称が衝突しやすい。`TextRange`/`CharRange`、`RangeSet` -> `RangeList` 等を検討。
 export class RangeSet {
   constructor(private ranges: Range[]) {}
 
@@ -20,8 +21,10 @@ export class RangeSet {
 /**
  * Range(l, r) represents a range from l to r.
  */
+// [P2] @owner: `Range` は DOM 型と紛らわしいため `TextRange`/`CharRange` を検討。
 export class Range {
   constructor(
+    // [P2] @owner: `l/r` は意味が不明瞭。`start/end` に変更すると明確。
     public l: number,
     public r: number,
   ) {}
@@ -39,6 +42,7 @@ export class Range {
  * |d|e|f|
  * 4 5 6 7
  */
+// [P2] @owner: `getNewlineRangeset` -> `getLineRanges` や `getNewlineRangeSet`（大文字小文字）に統一。
 export function getNewlineRangeset(content: string): RangeSet {
   const rangeset: RangeSet = new RangeSet([]);
   const regex = /(\n)/g;

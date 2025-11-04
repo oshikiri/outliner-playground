@@ -1,5 +1,6 @@
 import Block from "./BlockEntity";
 
+// [P3] @owner: `initialPage` はドキュメントのルートなので `initialDocument` / `initialRoot` が分かりやすい。
 const initialPage = new Block("", [
   new Block("This is a playground for outliner-playground"),
   new Block(""),

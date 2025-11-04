@@ -17,6 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          # [P3] @owner: 安定の LTS（Node 22）への固定を検討。`package.json` の "engines" でも明示推奨。
           node-version: "24"
           cache: "npm"
       - name: Build and test

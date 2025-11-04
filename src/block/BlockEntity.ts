@@ -1,3 +1,4 @@
+// [P2] @owner: ファイル名 BlockEntity.ts とクラス名 Block の不一致。どちらかに統一（例: ファイルを Block.ts に、またはクラス名を BlockEntity）。
 export default class Block {
   parent: Block | null = null;
   id: string = crypto.randomUUID();
@@ -21,6 +22,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
+  // [P3] @owner: 走査順が明確になるよう `getNextInPreorder` などの命名も検討。
   getNextBlock() {
     // case 1: the current block has children
     //   Return the first child
@@ -52,6 +54,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
+  // [P3] @owner: `getPrevInPreorder` など、走査の前提（pre-order）を名前に含めると明確。
   getPrevBlock() {
     const [parent, currentIdx] = this.getParentAndIdx();
     if (!parent) {
@@ -74,6 +77,7 @@ export default class Block {
     return this.getLastChild().getLastDescendant();
   }
 
+  // [P3] @owner: children が空の際に undefined を返すため、返り値の型/ガードの明示を検討。
   getLastChild() {
     return this.children[this.children.length - 1];
   }
@@ -81,6 +85,7 @@ export default class Block {
   /**
    * Retrieve the parent block and the index of the current block in the parent's children array.
    */
+  // [P2] @owner: `Idx` は省略形で意図が伝わりにくい。`getParentAndIndex` や `indexOfSelf` などが明確。
   getParentAndIdx(): [Block | null, number] {
     if (!this?.parent?.children) {
       console.error("Block has no parent or parent has no children.");
@@ -91,6 +96,8 @@ export default class Block {
     return [this.parent, idx];
   }
 
+  // [P1] @owner: 返り値が Block インスタンスではなくプレーンオブジェクト（スプレッド）になっている。
+  // メソッド喪失のリスクがあるため、設計を統一（Block を返す or 呼び出し側で必ず createBlock で再構築）。
   updateBlockById(id: string, updatedBlock: Block): Block {
     if (this.id === id) {
       return updatedBlock;
@@ -130,6 +137,8 @@ export default class Block {
   }
 
   indent() {
+    // [P1] @owner: 本クラスは配列を直接 mutate（push/splice）している一方、状態更新側は再構築を行っている。
+    // ミューテーション vs イミュータブルの方針を統一すること。
     const [parent, currentIdx] = this.getParentAndIdx();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
@@ -167,6 +176,7 @@ export default class Block {
       return { parent, grandParent: null };
     }
 
+    // [P3] @owner: 変数名は `grandparent` へ統一（キャメルケース&一貫性）。
     const [grandParent, parentIdx] = parent.getParentAndIdx();
     if (!grandParent || parentIdx === -1) {
       console.log("Parent has no parent:", parent);
@@ -178,6 +188,8 @@ export default class Block {
 
     parent.children = siblingsBefore;
     this.parent = grandParent;
+    // [P1] @owner: 現状の実装は「後続兄弟」を this の子に取り込むが、一般的なアウトライナでは
+    // 対象ブロックのみを親の直後へ移動するのが期待挙動。仕様を見直すこと。
     this.children = [...this.children, ...siblingsAfter];
     this.children.forEach((b) => {
       b.parent = this;
@@ -189,6 +201,7 @@ export default class Block {
     return { parent, grandParent };
   }
 
+  // [P2] @owner: `toJson` -> `toJSON` にすると JSON.stringify で自動適用され意図が明確。
   toJson(): any {
     return {
       id: this.id,

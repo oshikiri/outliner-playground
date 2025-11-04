@@ -4,6 +4,8 @@ import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
 import { getNewlineRangeset } from "../Range";
 
+// [P2] @owner: ファイル名 `keyboardevent.ts` はケバブ/キャメルの混在。`keyboardEvent.ts` や `keydown.ts` などへの統一を検討。
+// [P2] @owner: クラス名 KeyDownEventHandlerGenerator は冗長。`createKeydownHandler` / `BlockKeydownHandler` など簡潔な命名を検討。
 export class KeyDownEventHandlerGenerator {
   constructor(
     private block: BlockEntity,
@@ -22,6 +24,7 @@ export class KeyDownEventHandlerGenerator {
     private setBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
+  // [P3] @owner: 返り値の関数型を `React.KeyboardEventHandler` として明記すると読みやすい。
   public generate() {
     return (event: KeyboardEvent) => {
       const currentElement = this.contentRef.current;
@@ -60,6 +63,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(newBlock.id, 0);
   }
 
+  // [P2] @owner: 引数名 `currentInnerText` -> `currentText` など簡潔な命名に。
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
     this.block.content = currentInnerText;
@@ -183,9 +187,12 @@ export class KeyDownEventHandlerGenerator {
     prevBlock.content += this.block.content;
     const [parent, idx] = this.block.getParentAndIdx();
     parent?.children.splice(idx, 1);
+    // [P1] @owner: ここで prevBlock と親を setBlockById 経由で更新しないと状態/永続化がズレる。
+    // 呼び出し元から setBlockById を用いて prevBlock と parent を反映すること。
     this.setCursorPosition(prevBlock.id, prevContentLength);
   }
 
+  // [P2] @owner: `handle*` と `handler*` が混在。`handleArrowLeft` に統一。
   private handlerArrowLeft(event: KeyboardEvent) {
     if (!dom.caretIsAtHeadOfBlock()) {
       return;
@@ -200,8 +207,10 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, prevBlock.content.length);
   }
 
+  // [P2] @owner: 同上。`handleArrowRight` に統一。
   private handlerArrowRight(event: KeyboardEvent) {
     const position = dom.getCursorPositionInBlock(window.getSelection());
+    // [P2] @owner: position が未定義の場合に備えたヌルガードを追加すること。
     if (position.anchorOffset != position?.wholeText?.length) {
       return;
     }
