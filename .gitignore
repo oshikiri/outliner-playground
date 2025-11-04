@@ -3,3 +3,6 @@ node_modules/
 # vite
 dist/
 .vite/
+
+# VS Code
+.vscode/
