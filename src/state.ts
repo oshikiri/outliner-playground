@@ -4,7 +4,10 @@ import BlockEntity, { createBlock } from "./block/BlockEntity";
 import { initialPage } from "./block/data";
 
 const rootBlockKey = "rootBlock";
-const rootBlockFromLocalStorage = localStorage.getItem(rootBlockKey);
+const rootBlockFromLocalStorage =
+  typeof window !== "undefined"
+    ? window.localStorage.getItem(rootBlockKey)
+    : null;
 const rootBlock = rootBlockFromLocalStorage
   ? JSON.parse(rootBlockFromLocalStorage)
   : initialPage;
@@ -30,10 +33,16 @@ export const useStore = create((set, get: any) => ({
 }));
 
 export function setToLocalStorage(rootBlock: BlockEntity) {
-  localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJson()));
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJson()));
 }
 export function clearLocalStorage() {
-  localStorage.removeItem(rootBlockKey);
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.removeItem(rootBlockKey);
 }
 
 function createNext(
