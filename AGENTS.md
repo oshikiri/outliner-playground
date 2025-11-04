@@ -22,6 +22,7 @@
   - `fix:` for bug fixes or styling changes that affect the UI.
   - `test:` for adding or modifying tests.
   - `chore:` for maintenance updates (dependencies, tooling, token tweaks without visual impact).
+  - `docs:` for documentation or comment changes.
   - `refactor:` for internal restructuring without modifying behaviour.
 - Append `!` when a change is breaking.
 
