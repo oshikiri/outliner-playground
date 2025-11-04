@@ -1,5 +1,5 @@
-import { render } from "preact";
-import type { JSX } from "preact";
+import { JSX, StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
 import BlockEntity from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
@@ -7,7 +7,12 @@ import { useStore, setToLocalStorage, clearLocalStorage } from "./state";
 
 import "./styles.css";
 
-render(<Root />, document.getElementById("root")!);
+const root = createRoot(document.getElementById("root")!);
+root.render(
+  <StrictMode>
+    <Root />
+  </StrictMode>,
+);
 
 function Root(): JSX.Element {
   const rootBlock = useStore((state: any) => state.rootBlock);

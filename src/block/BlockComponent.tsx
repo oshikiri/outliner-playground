@@ -1,5 +1,4 @@
-import { useEffect, useRef } from "preact/hooks";
-import { JSX } from "preact";
+import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 
 import { useStore } from "../state";
 import BlockEntity from "./BlockEntity";
@@ -49,7 +48,7 @@ export default function BlockComponent({
     setBlockById,
   );
 
-  const onClick = (event: MouseEvent) => {
+  const onClick: MouseEventHandler = (event) => {
     const startOffset = dom.getNearestCursorOffset(
       event.clientX,
       event.clientY,
@@ -72,6 +71,7 @@ export default function BlockComponent({
           key={block.id + "-content"}
           ref={contentRef}
           contentEditable={isEditing || undefined}
+          suppressContentEditableWarning={isEditing || undefined}
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={keyDownHandlerGenerator.generate()}

@@ -1,11 +1,11 @@
 import { defineConfig } from "vitest/config";
-import preact from "@preact/preset-vite";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
   base: "./",
-  plugins: [preact(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   test: {
     environment: "node",
     globals: true,
