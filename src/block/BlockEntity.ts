@@ -84,7 +84,6 @@ export default class BlockEntity {
     return lastChild.getLastDescendant();
   }
 
-  // [P3] @owner: children が空の際に undefined を返すため、返り値の型/ガードの明示を検討。
   getLastChild(): BlockEntity | undefined {
     return this.children[this.children.length - 1];
   }

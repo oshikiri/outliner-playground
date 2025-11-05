@@ -7,7 +7,6 @@ export default defineConfig({
   base: "./",
   plugins: [react(), tailwindcss()],
   test: {
-    // [P1] @owner: DOM 依存のユニットテストを追加する場合は 'jsdom' を使用すること。
     environment: "node",
     globals: true,
     include: ["src/**/*.test.ts"],
