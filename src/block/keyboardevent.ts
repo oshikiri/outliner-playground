@@ -25,8 +25,8 @@ export class KeyDownEventHandlerGenerator {
   ) {}
 
   // [P3] @owner: 返り値の関数型を `React.KeyboardEventHandler` として明記すると読みやすい。
-  public generate() {
-    return (event: KeyboardEvent) => {
+  public generate(): React.KeyboardEventHandler<HTMLElement> {
+    return (event: KeyboardEvent<HTMLElement>) => {
       const currentElement = this.contentRef.current;
       const currentInnerText: string = currentElement?.innerText || "";
 
