@@ -10,17 +10,17 @@ export class KeyDownEventHandlerGenerator {
   constructor(
     private block: BlockEntity,
     private contentRef: React.RefObject<HTMLElement | null>,
-    private getTextsAroundCursor: () => {
-      beforeCursor: string | undefined;
-      afterCursor: string | undefined;
-      startOffset: number;
+    private getTextSegmentsAroundCaret: () => {
+      beforeText: string | undefined;
+      afterText: string | undefined;
+      caretOffset: number;
     },
     private createNextBlock: (
       blockId: string,
-      beforeCursor: string,
-      afterCursor: string,
+      beforeText: string,
+      afterText: string,
     ) => BlockEntity,
-    private setCursorPosition: (blockId: string, offset: number) => void,
+    private setCaretPosition: (blockId: string, offset: number) => void,
     private setBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
@@ -54,13 +54,13 @@ export class KeyDownEventHandlerGenerator {
 
   private handleEnter(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
-    const { beforeCursor, afterCursor } = this.getTextsAroundCursor();
+    const { beforeText, afterText } = this.getTextSegmentsAroundCaret();
     const newBlock = this.createNextBlock(
       this.block.id,
-      beforeCursor || "",
-      afterCursor || "",
+      beforeText || "",
+      afterText || "",
     );
-    this.setCursorPosition(newBlock.id, 0);
+    this.setCaretPosition(newBlock.id, 0);
   }
 
   // [P2] @owner: 引数名 `currentInnerText` -> `currentText` など簡潔な命名に。
@@ -84,8 +84,8 @@ export class KeyDownEventHandlerGenerator {
       }
     }
 
-    const { startOffset } = this.getTextsAroundCursor();
-    this.setCursorPosition(this.block.id, startOffset);
+    const { caretOffset } = this.getTextSegmentsAroundCaret();
+    this.setCaretPosition(this.block.id, caretOffset);
   }
 
   private handleArrowDown(
@@ -106,12 +106,12 @@ export class KeyDownEventHandlerGenerator {
     this.block.content = currentInnerText;
     this.setBlockById(this.block.id, this.block);
 
-    const caretOffset = dom.getOffsetFromLineStart(currentElement);
+    const caretOffset = dom.getCaretOffsetFromLineStart(currentElement);
     const lastRange = getNewlineRangeset(this.block.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
       : 0;
-    this.setCursorPosition(nextBlock.id, nextCaretOffset);
+    this.setCaretPosition(nextBlock.id, nextCaretOffset);
   }
 
   private handleArrowUp(
@@ -132,48 +132,48 @@ export class KeyDownEventHandlerGenerator {
     this.block.content = currentInnerText;
     this.setBlockById(this.block.id, this.block);
 
-    const offsetAtPrev = dom.getOffsetFromLineStart(currentElement);
+    const offsetAtPrev = dom.getCaretOffsetFromLineStart(currentElement);
     const lastRange = getNewlineRangeset(prevBlock.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
       : 0;
-    this.setCursorPosition(prevBlock.id, nextCaretOffset);
+    this.setCaretPosition(prevBlock.id, nextCaretOffset);
   }
 
   private goToLineStart(event: KeyboardEvent) {
     event.preventDefault();
 
-    const pos = dom.getCursorPositionInBlock(window.getSelection());
+    const pos = dom.getCaretPositionInBlock(window.getSelection());
     const newlineBeforeCaret = pos?.newlines?.findLast((newline: any) => {
       return newline.index < pos.anchorOffset;
     });
     if (newlineBeforeCaret) {
       const newlineIndex = newlineBeforeCaret.index;
-      this.setCursorPosition(this.block.id, newlineIndex + 1);
+      this.setCaretPosition(this.block.id, newlineIndex + 1);
     } else {
-      this.setCursorPosition(this.block.id, 0);
+      this.setCaretPosition(this.block.id, 0);
     }
   }
 
   private goToLineEnd(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
 
-    const pos = dom.getCursorPositionInBlock(window.getSelection());
+    const pos = dom.getCaretPositionInBlock(window.getSelection());
     const newlineAfterCaret = pos?.newlines?.find((newline: any) => {
       return newline.index >= pos.anchorOffset;
     });
     if (newlineAfterCaret) {
       const newlineIndex = newlineAfterCaret.index;
-      this.setCursorPosition(this.block.id, newlineIndex);
+      this.setCaretPosition(this.block.id, newlineIndex);
     } else {
-      this.setCursorPosition(this.block.id, currentInnerText.length);
+      this.setCaretPosition(this.block.id, currentInnerText.length);
     }
   }
 
   private handleBackspace(event: KeyboardEvent, currentInnerText: string) {
     this.block.content = currentInnerText;
 
-    if (this.block.children.length > 0 || !dom.caretIsAtHeadOfBlock()) {
+    if (this.block.children.length > 0 || !dom.caretIsAtBlockStart()) {
       return;
     }
 
@@ -189,11 +189,11 @@ export class KeyDownEventHandlerGenerator {
     parent?.children.splice(idx, 1);
     // [P1] @owner: ここで prevBlock と親を setBlockById 経由で更新しないと状態/永続化がズレる。
     // 呼び出し元から setBlockById を用いて prevBlock と parent を反映すること。
-    this.setCursorPosition(prevBlock.id, prevContentLength);
+    this.setCaretPosition(prevBlock.id, prevContentLength);
   }
 
   private handleArrowLeft(event: KeyboardEvent) {
-    if (!dom.caretIsAtHeadOfBlock()) {
+    if (!dom.caretIsAtBlockStart()) {
       return;
     }
 
@@ -203,11 +203,11 @@ export class KeyDownEventHandlerGenerator {
       return;
     }
 
-    this.setCursorPosition(prevBlock.id, prevBlock.content.length);
+    this.setCaretPosition(prevBlock.id, prevBlock.content.length);
   }
 
   private handleArrowRight(event: KeyboardEvent) {
-    const position = dom.getCursorPositionInBlock(window.getSelection());
+    const position = dom.getCaretPositionInBlock(window.getSelection());
     // [P2] @owner: position が未定義の場合に備えたヌルガードを追加すること。
     if (position.anchorOffset != position?.wholeText?.length) {
       return;
@@ -219,6 +219,6 @@ export class KeyDownEventHandlerGenerator {
       return;
     }
 
-    this.setCursorPosition(nextBlock.id, 0);
+    this.setCaretPosition(nextBlock.id, 0);
   }
 }

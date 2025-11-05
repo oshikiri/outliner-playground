@@ -10,14 +10,14 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
-  const cursorPosition = useStore((state: any) => state.cursorPosition);
-  const setCursorPosition = useStore((state: any) => state.setCursorPosition);
+  const caretPosition = useStore((state: any) => state.caretPosition);
+  const setCaretPosition = useStore((state: any) => state.setCaretPosition);
   const createNextBlock = useStore((state: any) => state.createNextBlock);
   const setBlockById = useStore((state: any) => state.setBlockById);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const isEditing = block.id === cursorPosition?.blockId;
+  const isEditing = block.id === caretPosition?.blockId;
   useEffect(() => {
     if (isEditing && contentRef.current) {
       // [P2] @owner: DOM 反映後にキャレットを合わせるため rAF/queueMicrotask を使うと安定する。
@@ -25,17 +25,17 @@ export default function BlockComponent({
 
       const offset = dom.getOffset(
         contentRef.current,
-        cursorPosition.startOffset,
+        caretPosition.caretOffset,
       );
       const textNode = contentRef.current.childNodes[0] as HTMLElement;
       if (textNode) {
-        dom.setCursor(textNode, offset);
+        dom.setCaret(textNode, offset);
       }
     }
-  }, [cursorPosition]);
+  }, [caretPosition]);
 
   const onBlur = () => {
-    setCursorPosition(null);
+    setCaretPosition(null);
     block.content = contentRef.current?.innerText || "";
     setBlockById(block.id, block);
   };
@@ -43,19 +43,16 @@ export default function BlockComponent({
   const keyDownHandlerGenerator = new KeyDownEventHandlerGenerator(
     block,
     contentRef,
-    dom.getTextsAroundCursor,
+    dom.getTextSegmentsAroundCaret,
     createNextBlock,
-    setCursorPosition,
+    setCaretPosition,
     setBlockById,
   );
 
   const onClick: MouseEventHandler = (event) => {
-    const startOffset = dom.getNearestCursorOffset(
-      event.clientX,
-      event.clientY,
-    );
+    const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
     // [P2] @owner: startOffset が undefined の場合に 0 へフォールバックするガードを追加。
-    setCursorPosition(block.id, startOffset);
+    setCaretPosition(block.id, caretOffset);
     event.stopPropagation();
     return;
   };

@@ -37,10 +37,9 @@ export const useStore = create((set, get: any) => ({
     get().setBlockById(newBlock.id, newBlock);
     return newBlock;
   },
-  cursorPosition: null,
-  // [P3] @owner: `startOffset` -> `caretOffset` など名称統一。
-  setCursorPosition: (blockId: string, startOffset: number) =>
-    set({ cursorPosition: { blockId, startOffset } }),
+  caretPosition: null,
+  setCaretPosition: (blockId: string, caretOffset: number) =>
+    set({ caretPosition: { blockId, caretOffset } }),
 }));
 
 export function setToLocalStorage(rootBlock: BlockEntity) {
