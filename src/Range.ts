@@ -1,15 +1,15 @@
 export class RangeList {
-  constructor(private ranges: Range[]) {}
+  constructor(private ranges: IndexRange[]) {}
 
-  getRanges(): Range[] {
+  getRanges(): IndexRange[] {
     return [...this.ranges];
   }
 
   pushRange(l: number, r: number): void {
-    this.ranges.push(new Range(l, r));
+    this.ranges.push(new IndexRange(l, r));
   }
 
-  getLastRange(): Range | null {
+  getLastRange(): IndexRange | null {
     if (this.ranges.length === 0) {
       return null;
     }
@@ -20,10 +20,8 @@ export class RangeList {
 /**
  * Range(l, r) represents a range from l to r.
  */
-// [P2] @owner: `Range` は DOM 型と紛らわしいため `TextRange`/`CharRange` を検討。
-export class Range {
+export class IndexRange {
   constructor(
-    // [P2] @owner: `l/r` は意味が不明瞭。`start/end` に変更すると明確。
     public l: number,
     public r: number,
   ) {}
@@ -41,7 +39,6 @@ export class Range {
  * |d|e|f|
  * 4 5 6 7
  */
-// [P2] @owner: `getNewlineRangeset` -> `getLineRanges` や `getNewlineRangeSet`（大文字小文字）に統一。
 export function getNewlineRangeList(content: string): RangeList {
   const rangeset: RangeList = new RangeList([]);
   const regex = /(\n)/g;

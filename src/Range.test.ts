@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { Range, getNewlineRangeList } from "./Range";
+import { IndexRange, getNewlineRangeList } from "./Range";
 
-describe("Range", () => {
+describe("IndexRange", () => {
   it("contains boundaries inclusively", () => {
-    const range = new Range(1, 3);
+    const range = new IndexRange(1, 3);
     expect(range.containsInclusive(1)).toBe(true);
     expect(range.containsInclusive(3)).toBe(true);
     expect(range.containsInclusive(0)).toBe(false);
