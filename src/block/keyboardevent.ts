@@ -1,4 +1,3 @@
-import { KeyboardEvent } from "react";
 import React from "react";
 import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
@@ -26,7 +25,7 @@ export class KeyDownEventHandlerGenerator {
 
   // [P3] @owner: 返り値の関数型を `React.KeyboardEventHandler` として明記すると読みやすい。
   public generate(): React.KeyboardEventHandler<HTMLElement> {
-    return (event: KeyboardEvent<HTMLElement>) => {
+    return (event: React.KeyboardEvent<HTMLElement>) => {
       const currentElement = this.contentRef.current;
       const currentInnerText: string = currentElement?.innerText || "";
 
@@ -52,7 +51,10 @@ export class KeyDownEventHandlerGenerator {
     };
   }
 
-  private handleEnter(event: KeyboardEvent, currentInnerText: string) {
+  private handleEnter(
+    event: React.KeyboardEvent<HTMLElement>,
+    currentInnerText: string,
+  ) {
     event.preventDefault();
     const { beforeCursor, afterCursor } = this.getTextsAroundCursor();
     const newBlock = this.createNextBlock(
@@ -64,7 +66,10 @@ export class KeyDownEventHandlerGenerator {
   }
 
   // [P2] @owner: 引数名 `currentInnerText` -> `currentText` など簡潔な命名に。
-  private handleTab(event: KeyboardEvent, currentInnerText: string) {
+  private handleTab(
+    event: React.KeyboardEvent<HTMLElement>,
+    currentInnerText: string,
+  ) {
     event.preventDefault();
     this.block.content = currentInnerText;
     this.setBlockById(this.block.id, this.block);
@@ -89,7 +94,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   private handleArrowDown(
-    event: KeyboardEvent,
+    event: React.KeyboardEvent<HTMLElement>,
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
@@ -115,7 +120,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   private handleArrowUp(
-    event: KeyboardEvent,
+    event: React.KeyboardEvent<HTMLElement>,
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
@@ -140,7 +145,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, nextCaretOffset);
   }
 
-  private goToLineStart(event: KeyboardEvent) {
+  private goToLineStart(event: React.KeyboardEvent<HTMLElement>) {
     event.preventDefault();
 
     const pos = dom.getCursorPositionInBlock(window.getSelection());
@@ -155,7 +160,10 @@ export class KeyDownEventHandlerGenerator {
     }
   }
 
-  private goToLineEnd(event: KeyboardEvent, currentInnerText: string) {
+  private goToLineEnd(
+    event: React.KeyboardEvent<HTMLElement>,
+    currentInnerText: string,
+  ) {
     event.preventDefault();
 
     const pos = dom.getCursorPositionInBlock(window.getSelection());
@@ -170,7 +178,10 @@ export class KeyDownEventHandlerGenerator {
     }
   }
 
-  private handleBackspace(event: KeyboardEvent, currentInnerText: string) {
+  private handleBackspace(
+    event: React.KeyboardEvent<HTMLElement>,
+    currentInnerText: string,
+  ) {
     this.block.content = currentInnerText;
 
     if (this.block.children.length > 0 || !dom.caretIsAtHeadOfBlock()) {
@@ -193,7 +204,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   // [P2] @owner: `handle*` と `handler*` が混在。`handleArrowLeft` に統一。
-  private handlerArrowLeft(event: KeyboardEvent) {
+  private handlerArrowLeft(event: React.KeyboardEvent<HTMLElement>) {
     if (!dom.caretIsAtHeadOfBlock()) {
       return;
     }
@@ -208,7 +219,7 @@ export class KeyDownEventHandlerGenerator {
   }
 
   // [P2] @owner: 同上。`handleArrowRight` に統一。
-  private handlerArrowRight(event: KeyboardEvent) {
+  private handlerArrowRight(event: React.KeyboardEvent<HTMLElement>) {
     const position = dom.getCursorPositionInBlock(window.getSelection());
     // [P2] @owner: position が未定義の場合に備えたヌルガードを追加すること。
     if (position.anchorOffset != position?.wholeText?.length) {
