@@ -1,4 +1,4 @@
-import { getNewlineRangeset } from "./Range";
+import { getNewlineRangeList } from "./Range";
 
 function getTextSegmentsAroundCaret() {
   const selection: Selection | null = window.getSelection();
@@ -34,7 +34,7 @@ export function isCaretAtLastLine(content: string): boolean {
   }
   const caretOffset = selection.anchorOffset;
 
-  const lastlineRange = getNewlineRangeset(content).getLastRange();
+  const lastlineRange = getNewlineRangeList(content).getLastRange();
   if (!lastlineRange) {
     return false;
   }

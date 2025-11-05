@@ -2,7 +2,7 @@ import { KeyboardEvent } from "react";
 import React from "react";
 import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
-import { getNewlineRangeset } from "../Range";
+import { getNewlineRangeList } from "../Range";
 
 // [P2] @owner: ファイル名 `keyboardevent.ts` はケバブ/キャメルの混在。`keyboardEvent.ts` や `keydown.ts` などへの統一を検討。
 // [P2] @owner: クラス名 KeyDownEventHandlerGenerator は冗長。`createKeydownHandler` / `BlockKeydownHandler` など簡潔な命名を検討。
@@ -107,7 +107,7 @@ export class KeyDownEventHandlerGenerator {
     this.setBlockById(this.block.id, this.block);
 
     const caretOffset = dom.getCaretOffsetFromLineStart(currentElement);
-    const lastRange = getNewlineRangeset(this.block.content).getLastRange();
+    const lastRange = getNewlineRangeList(this.block.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
       : 0;
@@ -133,7 +133,7 @@ export class KeyDownEventHandlerGenerator {
     this.setBlockById(this.block.id, this.block);
 
     const offsetAtPrev = dom.getCaretOffsetFromLineStart(currentElement);
-    const lastRange = getNewlineRangeset(prevBlock.content).getLastRange();
+    const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
       : 0;

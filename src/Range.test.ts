@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { Range, getNewlineRangeset } from "./Range";
+import { Range, getNewlineRangeList } from "./Range";
 
 describe("Range", () => {
   it("contains boundaries inclusively", () => {
@@ -11,20 +11,20 @@ describe("Range", () => {
   });
 });
 
-describe("getNewlineRangeset", () => {
+describe("getNewlineRangeList", () => {
   it("returns null when content is empty", () => {
-    expect(getNewlineRangeset("").getLastRange()).toBeNull();
+    expect(getNewlineRangeList("").getLastRange()).toBeNull();
   });
 
   it("returns an inclusive range when no newline exists", () => {
-    const ranges = getNewlineRangeset("abc").getRanges();
+    const ranges = getNewlineRangeList("abc").getRanges();
     expect(ranges).toHaveLength(1);
     expect(ranges[0]?.l).toBe(0);
     expect(ranges[0]?.r).toBe(3);
   });
 
   it("captures the trailing segment after the last newline", () => {
-    const ranges = getNewlineRangeset("abc\ndef").getRanges();
+    const ranges = getNewlineRangeList("abc\ndef").getRanges();
     expect(ranges).toHaveLength(2);
     expect(ranges[0]?.l).toBe(0);
     expect(ranges[0]?.r).toBe(3);

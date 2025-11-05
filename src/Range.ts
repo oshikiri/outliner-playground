@@ -1,5 +1,4 @@
-// [P2] @owner: DOM の `Range` と名称が衝突しやすい。`TextRange`/`CharRange`、`RangeSet` -> `RangeList` 等を検討。
-export class RangeSet {
+export class RangeList {
   constructor(private ranges: Range[]) {}
 
   getRanges(): Range[] {
@@ -43,8 +42,8 @@ export class Range {
  * 4 5 6 7
  */
 // [P2] @owner: `getNewlineRangeset` -> `getLineRanges` や `getNewlineRangeSet`（大文字小文字）に統一。
-export function getNewlineRangeset(content: string): RangeSet {
-  const rangeset: RangeSet = new RangeSet([]);
+export function getNewlineRangeList(content: string): RangeList {
+  const rangeset: RangeList = new RangeList([]);
   const regex = /(\n)/g;
   let match: RegExpExecArray | null;
 
