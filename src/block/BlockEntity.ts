@@ -1,4 +1,10 @@
 // [P2] @owner: ファイル名 BlockEntity.ts とクラス名 Block の不一致。どちらかに統一（例: ファイルを Block.ts に、またはクラス名を BlockEntity）。
+/**
+ * Block node for the outliner tree.
+ *
+ * Traversal convention: unless explicitly stated otherwise, tree traversal
+ * is pre-order depth-first.
+ */
 export default class Block {
   parent: Block | null = null;
   id: string = crypto.randomUUID();
@@ -22,7 +28,6 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  // [P3] @owner: 走査順が明確になるよう `getNextInPreorder` などの命名も検討。
   getNextBlock() {
     // case 1: the current block has children
     //   Return the first child
@@ -54,7 +59,6 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  // [P3] @owner: `getPrevInPreorder` など、走査の前提（pre-order）を名前に含めると明確。
   getPrevBlock() {
     const [parent, currentIdx] = this.getParentAndIdx();
     if (!parent) {
