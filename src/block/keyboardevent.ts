@@ -185,7 +185,7 @@ export class KeyDownEventHandlerGenerator {
     event.preventDefault();
     const prevContentLength = prevBlock.content.length;
     prevBlock.content += this.block.content;
-    const [parent, idx] = this.block.getParentAndIdx();
+    const [parent, idx] = this.block.getParentAndIndex();
     parent?.children.splice(idx, 1);
     // [P1] @owner: ここで prevBlock と親を setBlockById 経由で更新しないと状態/永続化がズレる。
     // 呼び出し元から setBlockById を用いて prevBlock と parent を反映すること。

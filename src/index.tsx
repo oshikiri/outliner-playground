@@ -35,7 +35,7 @@ function Root(): JSX.Element {
       {/* // [P3] @owner: key="json" -> "debug" / "stateJson" など、目的を表す命名に。 */}
       <Pane key="json">
         <pre className="text-xs whitespace-pre-wrap break-all">
-          {JSON.stringify(rootBlock.toJson(), null, 2)}
+          {JSON.stringify(rootBlock.toJSON(), null, 2)}
         </pre>
       </Pane>
     </div>

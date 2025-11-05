@@ -48,7 +48,7 @@ export function setToLocalStorage(rootBlock: BlockEntity) {
     return;
   }
   // [P2] @owner: 保存はレンダー中ではなく、state 変更に同期して呼ぶ（useEffect などでトリガ）。
-  window.localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJson()));
+  window.localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJSON()));
 }
 export function clearLocalStorage() {
   if (typeof window === "undefined") {
@@ -75,7 +75,7 @@ function createNext(
   }
 
   const newBlock = new BlockEntity(afterCursor, []).withParent(block.parent);
-  const [_parent, idx] = block.getParentAndIdx();
+  const [_parent, idx] = block.getParentAndIndex();
   // [P1] @owner: ここもミューテーション。イミュータブル方針との整合性を取ること。
   block.parent?.children.splice(idx + 1, 0, newBlock);
   return { block, newBlock };

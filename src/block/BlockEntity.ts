@@ -39,7 +39,7 @@ export default class Block {
     //   Go up the tree until we find a parent that has a closest next sibling
     let current: Block | null = this;
     while (current?.parent) {
-      const [parent, currentIdx]: any = current.getParentAndIdx();
+      const [parent, currentIdx]: any = current.getParentAndIndex();
       if (!parent || currentIdx === -1) {
         console.debug("no parent at getNextBlock");
         return null;
@@ -60,7 +60,7 @@ export default class Block {
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
   getPrevBlock() {
-    const [parent, currentIdx] = this.getParentAndIdx();
+    const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent) {
       return null;
     }
@@ -89,8 +89,7 @@ export default class Block {
   /**
    * Retrieve the parent block and the index of the current block in the parent's children array.
    */
-  // [P2] @owner: `Idx` は省略形で意図が伝わりにくい。`getParentAndIndex` や `indexOfSelf` などが明確。
-  getParentAndIdx(): [Block | null, number] {
+  getParentAndIndex(): [Block | null, number] {
     if (!this?.parent?.children) {
       console.error("Block has no parent or parent has no children.");
       return [null, -1];
@@ -143,7 +142,7 @@ export default class Block {
   indent() {
     // [P1] @owner: 本クラスは配列を直接 mutate（push/splice）している一方、状態更新側は再構築を行っている。
     // ミューテーション vs イミュータブルの方針を統一すること。
-    const [parent, currentIdx] = this.getParentAndIdx();
+    const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
       return parent;
@@ -170,7 +169,7 @@ export default class Block {
   }
 
   outdent() {
-    const [parent, currentIdx] = this.getParentAndIdx();
+    const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
       return { parent, grandParent: null };
@@ -181,7 +180,7 @@ export default class Block {
     }
 
     // [P3] @owner: 変数名は `grandparent` へ統一（キャメルケース&一貫性）。
-    const [grandParent, parentIdx] = parent.getParentAndIdx();
+    const [grandParent, parentIdx] = parent.getParentAndIndex();
     if (!grandParent || parentIdx === -1) {
       console.log("Parent has no parent:", parent);
       return { parent, grandParent };
@@ -205,15 +204,14 @@ export default class Block {
     return { parent, grandParent };
   }
 
-  // [P2] @owner: `toJson` -> `toJSON` にすると JSON.stringify で自動適用され意図が明確。
-  toJson(): any {
+  toJSON(): any {
     return {
       id: this.id,
       content: this.content,
       children:
         this.children?.length == 0
           ? undefined
-          : this.children?.map((child) => child.toJson()),
+          : this.children?.map((child) => child.toJSON()),
     };
   }
 }
