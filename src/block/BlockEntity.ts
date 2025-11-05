@@ -18,7 +18,7 @@ export default class Block {
     this.children = children;
   }
 
-  withParent(parent: Block | null) {
+  withParent(parent: Block | null): this {
     this.parent = parent;
     return this;
   }
@@ -28,7 +28,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getNextBlock() {
+  getNextBlock(): Block | null {
     // case 1: the current block has children
     //   Return the first child
     if (this.children.length > 0) {
@@ -59,7 +59,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getPrevBlock() {
+  getPrevBlock(): Block | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent) {
       return null;
@@ -78,11 +78,15 @@ export default class Block {
     if (this.children.length === 0) {
       return this;
     }
-    return this.getLastChild().getLastDescendant();
+    const lastChild = this.getLastChild();
+    if (!lastChild) {
+      return this;
+    }
+    return lastChild.getLastDescendant();
   }
 
   // [P3] @owner: children が空の際に undefined を返すため、返り値の型/ガードの明示を検討。
-  getLastChild() {
+  getLastChild(): Block | undefined {
     return this.children[this.children.length - 1];
   }
 
@@ -139,7 +143,7 @@ export default class Block {
     return null;
   }
 
-  indent() {
+  indent(): Block | null {
     // [P1] @owner: 本クラスは配列を直接 mutate（push/splice）している一方、状態更新側は再構築を行っている。
     // ミューテーション vs イミュータブルの方針を統一すること。
     const [parent, currentIdx] = this.getParentAndIndex();
@@ -168,7 +172,7 @@ export default class Block {
     return parent;
   }
 
-  outdent() {
+  outdent(): { parent: Block | null; grandParent: Block | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
@@ -204,7 +208,7 @@ export default class Block {
     return { parent, grandParent };
   }
 
-  toJSON(): any {
+  toJSON(): BlockJSON {
     return {
       id: this.id,
       content: this.content,
@@ -215,6 +219,12 @@ export default class Block {
     };
   }
 }
+
+type BlockJSON = {
+  id: string;
+  content: string;
+  children?: BlockJSON[];
+};
 
 function createBlock(obj: any): Block {
   const children = obj.children?.map(createBlock) || [];
