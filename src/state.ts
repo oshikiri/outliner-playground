@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import BlockEntity, { createBlock } from "./block/BlockEntity";
-import { initialPage } from "./block/data";
+import { initialRootBlock } from "./block/data";
 
 const rootBlockKey = "rootBlock";
 // [P3] @owner: `rootBlockFromLocalStorage` -> `rootBlockJson` / `savedRootBlock` など役割が分かる命名に。
@@ -12,7 +12,7 @@ const rootBlockFromLocalStorage =
 // [P3] @owner: `rootBlock` は後続で実体（Block）にも使うため、ここは `rootBlockData` 等に分けると読みやすい。
 const rootBlock = rootBlockFromLocalStorage
   ? JSON.parse(rootBlockFromLocalStorage)
-  : initialPage;
+  : initialRootBlock;
 
 // [P2] @owner: Zustand のステート型を定義し、セレクタに any を使わないようにすること。
 export const useStore = create((set, get: any) => ({

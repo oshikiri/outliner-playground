@@ -1,7 +1,6 @@
 import Block from "./BlockEntity";
 
-// [P3] @owner: `initialPage` はドキュメントのルートなので `initialDocument` / `initialRoot` が分かりやすい。
-const initialPage = new Block("", [
+const initialRootBlock = new Block("", [
   new Block("This is a playground for outliner-playground"),
   new Block(""),
   new Block("outliner-playground is a study of logseq-like outliner editors", [
@@ -45,4 +44,4 @@ const initialPage = new Block("", [
   ]),
 ]);
 
-export { initialPage };
+export { initialRootBlock };
