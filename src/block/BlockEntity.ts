@@ -1,24 +1,23 @@
-// [P2] @owner: ファイル名 BlockEntity.ts とクラス名 Block の不一致。どちらかに統一（例: ファイルを Block.ts に、またはクラス名を BlockEntity）。
 /**
  * Block node for the outliner tree.
  *
  * Traversal convention: unless explicitly stated otherwise, tree traversal
  * is pre-order depth-first.
  */
-export default class Block {
-  parent: Block | null = null;
+export default class BlockEntity {
+  parent: BlockEntity | null = null;
   id: string = crypto.randomUUID();
 
   constructor(
     public content: string,
-    public children: Block[] = [],
+    public children: BlockEntity[] = [],
   ) {
     this.content = content;
     children.forEach((child) => child.withParent(this));
     this.children = children;
   }
 
-  withParent(parent: Block | null): this {
+  withParent(parent: BlockEntity | null): this {
     this.parent = parent;
     return this;
   }
@@ -28,7 +27,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getNextBlock(): Block | null {
+  getNextBlock(): BlockEntity | null {
     // case 1: the current block has children
     //   Return the first child
     if (this.children.length > 0) {
@@ -37,7 +36,7 @@ export default class Block {
 
     // case 2: the current block has no children
     //   Go up the tree until we find a parent that has a closest next sibling
-    let current: Block | null = this;
+    let current: BlockEntity | null = this;
     while (current?.parent) {
       const [parent, currentIdx]: any = current.getParentAndIndex();
       if (!parent || currentIdx === -1) {
@@ -59,7 +58,7 @@ export default class Block {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getPrevBlock(): Block | null {
+  getPrevBlock(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent) {
       return null;
@@ -74,7 +73,7 @@ export default class Block {
   /**
    * Returns the last descendant of the current block, including itself.
    */
-  getLastDescendant(): Block {
+  getLastDescendant(): BlockEntity {
     if (this.children.length === 0) {
       return this;
     }
@@ -86,14 +85,14 @@ export default class Block {
   }
 
   // [P3] @owner: children が空の際に undefined を返すため、返り値の型/ガードの明示を検討。
-  getLastChild(): Block | undefined {
+  getLastChild(): BlockEntity | undefined {
     return this.children[this.children.length - 1];
   }
 
   /**
    * Retrieve the parent block and the index of the current block in the parent's children array.
    */
-  getParentAndIndex(): [Block | null, number] {
+  getParentAndIndex(): [BlockEntity | null, number] {
     if (!this?.parent?.children) {
       console.error("Block has no parent or parent has no children.");
       return [null, -1];
@@ -105,7 +104,7 @@ export default class Block {
 
   // [P1] @owner: 返り値が Block インスタンスではなくプレーンオブジェクト（スプレッド）になっている。
   // メソッド喪失のリスクがあるため、設計を統一（Block を返す or 呼び出し側で必ず createBlock で再構築）。
-  updateBlockById(id: string, updatedBlock: Block): Block {
+  updateBlockById(id: string, updatedBlock: BlockEntity): BlockEntity {
     if (this.id === id) {
       return updatedBlock;
     }
@@ -128,7 +127,7 @@ export default class Block {
    * NOTE: This function has a time complexity: O(the number of descendant blocks).
    * This is acceptable because the number of descendant blocks is expected to be small (< 1000)
    */
-  getBlockById(id: string): Block | null {
+  getBlockById(id: string): BlockEntity | null {
     if (this.id === id) {
       return this;
     }
@@ -143,7 +142,7 @@ export default class Block {
     return null;
   }
 
-  indent(): Block | null {
+  indent(): BlockEntity | null {
     // [P1] @owner: 本クラスは配列を直接 mutate（push/splice）している一方、状態更新側は再構築を行っている。
     // ミューテーション vs イミュータブルの方針を統一すること。
     const [parent, currentIdx] = this.getParentAndIndex();
@@ -172,7 +171,7 @@ export default class Block {
     return parent;
   }
 
-  outdent(): { parent: Block | null; grandparent: Block | null } {
+  outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
@@ -225,9 +224,9 @@ type BlockJSON = {
   children?: BlockJSON[];
 };
 
-function createBlock(obj: any): Block {
+function createBlock(obj: any): BlockEntity {
   const children = obj.children?.map(createBlock) || [];
-  const block = new Block(obj.content, children).withParent(obj.parent);
+  const block = new BlockEntity(obj.content, children).withParent(obj.parent);
   block.id = obj.id;
   return block;
 }
