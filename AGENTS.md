@@ -11,6 +11,7 @@
   - Web security standards
 
 ### TypeScript
+
 - Public methods should declare explicit return types.
 - Use precise unions (`T | null`, `T | undefined`) instead of relying on implicit `any`.
 - Guard optional returns before chaining (e.g., check for `undefined` before calling methods).
