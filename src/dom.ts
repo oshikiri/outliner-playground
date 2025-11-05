@@ -93,8 +93,7 @@ export function getCaretOffsetFromLineStart(element: HTMLElement): number {
   return range.startOffset;
 }
 
-// [P3] @owner: `setSelectionOffset` / `setCaretOffset` の方が目的が明確。
-function setCaret(node: HTMLElement, offset: number) {
+function setCaretOffset(node: HTMLElement, offset: number) {
   const range = document.createRange();
   range.setStart(node, offset);
   range.setEnd(node, offset);
@@ -115,7 +114,7 @@ function getNearestCaretOffset(x: number, y: number) {
 
 export {
   getOffset,
-  setCaret,
+  setCaretOffset,
   getTextSegmentsAroundCaret,
   getNearestCaretOffset,
 };

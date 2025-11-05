@@ -29,7 +29,7 @@ export default function BlockComponent({
       );
       const textNode = contentRef.current.childNodes[0] as HTMLElement;
       if (textNode) {
-        dom.setCaret(textNode, offset);
+        dom.setCaretOffset(textNode, offset);
       }
     }
   }, [caretPosition]);
