@@ -172,29 +172,28 @@ export default class Block {
     return parent;
   }
 
-  outdent(): { parent: Block | null; grandParent: Block | null } {
+  outdent(): { parent: Block | null; grandparent: Block | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
-      return { parent, grandParent: null };
+      return { parent, grandparent: null };
     }
     if (!parent.parent) {
       console.log("Cannot outdent block that is a child of the root.");
-      return { parent, grandParent: null };
+      return { parent, grandparent: null };
     }
 
-    // [P3] @owner: 変数名は `grandparent` へ統一（キャメルケース&一貫性）。
-    const [grandParent, parentIdx] = parent.getParentAndIndex();
-    if (!grandParent || parentIdx === -1) {
+    const [grandparent, parentIdx] = parent.getParentAndIndex();
+    if (!grandparent || parentIdx === -1) {
       console.log("Parent has no parent:", parent);
-      return { parent, grandParent };
+      return { parent, grandparent };
     }
 
     const siblingsBefore = parent.children.slice(0, currentIdx);
     const siblingsAfter = parent.children.slice(currentIdx + 1);
 
     parent.children = siblingsBefore;
-    this.parent = grandParent;
+    this.parent = grandparent;
     // [P1] @owner: 現状の実装は「後続兄弟」を this の子に取り込むが、一般的なアウトライナでは
     // 対象ブロックのみを親の直後へ移動するのが期待挙動。仕様を見直すこと。
     this.children = [...this.children, ...siblingsAfter];
@@ -202,10 +201,10 @@ export default class Block {
       b.parent = this;
     });
 
-    grandParent.children[parentIdx] = parent;
-    grandParent.children.splice(parentIdx + 1, 0, this);
+    grandparent.children[parentIdx] = parent;
+    grandparent.children.splice(parentIdx + 1, 0, this);
 
-    return { parent, grandParent };
+    return { parent, grandparent };
   }
 
   toJSON(): BlockJSON {

@@ -70,12 +70,12 @@ export class KeyDownEventHandlerGenerator {
     this.setBlockById(this.block.id, this.block);
 
     if (event.shiftKey) {
-      const { parent, grandParent } = this.block.outdent();
+      const { parent, grandparent } = this.block.outdent();
       if (parent) {
         this.setBlockById(parent.id, parent);
       }
-      if (grandParent) {
-        this.setBlockById(grandParent.id, grandParent);
+      if (grandparent) {
+        this.setBlockById(grandparent.id, grandparent);
       }
     } else {
       const parent = this.block.indent();
