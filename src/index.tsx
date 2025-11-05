@@ -31,8 +31,7 @@ function App(): JSX.Element {
           <BlockComponent key={`${block.id}/${i}`} block={block} />
         ))}
       </Pane>
-      {/* // [P3] @owner: key="json" -> "debug" / "stateJson" など、目的を表す命名に。 */}
-      <Pane key="json">
+      <Pane key="stateJson">
         <pre className="text-xs whitespace-pre-wrap break-all">
           {JSON.stringify(rootBlock.toJSON(), null, 2)}
         </pre>
