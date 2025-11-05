@@ -39,9 +39,9 @@ export class KeyDownEventHandlerGenerator {
       } else if (event.key === "ArrowUp") {
         this.handleArrowUp(event, currentElement, currentInnerText);
       } else if (event.key === "ArrowLeft") {
-        this.handlerArrowLeft(event);
+        this.handleArrowLeft(event);
       } else if (event.key === "ArrowRight") {
-        this.handlerArrowRight(event);
+        this.handleArrowRight(event);
       } else if (event.key === "a" && event.ctrlKey) {
         this.goToLineStart(event);
       } else if (event.key === "e" && event.ctrlKey) {
@@ -192,8 +192,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, prevContentLength);
   }
 
-  // [P2] @owner: `handle*` と `handler*` が混在。`handleArrowLeft` に統一。
-  private handlerArrowLeft(event: KeyboardEvent) {
+  private handleArrowLeft(event: KeyboardEvent) {
     if (!dom.caretIsAtHeadOfBlock()) {
       return;
     }
@@ -207,8 +206,7 @@ export class KeyDownEventHandlerGenerator {
     this.setCursorPosition(prevBlock.id, prevBlock.content.length);
   }
 
-  // [P2] @owner: 同上。`handleArrowRight` に統一。
-  private handlerArrowRight(event: KeyboardEvent) {
+  private handleArrowRight(event: KeyboardEvent) {
     const position = dom.getCursorPositionInBlock(window.getSelection());
     // [P2] @owner: position が未定義の場合に備えたヌルガードを追加すること。
     if (position.anchorOffset != position?.wholeText?.length) {
