@@ -10,12 +10,11 @@ import "./styles.css";
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <StrictMode>
-    <Root />
+    <App />
   </StrictMode>,
 );
 
-// [P3] @owner: ルートコンポーネント名は `App` とするのが一般的。
-function Root(): JSX.Element {
+function App(): JSX.Element {
   const rootBlock = useStore((state: any) => state.rootBlock);
   // [P1] @owner: レンダー中の副作用。localStorage 更新は useEffect([rootBlock]) で行うこと。
   setToLocalStorage(rootBlock);
