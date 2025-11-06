@@ -22,8 +22,7 @@ export class BlockKeydownHandlerFactory {
     private updateBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
-  // [P3] @owner: 返り値の関数型を `React.KeyboardEventHandler` として明記すると読みやすい。
-  public generate() {
+  public generate(): React.KeyboardEventHandler {
     return (event: KeyboardEvent) => {
       const currentElement = this.contentRef.current;
       const currentInnerText: string = currentElement?.innerText || "";
@@ -61,7 +60,6 @@ export class BlockKeydownHandlerFactory {
     this.setCaretPosition(newBlock.id, 0);
   }
 
-  // [P2] @owner: 引数名 `currentInnerText` -> `currentText` など簡潔な命名に。
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
     this.block.content = currentInnerText;
@@ -206,8 +204,10 @@ export class BlockKeydownHandlerFactory {
 
   private handleArrowRight(event: KeyboardEvent) {
     const position = dom.getCaretPositionInBlock(window.getSelection());
-    // [P2] @owner: position が未定義の場合に備えたヌルガードを追加すること。
-    if (position.anchorOffset != position?.wholeText?.length) {
+    if (!position) {
+      return;
+    }
+    if (position.anchorOffset != position.wholeText?.length) {
       return;
     }
 
