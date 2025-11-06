@@ -3,6 +3,7 @@ import React from "react";
 import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
 import { getNewlineRangeList } from "../Range";
+import type { CaretPosition } from "../state";
 
 export class BlockKeydownHandlerFactory {
   constructor(
@@ -18,7 +19,7 @@ export class BlockKeydownHandlerFactory {
       beforeText: string,
       afterText: string,
     ) => BlockEntity,
-    private setCaretPosition: (blockId: string, offset: number) => void,
+    private setCaretPosition: (position: CaretPosition | null) => void,
     private updateBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
@@ -57,7 +58,7 @@ export class BlockKeydownHandlerFactory {
       beforeText || "",
       afterText || "",
     );
-    this.setCaretPosition(newBlock.id, 0);
+    this.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
   }
 
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
@@ -81,7 +82,7 @@ export class BlockKeydownHandlerFactory {
     }
 
     const { caretOffset } = this.getTextSegmentsAroundCaret();
-    this.setCaretPosition(this.block.id, caretOffset);
+    this.setCaretPosition({ blockId: this.block.id, caretOffset });
   }
 
   private handleArrowDown(
@@ -107,7 +108,10 @@ export class BlockKeydownHandlerFactory {
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
       : 0;
-    this.setCaretPosition(nextBlock.id, nextCaretOffset);
+    this.setCaretPosition({
+      blockId: nextBlock.id,
+      caretOffset: nextCaretOffset,
+    });
   }
 
   private handleArrowUp(
@@ -133,7 +137,10 @@ export class BlockKeydownHandlerFactory {
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
       : 0;
-    this.setCaretPosition(prevBlock.id, nextCaretOffset);
+    this.setCaretPosition({
+      blockId: prevBlock.id,
+      caretOffset: nextCaretOffset,
+    });
   }
 
   private goToLineStart(event: KeyboardEvent) {
@@ -145,9 +152,12 @@ export class BlockKeydownHandlerFactory {
     });
     if (newlineBeforeCaret) {
       const newlineIndex = newlineBeforeCaret.index;
-      this.setCaretPosition(this.block.id, newlineIndex + 1);
+      this.setCaretPosition({
+        blockId: this.block.id,
+        caretOffset: newlineIndex + 1,
+      });
     } else {
-      this.setCaretPosition(this.block.id, 0);
+      this.setCaretPosition({ blockId: this.block.id, caretOffset: 0 });
     }
   }
 
@@ -160,9 +170,15 @@ export class BlockKeydownHandlerFactory {
     });
     if (newlineAfterCaret) {
       const newlineIndex = newlineAfterCaret.index;
-      this.setCaretPosition(this.block.id, newlineIndex);
+      this.setCaretPosition({
+        blockId: this.block.id,
+        caretOffset: newlineIndex,
+      });
     } else {
-      this.setCaretPosition(this.block.id, currentInnerText.length);
+      this.setCaretPosition({
+        blockId: this.block.id,
+        caretOffset: currentInnerText.length,
+      });
     }
   }
 
@@ -185,7 +201,10 @@ export class BlockKeydownHandlerFactory {
     parent?.children.splice(idx, 1);
     // [P1] @owner: ここで prevBlock と親を setBlockById 経由で更新しないと状態/永続化がズレる。
     // 呼び出し元から setBlockById を用いて prevBlock と parent を反映すること。
-    this.setCaretPosition(prevBlock.id, prevContentLength);
+    this.setCaretPosition({
+      blockId: prevBlock.id,
+      caretOffset: prevContentLength,
+    });
   }
 
   private handleArrowLeft(event: KeyboardEvent) {
@@ -199,7 +218,10 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
-    this.setCaretPosition(prevBlock.id, prevBlock.content.length);
+    this.setCaretPosition({
+      blockId: prevBlock.id,
+      caretOffset: prevBlock.content.length,
+    });
   }
 
   private handleArrowRight(event: KeyboardEvent) {
@@ -217,6 +239,6 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
-    this.setCaretPosition(nextBlock.id, 0);
+    this.setCaretPosition({ blockId: nextBlock.id, caretOffset: 0 });
   }
 }

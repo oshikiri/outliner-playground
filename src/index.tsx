@@ -15,7 +15,7 @@ root.render(
 );
 
 function App(): JSX.Element {
-  const rootBlock = useStore((state: any) => state.rootBlock);
+  const rootBlock = useStore((state) => state.rootBlock);
 
   useEffect(() => {
     setToLocalStorage(rootBlock);

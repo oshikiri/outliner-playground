@@ -12,8 +12,26 @@ const rootBlockData = savedRootBlock
   ? JSON.parse(savedRootBlock)
   : initialRootBlock;
 
-// [P2] @owner: Zustand のステート型を定義し、セレクタに any を使わないようにすること。
-export const useStore = create((set, get: any) => ({
+export type CaretPosition = {
+  blockId: string;
+  caretOffset: number;
+};
+
+type BlockStore = {
+  rootBlock: BlockEntity;
+  setRootBlock: (block: BlockEntity) => void;
+  findBlockById: (id: string) => BlockEntity | null;
+  updateBlockById: (id: string, block: BlockEntity) => void;
+  createNextBlock: (
+    id: string,
+    beforeCursor: string,
+    afterCursor: string,
+  ) => BlockEntity;
+  caretPosition: CaretPosition | null;
+  setCaretPosition: (position: CaretPosition | null) => void;
+};
+
+export const useStore = create<BlockStore>((set, get) => ({
   rootBlock: createBlock(rootBlockData),
   setRootBlock: (block: BlockEntity) => set({ rootBlock: block }),
   findBlockById: (id: string) => get().rootBlock.findBlockById(id),
@@ -26,16 +44,17 @@ export const useStore = create((set, get: any) => ({
   },
   // [P2] @owner: `createNextBlock` -> `insertNextBlock` / `splitBlockAtCursor` の方が意図が明確。
   createNextBlock: (id: string, beforeCursor: string, afterCursor: string) => {
-    // [P1] @owner: getBlockById は null になり得るためガードを追加。
     const block = get().rootBlock.findBlockById(id);
+    if (!block) {
+      throw new Error(`Block with id ${id} was not found`);
+    }
     const { newBlock } = createNext(block, beforeCursor, afterCursor);
     // [P1] @owner: 新規挿入後は親/旧ブロック側の更新を set する方が安全（木全体の一貫性のため）。
     get().updateBlockById(newBlock.id, newBlock);
     return newBlock;
   },
   caretPosition: null,
-  setCaretPosition: (blockId: string, caretOffset: number) =>
-    set({ caretPosition: { blockId, caretOffset } }),
+  setCaretPosition: (position) => set({ caretPosition: position }),
 }));
 
 export function setToLocalStorage(rootBlock: BlockEntity) {

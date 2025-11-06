@@ -10,10 +10,10 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
-  const caretPosition = useStore((state: any) => state.caretPosition);
-  const setCaretPosition = useStore((state: any) => state.setCaretPosition);
-  const createNextBlock = useStore((state: any) => state.createNextBlock);
-  const updateBlockById = useStore((state: any) => state.updateBlockById);
+  const caretPosition = useStore((state) => state.caretPosition);
+  const setCaretPosition = useStore((state) => state.setCaretPosition);
+  const createNextBlock = useStore((state) => state.createNextBlock);
+  const updateBlockById = useStore((state) => state.updateBlockById);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +51,10 @@ export default function BlockComponent({
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
-    setCaretPosition(block.id, caretOffset ?? 0);
+    setCaretPosition({
+      blockId: block.id,
+      caretOffset: caretOffset ?? 0,
+    });
     event.stopPropagation();
     return;
   };
