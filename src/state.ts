@@ -18,8 +18,7 @@ const rootBlock = rootBlockFromLocalStorage
 export const useStore = create((set, get: any) => ({
   rootBlock: createBlock(rootBlock),
   setRootBlock: (block: BlockEntity) => set({ rootBlock: block }),
-  // [P2] @owner: 検索系は `findBlockById` の方が null 返却と整合的。
-  getBlockById: (id: string) => get().rootBlock.getBlockById(id),
+  findBlockById: (id: string) => get().rootBlock.findBlockById(id),
   // [P2] @owner: `setBlockById` -> `updateBlockById` にすると Block 側の命名と一致。
   setBlockById: (id: string, block: BlockEntity) => {
     // [P1] @owner: mutate/immutable が混在。Block 側はミューテーション、ここは再構築。
@@ -31,7 +30,7 @@ export const useStore = create((set, get: any) => ({
   // [P2] @owner: `createNextBlock` -> `insertNextBlock` / `splitBlockAtCursor` の方が意図が明確。
   createNextBlock: (id: string, beforeCursor: string, afterCursor: string) => {
     // [P1] @owner: getBlockById は null になり得るためガードを追加。
-    const block = get().rootBlock.getBlockById(id);
+    const block = get().rootBlock.findBlockById(id);
     const { newBlock } = createNext(block, beforeCursor, afterCursor);
     // [P1] @owner: 新規挿入後は親/旧ブロック側の更新を set する方が安全（木全体の一貫性のため）。
     get().setBlockById(newBlock.id, newBlock);

@@ -126,13 +126,13 @@ export default class BlockEntity {
    * NOTE: This function has a time complexity: O(the number of descendant blocks).
    * This is acceptable because the number of descendant blocks is expected to be small (< 1000)
    */
-  getBlockById(id: string): BlockEntity | null {
+  findBlockById(id: string): BlockEntity | null {
     if (this.id === id) {
       return this;
     }
 
     for (let child of this.children) {
-      const found = child.getBlockById(id);
+      const found = child.findBlockById(id);
       if (found) {
         return found;
       }

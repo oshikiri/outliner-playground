@@ -17,6 +17,7 @@
 - Guard optional returns before chaining (e.g., check for `undefined` before calling methods).
 - Do not export types or helpers unless they are used outside the module. Keep internal details unexported to minimize surface area.
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
+- Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 
 ## Testing
 
