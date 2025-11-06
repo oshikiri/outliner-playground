@@ -21,6 +21,17 @@ function App(): JSX.Element {
     setToLocalStorage(rootBlock);
   }, [rootBlock]);
 
+  useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "k" && event.ctrlKey) {
+        clearLocalStorage();
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, []);
+
   return (
     <div
       className="flex justify-center h-full
@@ -54,11 +65,3 @@ function Panel({ children }: { children: ReactNode }) {
     </div>
   );
 }
-
-// [P1] @owner: グローバルハンドラは useEffect で登録・クリーンアップする（アンマウント時に解除）。
-window.onkeydown = (event) => {
-  if (event.key === "k" && event.ctrlKey) {
-    clearLocalStorage();
-    event.preventDefault();
-  }
-};
