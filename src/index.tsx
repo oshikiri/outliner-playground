@@ -1,4 +1,4 @@
-import { JSX, StrictMode, type ReactNode } from "react";
+import { JSX, StrictMode, type ReactNode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import BlockEntity from "./block/BlockEntity";
@@ -16,8 +16,10 @@ root.render(
 
 function App(): JSX.Element {
   const rootBlock = useStore((state: any) => state.rootBlock);
-  // [P1] @owner: レンダー中の副作用。localStorage 更新は useEffect([rootBlock]) で行うこと。
-  setToLocalStorage(rootBlock);
+
+  useEffect(() => {
+    setToLocalStorage(rootBlock);
+  }, [rootBlock]);
 
   return (
     <div
