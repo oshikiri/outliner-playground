@@ -25,22 +25,21 @@ function App(): JSX.Element {
         portrait:flex-col portrait:w-full
         landscape:flex-row"
     >
-      {/* // [P3] @owner: "Pane" -> "Panel" / より意味のある名前に（例: EditorPane, StatePane）。 */}
-      <Pane key="editor">
+      <Panel key="editor">
         {rootBlock.children.map((block: BlockEntity, i: number) => (
           <BlockComponent key={`${block.id}/${i}`} block={block} />
         ))}
-      </Pane>
-      <Pane key="stateJson">
+      </Panel>
+      <Panel key="stateJson">
         <pre className="text-xs whitespace-pre-wrap break-all">
           {JSON.stringify(rootBlock.toJSON(), null, 2)}
         </pre>
-      </Pane>
+      </Panel>
     </div>
   );
 }
 
-function Pane({ children }: { children: ReactNode }) {
+function Panel({ children }: { children: ReactNode }) {
   return (
     <div
       className="border border-gray-300
