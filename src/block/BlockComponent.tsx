@@ -59,8 +59,7 @@ export default function BlockComponent({
 
   return (
     <div key={block.id} className="flex">
-      {/* [P2] @owner: 装飾のみなので aria-hidden="true" を付与。 */}
-      <div>・</div>
+      <div aria-hidden={true}>・</div>
       <div className="flex-grow">
         <div
           // Set px-1 for visibility when the cursor is at the beginning of the line.
@@ -72,11 +71,12 @@ export default function BlockComponent({
           ref={contentRef}
           contentEditable={isEditing || undefined}
           suppressContentEditableWarning={isEditing || undefined}
-          // [P2] @owner: role/aria を付与してアクセシビリティを改善（role="textbox" aria-multiline="true" など）。
           // [P2] @owner: onPaste でプレーンテキスト化し HTML 混入を防止すること。
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={keyDownHandlerGenerator.generate()}
+          role="textbox"
+          aria-multiline={true}
         >
           {block.content}
         </div>
