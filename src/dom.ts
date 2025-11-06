@@ -108,9 +108,19 @@ function setCaretOffset(node: HTMLElement, offset: number) {
 }
 
 function getNearestCaretOffset(x: number, y: number) {
-  // [P1] @owner: caretPositionFromPoint 非対応ブラウザでは caretRangeFromPoint へフォールバックすること。
-  const caretPosition = document.caretPositionFromPoint(x, y);
-  return caretPosition?.offset;
+  // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
+  const caretPosition = document.caretPositionFromPoint?.(x, y);
+  if (caretPosition) {
+    return caretPosition?.offset;
+  }
+
+  // https://developer.mozilla.org/ja/docs/Web/API/Document/caretRangeFromPoint
+  const caretRange = document.caretRangeFromPoint?.(x, y);
+  if (caretRange) {
+    return caretRange.startOffset;
+  }
+
+  return null;
 }
 
 export {
