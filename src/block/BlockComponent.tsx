@@ -51,8 +51,7 @@ export default function BlockComponent({
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
-    // [P2] @owner: startOffset が undefined の場合に 0 へフォールバックするガードを追加。
-    setCaretPosition(block.id, caretOffset);
+    setCaretPosition(block.id, caretOffset ?? 0);
     event.stopPropagation();
     return;
   };
