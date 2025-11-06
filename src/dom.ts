@@ -70,6 +70,7 @@ export function caretIsAtBlockStart(): boolean {
 export function getCaretPositionInBlock(selection: Selection | null) {
   if (!selection) return {};
 
+  // [P1] @owner: selection.anchorNode は空ブロックなどで Element になり得るため Text 前提のキャストはクラッシュする。nodeType を確認し安全にフォールバックすること。
   const text: Text = selection.anchorNode as Text;
   const wholeText = text.wholeText || "";
   const anchorOffset = selection.anchorOffset;
