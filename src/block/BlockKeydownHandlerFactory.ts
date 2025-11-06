@@ -4,9 +4,7 @@ import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
 import { getNewlineRangeList } from "../Range";
 
-// [P2] @owner: ファイル名 `keyboardevent.ts` はケバブ/キャメルの混在。`keyboardEvent.ts` や `keydown.ts` などへの統一を検討。
-// [P2] @owner: クラス名 KeyDownEventHandlerGenerator は冗長。`createKeydownHandler` / `BlockKeydownHandler` など簡潔な命名を検討。
-export class KeyDownEventHandlerGenerator {
+export class BlockKeydownHandlerFactory {
   constructor(
     private block: BlockEntity,
     private contentRef: React.RefObject<HTMLElement | null>,

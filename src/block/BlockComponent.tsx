@@ -3,7 +3,7 @@ import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 import { useStore } from "../state";
 import BlockEntity from "./BlockEntity";
 import * as dom from "../dom";
-import { KeyDownEventHandlerGenerator } from "./keyboardevent";
+import { BlockKeydownHandlerFactory } from "./BlockKeydownHandlerFactory";
 
 export default function BlockComponent({
   block,
@@ -40,7 +40,7 @@ export default function BlockComponent({
     updateBlockById(block.id, block);
   };
 
-  const keyDownHandlerGenerator = new KeyDownEventHandlerGenerator(
+  const keyDownHandlerGenerator = new BlockKeydownHandlerFactory(
     block,
     contentRef,
     dom.getTextSegmentsAroundCaret,
