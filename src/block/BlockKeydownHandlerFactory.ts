@@ -103,7 +103,7 @@ export class BlockKeydownHandlerFactory {
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
-    const caretOffset = dom.getCaretOffsetFromLineStart(currentElement);
+    const caretOffset = dom.getCurrentLineOffset(currentElement);
     const lastRange = getNewlineRangeList(this.block.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
@@ -132,7 +132,7 @@ export class BlockKeydownHandlerFactory {
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
-    const offsetAtPrev = dom.getCaretOffsetFromLineStart(currentElement);
+    const offsetAtPrev = dom.getCurrentLineOffset(currentElement);
     const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)

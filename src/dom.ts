@@ -82,8 +82,7 @@ export function getCaretPositionInBlock(selection: Selection | null) {
  *
  * [P3] @owner: 折返し（wrap）を考慮するには Range.getClientRects() で視覚行ベースに再実装する。
  */
-// [P3] @owner: selection の現在位置を返す関数名として `getCurrentLineOffset` などの方が意図が伝わる。
-export function getCaretOffsetFromLineStart(element: HTMLElement): number {
+export function getCurrentLineOffset(element: HTMLElement): number {
   const selection: Selection | null = window.getSelection();
   if (!selection) {
     return 0;
