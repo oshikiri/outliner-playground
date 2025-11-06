@@ -19,8 +19,7 @@ export const useStore = create((set, get: any) => ({
   rootBlock: createBlock(rootBlock),
   setRootBlock: (block: BlockEntity) => set({ rootBlock: block }),
   findBlockById: (id: string) => get().rootBlock.findBlockById(id),
-  // [P2] @owner: `setBlockById` -> `updateBlockById` にすると Block 側の命名と一致。
-  setBlockById: (id: string, block: BlockEntity) => {
+  updateBlockById: (id: string, block: BlockEntity) => {
     // [P1] @owner: mutate/immutable が混在。Block 側はミューテーション、ここは再構築。
     // 方針を統一（完全イミュータブル or immer でミューテーション）すること。
     const root = createBlock(get().rootBlock);
@@ -33,7 +32,7 @@ export const useStore = create((set, get: any) => ({
     const block = get().rootBlock.findBlockById(id);
     const { newBlock } = createNext(block, beforeCursor, afterCursor);
     // [P1] @owner: 新規挿入後は親/旧ブロック側の更新を set する方が安全（木全体の一貫性のため）。
-    get().setBlockById(newBlock.id, newBlock);
+    get().updateBlockById(newBlock.id, newBlock);
     return newBlock;
   },
   caretPosition: null,

@@ -13,7 +13,7 @@ export default function BlockComponent({
   const caretPosition = useStore((state: any) => state.caretPosition);
   const setCaretPosition = useStore((state: any) => state.setCaretPosition);
   const createNextBlock = useStore((state: any) => state.createNextBlock);
-  const setBlockById = useStore((state: any) => state.setBlockById);
+  const updateBlockById = useStore((state: any) => state.updateBlockById);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +37,7 @@ export default function BlockComponent({
   const onBlur = () => {
     setCaretPosition(null);
     block.content = contentRef.current?.innerText || "";
-    setBlockById(block.id, block);
+    updateBlockById(block.id, block);
   };
 
   const keyDownHandlerGenerator = new KeyDownEventHandlerGenerator(
@@ -46,7 +46,7 @@ export default function BlockComponent({
     dom.getTextSegmentsAroundCaret,
     createNextBlock,
     setCaretPosition,
-    setBlockById,
+    updateBlockById,
   );
 
   const onClick: MouseEventHandler = (event) => {

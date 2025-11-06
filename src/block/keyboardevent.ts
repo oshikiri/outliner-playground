@@ -21,7 +21,7 @@ export class KeyDownEventHandlerGenerator {
       afterText: string,
     ) => BlockEntity,
     private setCaretPosition: (blockId: string, offset: number) => void,
-    private setBlockById: (blockId: string, block: BlockEntity) => void,
+    private updateBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
   // [P3] @owner: 返り値の関数型を `React.KeyboardEventHandler` として明記すると読みやすい。
@@ -67,20 +67,20 @@ export class KeyDownEventHandlerGenerator {
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
     this.block.content = currentInnerText;
-    this.setBlockById(this.block.id, this.block);
+    this.updateBlockById(this.block.id, this.block);
 
     if (event.shiftKey) {
       const { parent, grandparent } = this.block.outdent();
       if (parent) {
-        this.setBlockById(parent.id, parent);
+        this.updateBlockById(parent.id, parent);
       }
       if (grandparent) {
-        this.setBlockById(grandparent.id, grandparent);
+        this.updateBlockById(grandparent.id, grandparent);
       }
     } else {
       const parent = this.block.indent();
       if (parent) {
-        this.setBlockById(parent.id, parent);
+        this.updateBlockById(parent.id, parent);
       }
     }
 
@@ -104,7 +104,7 @@ export class KeyDownEventHandlerGenerator {
     }
 
     this.block.content = currentInnerText;
-    this.setBlockById(this.block.id, this.block);
+    this.updateBlockById(this.block.id, this.block);
 
     const caretOffset = dom.getCaretOffsetFromLineStart(currentElement);
     const lastRange = getNewlineRangeList(this.block.content).getLastRange();
@@ -130,7 +130,7 @@ export class KeyDownEventHandlerGenerator {
     }
 
     this.block.content = currentInnerText;
-    this.setBlockById(this.block.id, this.block);
+    this.updateBlockById(this.block.id, this.block);
 
     const offsetAtPrev = dom.getCaretOffsetFromLineStart(currentElement);
     const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
