@@ -23,7 +23,7 @@ export default function BlockComponent({
       // [P2] @owner: DOM 反映後にキャレットを合わせるため rAF/queueMicrotask を使うと安定する。
       contentRef.current.focus();
 
-      const offset = dom.getOffset(
+      const offset = dom.clampOffsetToTextLength(
         contentRef.current,
         caretPosition.caretOffset,
       );

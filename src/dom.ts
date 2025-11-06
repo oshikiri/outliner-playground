@@ -14,8 +14,7 @@ function getTextSegmentsAroundCaret() {
   return { beforeText, afterText, caretOffset: range.startOffset };
 }
 
-// [P3] @owner: `getOffset` は意味が広い。`clampOffsetToTextLength` 等で意図（上限丸め）を明確に。
-function getOffset(node: HTMLElement, startOffset: number) {
+function clampOffsetToTextLength(node: HTMLElement, startOffset: number) {
   const nextInnerText = node.innerText || "";
   if (startOffset >= nextInnerText.length) {
     return nextInnerText.length;
@@ -124,7 +123,7 @@ function getNearestCaretOffset(x: number, y: number) {
 }
 
 export {
-  getOffset,
+  clampOffsetToTextLength,
   setCaretOffset,
   getTextSegmentsAroundCaret,
   getNearestCaretOffset,
