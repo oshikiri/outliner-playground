@@ -12,7 +12,7 @@ export default function BlockComponent({
 }): JSX.Element {
   const caretPosition = useStore((state) => state.caretPosition);
   const setCaretPosition = useStore((state) => state.setCaretPosition);
-  const createNextBlock = useStore((state) => state.createNextBlock);
+  const splitBlockAtCaret = useStore((state) => state.splitBlockAtCaret);
   const updateBlockById = useStore((state) => state.updateBlockById);
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ export default function BlockComponent({
     block,
     contentRef,
     dom.getTextSegmentsAroundCaret,
-    createNextBlock,
+    splitBlockAtCaret,
     setCaretPosition,
     updateBlockById,
   );

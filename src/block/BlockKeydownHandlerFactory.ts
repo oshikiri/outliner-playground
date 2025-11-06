@@ -14,7 +14,7 @@ export class BlockKeydownHandlerFactory {
       afterText: string | undefined;
       caretOffset: number;
     },
-    private createNextBlock: (
+    private splitBlockAtCaret: (
       blockId: string,
       beforeText: string,
       afterText: string,
@@ -53,7 +53,7 @@ export class BlockKeydownHandlerFactory {
   private handleEnter(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
     const { beforeText, afterText } = this.getTextSegmentsAroundCaret();
-    const newBlock = this.createNextBlock(
+    const newBlock = this.splitBlockAtCaret(
       this.block.id,
       beforeText || "",
       afterText || "",

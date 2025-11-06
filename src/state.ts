@@ -22,7 +22,7 @@ type BlockStore = {
   setRootBlock: (block: BlockEntity) => void;
   findBlockById: (id: string) => BlockEntity | null;
   updateBlockById: (id: string, block: BlockEntity) => void;
-  createNextBlock: (
+  splitBlockAtCaret: (
     id: string,
     beforeCursor: string,
     afterCursor: string,
@@ -42,13 +42,16 @@ export const useStore = create<BlockStore>((set, get) => ({
     const updatedRoot = root.updateBlockById(id, block);
     set({ rootBlock: createBlock(updatedRoot) });
   },
-  // [P2] @owner: `createNextBlock` -> `insertNextBlock` / `splitBlockAtCursor` の方が意図が明確。
-  createNextBlock: (id: string, beforeCursor: string, afterCursor: string) => {
+  splitBlockAtCaret: (
+    id: string,
+    beforeCursor: string,
+    afterCursor: string,
+  ) => {
     const block = get().rootBlock.findBlockById(id);
     if (!block) {
       throw new Error(`Block with id ${id} was not found`);
     }
-    const { newBlock } = createNext(block, beforeCursor, afterCursor);
+    const { newBlock } = splitBlockAtCaret(block, beforeCursor, afterCursor);
     // [P1] @owner: 新規挿入後は親/旧ブロック側の更新を set する方が安全（木全体の一貫性のため）。
     get().updateBlockById(newBlock.id, newBlock);
     return newBlock;
@@ -76,13 +79,12 @@ export function resetLocalStorage() {
   });
 }
 
-// [P2] @owner: `createNext` は曖昧。`insertNextBlock` / `splitAtCursor` などへ改名検討。
-function createNext(
+function splitBlockAtCaret(
   block: BlockEntity,
   beforeCursor: string,
   afterCursor: string,
 ) {
-  console.log("createNext", { beforeCursor, afterCursor });
+  console.log("splitBlockAtCaret", { beforeCursor, afterCursor });
   block.content = beforeCursor;
 
   if (block.children.length > 0) {
