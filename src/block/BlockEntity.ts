@@ -192,8 +192,6 @@ export default class BlockEntity {
 
     parent.children = siblingsBefore;
     this.parent = grandparent;
-    // [P1] @owner: 現状の実装は「後続兄弟」を this の子に取り込むが、一般的なアウトライナでは
-    // 対象ブロックのみを親の直後へ移動するのが期待挙動。仕様を見直すこと。
     this.children = [...this.children, ...siblingsAfter];
     this.children.forEach((b) => {
       b.parent = this;
