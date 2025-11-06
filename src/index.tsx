@@ -39,9 +39,8 @@ function App(): JSX.Element {
         landscape:flex-row"
     >
       <Panel key="editor">
-        {/* [P2] @owner: key にインデックスを含めるとインデント/並べ替え時に別要素として再生成され、フォーカスやローカル状態が失われる。 */}
-        {rootBlock.children.map((block: BlockEntity, i: number) => (
-          <BlockComponent key={`${block.id}/${i}`} block={block} />
+        {rootBlock.children.map((block: BlockEntity) => (
+          <BlockComponent key={block.id} block={block} />
         ))}
       </Panel>
       <Panel key="stateJson">
