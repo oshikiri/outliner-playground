@@ -101,23 +101,23 @@ export default class BlockEntity {
     return [this.parent, idx];
   }
 
-  // [P1] @owner: 返り値が Block インスタンスではなくプレーンオブジェクト（スプレッド）になっている。
-  // メソッド喪失のリスクがあるため、設計を統一（Block を返す or 呼び出し側で必ず createBlock で再構築）。
   updateBlockById(id: string, updatedBlock: BlockEntity): BlockEntity {
     if (this.id === id) {
       return updatedBlock;
     }
 
-    if (this.children) {
-      return {
-        ...this,
-        children: this.children.map((child) =>
-          child.updateBlockById(id, updatedBlock),
-        ),
-      };
+    if (!this.children || this.children.length === 0) {
+      return this;
     }
 
-    return this;
+    const nextChildren = this.children.map((child) =>
+      child.updateBlockById(id, updatedBlock),
+    );
+
+    const clone = new BlockEntity(this.content, nextChildren);
+    clone.id = this.id;
+    clone.parent = this.parent;
+    return clone;
   }
 
   /**
