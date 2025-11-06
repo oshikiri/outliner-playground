@@ -45,12 +45,16 @@ export function setToLocalStorage(rootBlock: BlockEntity) {
   // [P2] @owner: 保存はレンダー中ではなく、state 変更に同期して呼ぶ（useEffect などでトリガ）。
   window.localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJSON()));
 }
-export function clearLocalStorage() {
+export function resetLocalStorage() {
   if (typeof window === "undefined") {
     return;
   }
-  // [P2] @owner: localStorage クリア時にストアも初期状態へリセットすると UI と一致する。
   window.localStorage.removeItem(rootBlockKey);
+
+  useStore.setState({
+    rootBlock: createBlock(initialRootBlock),
+    caretPosition: null,
+  });
 }
 
 // [P2] @owner: `createNext` は曖昧。`insertNextBlock` / `splitAtCursor` などへ改名検討。

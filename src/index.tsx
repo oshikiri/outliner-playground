@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import BlockEntity from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
-import { useStore, setToLocalStorage, clearLocalStorage } from "./state";
+import { useStore, setToLocalStorage, resetLocalStorage } from "./state";
 
 import "./styles.css";
 
@@ -24,7 +24,7 @@ function App(): JSX.Element {
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
-        clearLocalStorage();
+        resetLocalStorage();
         event.preventDefault();
       }
     };
