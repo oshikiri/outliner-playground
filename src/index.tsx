@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import BlockEntity from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
-import { useStore, setToLocalStorage, resetLocalStorage } from "./state";
+import { useStore, resetLocalStorage } from "./state";
 
 import "./styles.css";
 
@@ -16,10 +16,6 @@ root.render(
 
 function App(): JSX.Element {
   const rootBlock = useStore((state) => state.rootBlock);
-
-  useEffect(() => {
-    setToLocalStorage(rootBlock);
-  }, [rootBlock]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {

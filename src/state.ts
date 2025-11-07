@@ -60,13 +60,18 @@ export const useStore = create<BlockStore>((set, get) => ({
   setCaretPosition: (position) => set({ caretPosition: position }),
 }));
 
-export function setToLocalStorage(rootBlock: BlockEntity) {
-  if (typeof window === "undefined") {
-    return;
-  }
-  // [P2] @owner: 保存はレンダー中ではなく、state 変更に同期して呼ぶ（useEffect などでトリガ）。
-  window.localStorage.setItem(rootBlockKey, JSON.stringify(rootBlock.toJSON()));
+if (typeof window !== "undefined") {
+  useStore.subscribe((state, prevState) => {
+    if (!prevState || state.rootBlock === prevState.rootBlock) {
+      return;
+    }
+    window.localStorage.setItem(
+      rootBlockKey,
+      JSON.stringify(state.rootBlock.toJSON()),
+    );
+  });
 }
+
 export function resetLocalStorage() {
   if (typeof window === "undefined") {
     return;
