@@ -79,24 +79,25 @@ export function resetLocalStorage() {
   });
 }
 
+// @owner: [P1] 直接ミューテーション（splice）を使用。イミュータブル方針なら新しい配列を作成する実装に変更すること。
 function splitBlockAtCaret(
   block: BlockEntity,
-  beforeCursor: string,
-  afterCursor: string,
+  beforeCaretText: string,
+  afterCaretText: string,
 ) {
-  console.log("splitBlockAtCaret", { beforeCursor, afterCursor });
-  block.content = beforeCursor;
+  console.log("splitBlockAtCaret", { beforeCaretText, afterCaretText });
+  block.content = beforeCaretText;
 
+  // 1. If the block has children, insert the new block as the first child.
   if (block.children.length > 0) {
-    const newBlock = new BlockEntity(afterCursor, []).withParent(block);
-    // [P1] @owner: 直接ミューテーション（splice）を使用。イミュータブル方針なら新しい配列を作成する実装に変更すること。
+    const newBlock = new BlockEntity(afterCaretText, []).withParent(block);
     block.children.splice(0, 0, newBlock);
     return { block, newBlock };
   }
 
-  const newBlock = new BlockEntity(afterCursor, []).withParent(block.parent);
+  // 2. Otherwise, insert the new block as the next sibling.
+  const newBlock = new BlockEntity(afterCaretText, []).withParent(block.parent);
   const [_parent, idx] = block.getParentAndIndex();
-  // [P1] @owner: ここもミューテーション。イミュータブル方針との整合性を取ること。
   block.parent?.children.splice(idx + 1, 0, newBlock);
   return { block, newBlock };
 }
