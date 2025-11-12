@@ -2,15 +2,14 @@ import { getNewlineRangeList } from "./Range";
 
 function getTextSegmentsAroundCaret() {
   const selection: Selection | null = window.getSelection();
-  if (!selection) {
+  if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
   }
 
-  // [P2] @owner: selection.rangeCount のチェックを追加し、空レンジの際は安全に空文字を返すこと。
   const range = selection.getRangeAt(0);
-  const text = range.startContainer.textContent;
-  const beforeText = text?.substring(0, range.startOffset);
-  const afterText = text?.substring(range.endOffset);
+  const text = range.startContainer.textContent ?? "";
+  const beforeText = text.substring(0, range.startOffset);
+  const afterText = text.substring(range.endOffset);
   return { beforeText, afterText, caretOffset: range.startOffset };
 }
 
