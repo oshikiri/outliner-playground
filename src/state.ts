@@ -42,7 +42,7 @@ export function useSplitBlockAtCaret(): (
       throw new Error(`Block with id ${id} was not found`);
     }
 
-    const {newBlock} = splitBlockAtCaret(block, beforeCursor, afterCursor);
+    const { newBlock } = splitBlockAtCaret(block, beforeCursor, afterCursor);
     setRootBlock(createBlock(rootBlock));
 
     return newBlock;
