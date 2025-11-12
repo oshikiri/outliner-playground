@@ -22,7 +22,7 @@
 ### jotai
 
 - Keep the model layer and state layer responsibilities separate, and confine storage/serialization helpers to the state layer (or document clearly when you cannot).
-- Avoid creating setter-only hooks; prefer a single `useAtom`-based hook that returns both value and updater in one tuple.
+- Avoid creating setter-only hooks; prefer a single `useAtom`-based hook that returns both value and updater in one tuple. Setter-only hooks are acceptable for derived/action hooks (e.g., actions that do not need to return the atom value).
 
 ## Testing
 
