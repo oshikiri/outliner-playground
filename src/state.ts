@@ -1,90 +1,54 @@
-import { create } from "zustand";
+import { atom, useAtom } from "jotai";
 
 import BlockEntity, { createBlock } from "./block/BlockEntity";
 import { initialRootBlock } from "./block/data";
 
-const rootBlockKey = "rootBlock";
-const savedRootBlock =
-  typeof window !== "undefined"
-    ? window.localStorage.getItem(rootBlockKey)
-    : null;
-const rootBlockData = savedRootBlock
-  ? JSON.parse(savedRootBlock)
-  : initialRootBlock;
-
 export type CaretPosition = {
   blockId: string;
   caretOffset: number;
-};
+} | null;
 
-type BlockStore = {
-  rootBlock: BlockEntity;
-  setRootBlock: (block: BlockEntity) => void;
-  findBlockById: (id: string) => BlockEntity | null;
-  updateBlockById: (id: string, block: BlockEntity) => void;
-  splitBlockAtCaret: (
-    id: string,
-    beforeCursor: string,
-    afterCursor: string,
-  ) => BlockEntity;
-  caretPosition: CaretPosition | null;
-  setCaretPosition: (position: CaretPosition | null) => void;
-};
+// @owner get initial value from localStorage
+const rootBlockAtom = atom<BlockEntity>(initialRootBlock);
+const caretPositionAtom = atom<CaretPosition>(null);
 
-export const useStore = create<BlockStore>((set, get) => ({
-  rootBlock: createBlock(rootBlockData),
-  setRootBlock: (block: BlockEntity) => set({ rootBlock: block }),
-  findBlockById: (id: string) => get().rootBlock.findBlockById(id),
-  updateBlockById: (id: string, block: BlockEntity) => {
-    // [P1] @owner: mutate/immutable が混在。Block 側はミューテーション、ここは再構築。
-    // 方針を統一（完全イミュータブル or immer でミューテーション）すること。
-    const root = createBlock(get().rootBlock);
-    const updatedRoot = root.updateBlockById(id, block);
-    set({ rootBlock: createBlock(updatedRoot) });
-  },
-  splitBlockAtCaret: (
-    id: string,
-    beforeCursor: string,
-    afterCursor: string,
-  ) => {
-    const block = get().rootBlock.findBlockById(id);
+export function useRootBlock(): [BlockEntity, (block: BlockEntity) => void] {
+  return useAtom(rootBlockAtom);
+}
+
+export function useCaretPosition(): [
+  CaretPosition,
+  (position: CaretPosition) => void,
+] {
+  return useAtom(caretPositionAtom);
+}
+
+export function useUpdateBlockById(): (id: string, block: BlockEntity) => void {
+  const [, setRootBlock] = useAtom(rootBlockAtom);
+  return (id, block) => {
+    setRootBlock((root) => root.updateBlockById(id, block));
+  };
+}
+
+export function useSplitBlockAtCaret(): (
+  id: string,
+  beforeCursor: string,
+  afterCursor: string,
+) => BlockEntity {
+  const [rootBlock, setRootBlock] = useAtom(rootBlockAtom);
+  return (id, beforeCursor, afterCursor) => {
+    const block = rootBlock.findBlockById(id);
     if (!block) {
       throw new Error(`Block with id ${id} was not found`);
     }
+
     const { newBlock } = splitBlockAtCaret(block, beforeCursor, afterCursor);
-    // [P1] @owner: 新規挿入後は親/旧ブロック側の更新を set する方が安全（木全体の一貫性のため）。
-    get().updateBlockById(newBlock.id, newBlock);
+    setRootBlock(createBlock(rootBlock));
+
     return newBlock;
-  },
-  caretPosition: null,
-  setCaretPosition: (position) => set({ caretPosition: position }),
-}));
-
-if (typeof window !== "undefined") {
-  useStore.subscribe((state, prevState) => {
-    if (!prevState || state.rootBlock === prevState.rootBlock) {
-      return;
-    }
-    window.localStorage.setItem(
-      rootBlockKey,
-      JSON.stringify(state.rootBlock.toJSON()),
-    );
-  });
+  };
 }
 
-export function resetLocalStorage() {
-  if (typeof window === "undefined") {
-    return;
-  }
-  window.localStorage.removeItem(rootBlockKey);
-
-  useStore.setState({
-    rootBlock: createBlock(initialRootBlock),
-    caretPosition: null,
-  });
-}
-
-// @owner: [P1] 直接ミューテーション（splice）を使用。イミュータブル方針なら新しい配列を作成する実装に変更すること。
 function splitBlockAtCaret(
   block: BlockEntity,
   beforeCaretText: string,

@@ -1,9 +1,10 @@
 import { JSX, StrictMode, type ReactNode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
-import BlockEntity from "./block/BlockEntity";
+import BlockEntity, { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
-import { useStore, resetLocalStorage } from "./state";
+import { initialRootBlock } from "./block/data";
+import { useRootBlock, useCaretPosition } from "./state";
 
 import "./styles.css";
 
@@ -15,12 +16,14 @@ root.render(
 );
 
 function App(): JSX.Element {
-  const rootBlock = useStore((state) => state.rootBlock);
+  const [rootBlock, setRootBlock] = useRootBlock();
+  const [, setCaretPosition] = useCaretPosition();
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
-        resetLocalStorage();
+        setRootBlock(createBlock(initialRootBlock));
+        setCaretPosition(null);
         event.preventDefault();
       }
     };
