@@ -19,6 +19,11 @@
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 
+### jotai
+
+- Keep the model layer and state layer responsibilities separate, and confine storage/serialization helpers to the state layer (or document clearly when you cannot).
+- Avoid creating setter-only hooks; prefer a single `useAtom`-based hook that returns both value and updater in one tuple.
+
 ## Testing
 
 - Use Vitest for unit tests.

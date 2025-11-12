@@ -1,6 +1,10 @@
 import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 
-import { useStore } from "../state";
+import {
+  useCaretPosition,
+  useSplitBlockAtCaret,
+  useUpdateBlockById,
+} from "../state";
 import BlockEntity from "./BlockEntity";
 import * as dom from "../dom";
 import { BlockKeydownHandlerFactory } from "./BlockKeydownHandlerFactory";
@@ -10,10 +14,9 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
-  const caretPosition = useStore((state) => state.caretPosition);
-  const setCaretPosition = useStore((state) => state.setCaretPosition);
-  const splitBlockAtCaret = useStore((state) => state.splitBlockAtCaret);
-  const updateBlockById = useStore((state) => state.updateBlockById);
+  const [caretPosition, setCaretPosition] = useCaretPosition();
+  const splitBlockAtCaret = useSplitBlockAtCaret();
+  const updateBlockById = useUpdateBlockById();
 
   const contentRef = useRef<HTMLDivElement>(null);
 
