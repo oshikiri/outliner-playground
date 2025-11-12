@@ -64,12 +64,12 @@ export function caretIsAtBlockStart(): boolean {
   return selection.anchorOffset === 0;
 }
 
-export function getCaretPositionInBlock(selection: Selection | null): CursorPosition | undefined {
+export function getCaretPositionInBlock(
+  selection: Selection | null,
+): CursorPosition | undefined {
   if (!selection) return undefined;
 
-  // [P1] @owner: selection.anchorNode は空ブロックなどで Element になり得るため Text 前提のキャストはクラッシュする。nodeType を確認し安全にフォールバックすること。
-  const text: Text = selection.anchorNode as Text;
-  const wholeText = text.wholeText || "";
+  const wholeText = getTextFromNote(selection.anchorNode);
   const anchorOffset = selection.anchorOffset;
   const newlines = Array.from(wholeText.matchAll(/\n/g));
   return { newlines, wholeText, anchorOffset };
@@ -80,6 +80,15 @@ type CursorPosition = {
   newlines: RegExpExecArray[];
   anchorOffset: number;
 };
+
+function getTextFromNote(node: Node | null): string {
+  if (!node) return "";
+  const isTextNode = node.nodeType === Node.TEXT_NODE;
+  if (isTextNode) {
+    return (node as Text).wholeText ?? "";
+  }
+  return node.textContent ?? "";
+}
 
 /**
  * Get the offset of the cursor from the start of the line in a div.
