@@ -64,9 +64,8 @@ export function caretIsAtBlockStart(): boolean {
   return selection.anchorOffset === 0;
 }
 
-// [P2] @owner: 返り値の型（CursorPosition）を定義し、プロパティ名も `lineBreaks` など意味的に。
-export function getCaretPositionInBlock(selection: Selection | null) {
-  if (!selection) return {};
+export function getCaretPositionInBlock(selection: Selection | null): CursorPosition | undefined {
+  if (!selection) return undefined;
 
   // [P1] @owner: selection.anchorNode は空ブロックなどで Element になり得るため Text 前提のキャストはクラッシュする。nodeType を確認し安全にフォールバックすること。
   const text: Text = selection.anchorNode as Text;
@@ -75,6 +74,12 @@ export function getCaretPositionInBlock(selection: Selection | null) {
   const newlines = Array.from(wholeText.matchAll(/\n/g));
   return { newlines, wholeText, anchorOffset };
 }
+
+type CursorPosition = {
+  wholeText: string;
+  newlines: RegExpExecArray[];
+  anchorOffset: number;
+};
 
 /**
  * Get the offset of the cursor from the start of the line in a div.
