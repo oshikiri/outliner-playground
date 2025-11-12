@@ -142,8 +142,6 @@ export default class BlockEntity {
   }
 
   indent(): BlockEntity | null {
-    // [P1] @owner: 本クラスは配列を直接 mutate（push/splice）している一方、状態更新側は再構築を行っている。
-    // ミューテーション vs イミュータブルの方針を統一すること。
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
       console.log("Block has no parent:", this);
