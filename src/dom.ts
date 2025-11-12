@@ -92,8 +92,6 @@ function getTextFromNote(node: Node | null): string {
 
 /**
  * Get the offset of the cursor from the start of the line in a div.
- *
- * [P3] @owner: 折返し（wrap）を考慮するには Range.getClientRects() で視覚行ベースに再実装する。
  */
 export function getCurrentLineOffset(element: HTMLElement): number {
   const selection: Selection | null = window.getSelection();

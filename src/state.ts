@@ -8,7 +8,6 @@ export type CaretPosition = {
   caretOffset: number;
 } | null;
 
-// @owner get initial value from localStorage
 const rootBlockAtom = atom<BlockEntity>(initialRootBlock);
 const caretPositionAtom = atom<CaretPosition>(null);
 

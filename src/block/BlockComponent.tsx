@@ -23,7 +23,6 @@ export default function BlockComponent({
   const isEditing = block.id === caretPosition?.blockId;
   useEffect(() => {
     if (isEditing && contentRef.current) {
-      // [P2] @owner: DOM 反映後にキャレットを合わせるため rAF/queueMicrotask を使うと安定する。
       contentRef.current.focus();
 
       const offset = dom.clampOffsetToTextLength(
@@ -76,7 +75,6 @@ export default function BlockComponent({
           ref={contentRef}
           contentEditable={isEditing || undefined}
           suppressContentEditableWarning={isEditing || undefined}
-          // [P2] @owner: onPaste でプレーンテキスト化し HTML 混入を防止すること。
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={keyDownHandlerGenerator.generate()}
