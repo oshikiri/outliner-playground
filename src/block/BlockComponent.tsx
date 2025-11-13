@@ -30,12 +30,12 @@ export default function BlockComponent({
       );
     }
 
-    setRootBlock(createBlock(rootBlock));
+    setRootBlock(() => createBlock(rootBlock));
 
     return newBlock;
   };
   const updateBlockById = (id: string, block: BlockEntity) => {
-    setRootBlock(rootBlock.updateBlockById(id, block));
+    setRootBlock((prev) => prev.updateBlockById(id, block));
   };
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -57,7 +57,7 @@ export default function BlockComponent({
   }, [caretPosition]);
 
   const onBlur = () => {
-    setCaretPosition(null);
+    setCaretPosition(() => null);
     block.content = contentRef.current?.innerText || "";
     updateBlockById(block.id, block);
   };
@@ -73,10 +73,10 @@ export default function BlockComponent({
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
-    setCaretPosition({
+    setCaretPosition(() => ({
       blockId: block.id,
       caretOffset: caretOffset ?? 0,
-    });
+    }));
     event.stopPropagation();
     return;
   };

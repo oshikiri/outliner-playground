@@ -22,8 +22,8 @@ function App(): JSX.Element {
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
-        setRootBlock(createBlock(initialRootBlock));
-        setCaretPosition(null);
+        setRootBlock(() => createBlock(initialRootBlock));
+        setCaretPosition(() => null);
         event.preventDefault();
       }
     };

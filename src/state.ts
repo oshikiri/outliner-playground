@@ -11,13 +11,15 @@ export type CaretPosition = {
 const rootBlockAtom = atom<BlockEntity>(initialRootBlock);
 const caretPositionAtom = atom<CaretPosition>(null);
 
-export function useRootBlock(): [BlockEntity, (block: BlockEntity) => void] {
+type UpdateBlock = (prev: BlockEntity) => BlockEntity;
+export function useRootBlock(): [BlockEntity, (updateFn: UpdateBlock) => void] {
   return useAtom(rootBlockAtom);
 }
 
+export type UpdateCaretPosition = (prev: CaretPosition) => CaretPosition;
 export function useCaretPosition(): [
   CaretPosition,
-  (position: CaretPosition) => void,
+  (updateFn: UpdateCaretPosition) => void,
 ] {
   return useAtom(caretPositionAtom);
 }
