@@ -1,11 +1,7 @@
 import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 
-import {
-  useCaretPosition,
-  useSplitBlockAtCaret,
-  useUpdateBlockById,
-} from "../state";
-import BlockEntity from "./BlockEntity";
+import { useRootBlock, useCaretPosition } from "../state";
+import BlockEntity, { createBlock } from "./BlockEntity";
 import * as dom from "../dom";
 import { BlockKeydownHandlerFactory } from "./BlockKeydownHandlerFactory";
 
@@ -14,9 +10,33 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
+  const [rootBlock, setRootBlock] = useRootBlock();
   const [caretPosition, setCaretPosition] = useCaretPosition();
-  const splitBlockAtCaret = useSplitBlockAtCaret();
-  const updateBlockById = useUpdateBlockById();
+
+  const splitBlockAtCaret = (
+    id: string,
+    beforeCursor: string,
+    afterCursor: string,
+  ) => {
+    const block = rootBlock.findBlockById(id);
+    if (!block) {
+      throw new Error(`Block with id ${id} was not found`);
+    }
+
+    const newBlock = block.appendNewByNewline(beforeCursor, afterCursor);
+    if (!newBlock) {
+      throw new Error(
+        `Failed to append new block by splitting block with id ${id}`,
+      );
+    }
+
+    setRootBlock(() => createBlock(rootBlock));
+
+    return newBlock;
+  };
+  const updateBlockById = (id: string, block: BlockEntity) => {
+    setRootBlock((prev) => prev.updateBlockById(id, block));
+  };
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +57,7 @@ export default function BlockComponent({
   }, [caretPosition]);
 
   const onBlur = () => {
-    setCaretPosition(null);
+    setCaretPosition(() => null);
     block.content = contentRef.current?.innerText || "";
     updateBlockById(block.id, block);
   };
@@ -53,10 +73,10 @@ export default function BlockComponent({
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
-    setCaretPosition({
+    setCaretPosition(() => ({
       blockId: block.id,
       caretOffset: caretOffset ?? 0,
-    });
+    }));
     event.stopPropagation();
     return;
   };

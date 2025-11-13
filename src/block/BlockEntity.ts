@@ -141,6 +141,41 @@ export default class BlockEntity {
     return null;
   }
 
+  /**
+   * Append a new block by splitting the current block at the caret position.
+   *
+   * @param beforeCaretText
+   * @param afterCaretText
+   * @returns newly created BlockEntity that contains afterCaretText
+   */
+  appendNewByNewline(
+    beforeCaretText: string,
+    afterCaretText: string,
+  ): BlockEntity | null {
+    if (this.parent === null) {
+      console.warn("Cannot append new block to root-level block.");
+      return null;
+    }
+
+    console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
+    this.content = beforeCaretText;
+
+    // 1. If the block has children, insert the new block as the first child.
+    if (this.children.length > 0) {
+      const newBlock = new BlockEntity(afterCaretText, []).withParent(this);
+      this.children.splice(0, 0, newBlock);
+      return newBlock;
+    }
+
+    // 2. Otherwise, insert the new block as the next sibling.
+    const newBlock = new BlockEntity(afterCaretText, []).withParent(
+      this.parent,
+    );
+    const [_parent, idx] = this.getParentAndIndex();
+    this.parent?.children.splice(idx + 1, 0, newBlock);
+    return newBlock;
+  }
+
   indent(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
@@ -219,11 +254,9 @@ type BlockJSON = {
   children?: BlockJSON[];
 };
 
-function createBlock(obj: any): BlockEntity {
+export function createBlock(obj: any): BlockEntity {
   const children = obj.children?.map(createBlock) || [];
   const block = new BlockEntity(obj.content, children).withParent(obj.parent);
   block.id = obj.id;
   return block;
 }
-
-export { createBlock };

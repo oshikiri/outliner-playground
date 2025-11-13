@@ -3,7 +3,7 @@ import React from "react";
 import BlockEntity from "./BlockEntity";
 import * as dom from "./../dom";
 import { getNewlineRangeList } from "../Range";
-import type { CaretPosition } from "../state";
+import type { UpdateCaretPosition } from "../state";
 
 export class BlockKeydownHandlerFactory {
   constructor(
@@ -19,7 +19,7 @@ export class BlockKeydownHandlerFactory {
       beforeText: string,
       afterText: string,
     ) => BlockEntity,
-    private setCaretPosition: (position: CaretPosition | null) => void,
+    private setCaretPosition: (updateFn: UpdateCaretPosition) => void,
     private updateBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
@@ -58,7 +58,7 @@ export class BlockKeydownHandlerFactory {
       beforeText || "",
       afterText || "",
     );
-    this.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
+    this.setCaretPosition(() => ({ blockId: newBlock.id, caretOffset: 0 }));
   }
 
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
@@ -82,7 +82,7 @@ export class BlockKeydownHandlerFactory {
     }
 
     const { caretOffset } = this.getTextSegmentsAroundCaret();
-    this.setCaretPosition({ blockId: this.block.id, caretOffset });
+    this.setCaretPosition(() => ({ blockId: this.block.id, caretOffset }));
   }
 
   private handleArrowDown(
@@ -108,10 +108,10 @@ export class BlockKeydownHandlerFactory {
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
       : 0;
-    this.setCaretPosition({
+    this.setCaretPosition(() => ({
       blockId: nextBlock.id,
       caretOffset: nextCaretOffset,
-    });
+    }));
   }
 
   private handleArrowUp(
@@ -137,10 +137,10 @@ export class BlockKeydownHandlerFactory {
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
       : 0;
-    this.setCaretPosition({
+    this.setCaretPosition(() => ({
       blockId: prevBlock.id,
       caretOffset: nextCaretOffset,
-    });
+    }));
   }
 
   private goToLineStart(event: KeyboardEvent) {
@@ -152,12 +152,12 @@ export class BlockKeydownHandlerFactory {
     });
     if (newlineBeforeCaret) {
       const newlineIndex = newlineBeforeCaret.index;
-      this.setCaretPosition({
+      this.setCaretPosition(() => ({
         blockId: this.block.id,
         caretOffset: newlineIndex + 1,
-      });
+      }));
     } else {
-      this.setCaretPosition({ blockId: this.block.id, caretOffset: 0 });
+      this.setCaretPosition(() => ({ blockId: this.block.id, caretOffset: 0 }));
     }
   }
 
@@ -170,15 +170,15 @@ export class BlockKeydownHandlerFactory {
     });
     if (newlineAfterCaret) {
       const newlineIndex = newlineAfterCaret.index;
-      this.setCaretPosition({
+      this.setCaretPosition(() => ({
         blockId: this.block.id,
         caretOffset: newlineIndex,
-      });
+      }));
     } else {
-      this.setCaretPosition({
+      this.setCaretPosition(() => ({
         blockId: this.block.id,
         caretOffset: currentInnerText.length,
-      });
+      }));
     }
   }
 
@@ -205,10 +205,10 @@ export class BlockKeydownHandlerFactory {
       this.updateBlockById(parent.id, parent);
     }
 
-    this.setCaretPosition({
+    this.setCaretPosition(() => ({
       blockId: prevBlock.id,
       caretOffset: prevContentLength,
-    });
+    }));
   }
 
   private handleArrowLeft(event: KeyboardEvent) {
@@ -222,10 +222,10 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
-    this.setCaretPosition({
+    this.setCaretPosition(() => ({
       blockId: prevBlock.id,
       caretOffset: prevBlock.content.length,
-    });
+    }));
   }
 
   private handleArrowRight(event: KeyboardEvent) {
@@ -243,6 +243,6 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
-    this.setCaretPosition({ blockId: nextBlock.id, caretOffset: 0 });
+    this.setCaretPosition(() => ({ blockId: nextBlock.id, caretOffset: 0 }));
   }
 }
