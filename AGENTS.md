@@ -1,5 +1,7 @@
 # AGENTS.md
 
+- Always communicate in Japanese.
+
 ## Coding styles
 
 ### JavaScript/TypeScript
@@ -10,6 +12,7 @@
 - Do not export types or helpers unless they are used outside the module. Keep internal details unexported to minimize surface area.
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
+- Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
 
 ### React
 
@@ -18,6 +21,9 @@
 - Memoize event handlers/factories passed down the tree (`useCallback`, `useMemo`) so we do not recreate them every render.
 - Only use `key` props for array/iterator children; avoid attaching `key` to solitary elements.
 - Provide semantic landmarks/ARIA attributes and keep accessibility in sync with README guidance.
+- Extract repeated or branch-heavy JSX (e.g., map renderers) into focused child components to keep primary component bodies easy to scan.
+- Group domain-specific UI pieces (e.g., markdown renderers) into dedicated subdirectories so the src root stays tidy and discoverable.
+- Move helper components and pure parsing logic into their own modules when they are conceptually separate, so primary components remain focused.
 
 ### jotai
 
