@@ -22,10 +22,8 @@ function App(): JSX.Element {
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
-        // @owner [P1] ここもSetStateActionへ値を直接渡さず関数ラップしている
-        setRootBlock(() => createBlock(initialRootBlock));
-        // @owner [P1] setter誤用
-        setCaretPosition(() => null);
+        setRootBlock(createBlock(initialRootBlock));
+        setCaretPosition(null);
         event.preventDefault();
       }
     };

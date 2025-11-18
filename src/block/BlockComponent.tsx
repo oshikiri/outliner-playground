@@ -33,8 +33,7 @@ export default function BlockComponent({
       );
     }
 
-    // @owner [P1] ここも不要な`()=>`でラップしておりSetStateActionの直接指定ができていません
-    setRootBlock(() => createBlock(rootBlock));
+    setRootBlock(createBlock(rootBlock));
 
     return newBlock;
   };
@@ -63,8 +62,7 @@ export default function BlockComponent({
   }, [caretPosition]);
 
   const onBlur = () => {
-    // @owner [P1] setterに直接値を渡せるのに毎回`()=>`ラップしておりJotaiのSetStateActionを無視しています
-    setCaretPosition(() => null);
+    setCaretPosition(null);
     // @owner [P1] block.contentへ直接代入しているため不変性違反です
     block.content = contentRef.current?.innerText || "";
     updateBlockById(block.id, block);
@@ -82,11 +80,10 @@ export default function BlockComponent({
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
-    // @owner [P1] ここでも不要な`()=>`を噛ませています
-    setCaretPosition(() => ({
+    setCaretPosition({
       blockId: block.id,
       caretOffset: caretOffset ?? 0,
-    }));
+    });
     event.stopPropagation();
     return;
   };
