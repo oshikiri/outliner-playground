@@ -13,6 +13,7 @@
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 - Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
+- Use strict comparisons (`===`, `!==`) unless there is a clear need for loose equality, and keep that policy consistent across files.
 
 ### React
 

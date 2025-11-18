@@ -251,8 +251,7 @@ export default class BlockEntity {
       id: this.id,
       content: this.content,
       children:
-        // @owner [P1] 厳密比較ではなく==を使っている
-        this.children?.length == 0
+        this.children?.length === 0
           ? undefined
           : this.children?.map((child) => child.toJSON()),
     };
