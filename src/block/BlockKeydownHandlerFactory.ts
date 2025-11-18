@@ -260,8 +260,7 @@ export class BlockKeydownHandlerFactory {
     if (!position) {
       return;
     }
-    if (position.anchorOffset != position.wholeText?.length) {
-      // @owner [P1] != を使っており型安全性/ESLint不適合
+    if (position.anchorOffset !== position.wholeText?.length) {
       return;
     }
 
