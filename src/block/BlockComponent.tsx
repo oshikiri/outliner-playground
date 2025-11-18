@@ -4,6 +4,7 @@ import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity, { createBlock } from "./BlockEntity";
 import * as dom from "../dom";
 import { BlockKeydownHandlerFactory } from "./BlockKeydownHandlerFactory";
+import MarkdownComponent from "../markdown/MarkdownComponent";
 
 export default function BlockComponent({
   block,
@@ -112,7 +113,11 @@ export default function BlockComponent({
           aria-multiline={true}
         >
           {/* @owner [P1] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}
-          {block.content}
+          {isEditing ? (
+            block.content
+          ) : (
+            <MarkdownComponent raw={block.content} />
+          )}
         </div>
         {/* @owner [P1] 下段でも単一要素にkeyを付けています */}
         <div className="ml-5" key={block.id + "-children"}>

@@ -13,17 +13,21 @@ const initialRootBlock = new Block("", [
         "You can update the nested items and see the current state in the right pane",
       ),
     ]),
+    new Block("Markdown rendering", [
+      new Block("[link example](https://example.com)"),
+      new Block("`inline code` example"),
+    ]),
     new Block("logseq-like keybinds", [
-      new Block("tab: increase level"),
-      new Block("shift+tab: decrease level"),
-      new Block("enter: add new block after the current block", [
+      new Block("`tab`: increase level"),
+      new Block("`shift+tab`: decrease level"),
+      new Block("`enter`: add new block after the current block", [
         new Block(
           "Add a new sibling block if the current block has no children, or add a new child block if it does",
         ),
         new Block("The cursor will move to the new block"),
       ]),
-      new Block("shift+enter: insert a newline"),
-      new Block("arrow up/down: move to the previous/next visual line", [
+      new Block("`shift+enter`: insert a newline"),
+      new Block("`arrow up/down`: move to the previous/next visual line", [
         new Block(
           '"The next visual line" is the line that appears immediately below the current line as displayed on the screen, taking into account text wrapping. ',
           [
@@ -37,9 +41,9 @@ const initialRootBlock = new Block("", [
         ),
         new Block("And it preserves the cursor position"),
       ]),
-      new Block("ctrl+a: move cursor to the beginning of the line"),
-      new Block("ctrl+e: move cursor to the end of the line"),
-      new Block("ctrl+k: clear the localStorage"),
+      new Block("`ctrl+a`: move cursor to the beginning of the line"),
+      new Block("`ctrl+e`: move cursor to the end of the line"),
+      new Block("`ctrl+k`: clear the localStorage"),
     ]),
   ]),
   new Block("TODOs", [
@@ -47,7 +51,6 @@ const initialRootBlock = new Block("", [
     new Block("Caret movement across visual lines"),
     new Block("Copy/paste handling (rich text -> plain text)"),
     new Block("Undo/redo functionality"),
-    new Block("Render Markdown syntax"),
   ]),
 ]);
 
