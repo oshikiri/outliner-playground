@@ -4,7 +4,6 @@ import type { Segment } from "./Segment";
 
 type SegmentProps = {
   segment: Segment;
-  index: number;
 };
 
 export default function SegmentComponent({

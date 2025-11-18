@@ -15,11 +15,7 @@ export default function MarkdownComponent({
   return (
     <>
       {segments.map((segment, index) => (
-        <SegmentComponent
-          key={`${segment.type}-${index}`}
-          segment={segment}
-          index={index}
-        />
+        <SegmentComponent key={`${segment.type}-${index}`} segment={segment} />
       ))}
     </>
   );
