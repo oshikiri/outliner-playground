@@ -155,12 +155,10 @@ export default class BlockEntity {
     afterCaretText: string,
   ): BlockEntity | null {
     if (this.parent === null) {
-      // @owner [P1] warnログが多数残存
       console.warn("Cannot append new block to root-level block.");
       return null;
     }
 
-    // @owner [P1] consoleログの消し忘れ
     console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
     // @owner [P1] contentをそのまま書き換えているのでUndo/redoに対応しづらい
     this.content = beforeCaretText;
@@ -184,13 +182,11 @@ export default class BlockEntity {
   indent(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      // @owner [P1] console.logがそのまま残っているため本番でノイズになります
       console.log("Block has no parent:", this);
       return parent;
     }
 
     if (currentIdx === 0) {
-      // @owner [P1] ここも同上
       console.log("Cannot indent block that is the first child of its parent.");
       return parent;
     }
@@ -213,12 +209,10 @@ export default class BlockEntity {
   outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      // @owner [P1] console.log残骸
       console.log("Block has no parent:", this);
       return { parent, grandparent: null };
     }
     if (!parent.parent) {
-      // @owner [P1] 同上
       console.log("Cannot outdent block that is a child of the root.");
       return { parent, grandparent: null };
     }
