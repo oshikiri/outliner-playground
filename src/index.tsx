@@ -1,4 +1,4 @@
-import { JSX, StrictMode, type ReactNode, useEffect } from "react";
+import { JSX, StrictMode, type PropsWithChildren, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 import BlockEntity, { createBlock } from "./block/BlockEntity";
@@ -56,8 +56,7 @@ function App(): JSX.Element {
   );
 }
 
-// @owner [P1] PropsWithChildren等を使わず手動で子propsを定義しているためDRYでない
-function Panel({ children }: { children: ReactNode }) {
+function Panel({ children }: PropsWithChildren) {
   return (
     <div
       className="border border-gray-300
