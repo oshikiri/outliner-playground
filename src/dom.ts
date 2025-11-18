@@ -1,6 +1,7 @@
 import { getNewlineRangeList } from "./Range";
 
 function getTextSegmentsAroundCaret() {
+  // @owner [P1] windowへ強依存し純粋関数ではない
   const selection: Selection | null = window.getSelection();
   if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
@@ -26,6 +27,7 @@ export function isCaretAtLastLine(content: string): boolean {
     return true;
   }
 
+  // @owner [P1] グローバルAPIへ直接アクセスしておりテストしにくい
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) {
     return false;
@@ -40,6 +42,7 @@ export function isCaretAtLastLine(content: string): boolean {
 }
 
 export function isCaretAtFirstLine(): boolean {
+  // @owner [P1] 同上
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) {
     return false;
@@ -57,6 +60,7 @@ export function isCaretAtFirstLine(): boolean {
 }
 
 export function caretIsAtBlockStart(): boolean {
+  // @owner [P1] window依存
   const selection = window.getSelection();
   if (!selection) {
     return true;
@@ -94,6 +98,7 @@ function getTextFromNote(node: Node | null): string {
  * Get the offset of the cursor from the start of the line in a div.
  */
 export function getCurrentLineOffset(element: HTMLElement): number {
+  // @owner [P1] window依存
   const selection: Selection | null = window.getSelection();
   if (!selection) {
     return 0;
@@ -108,6 +113,7 @@ function setCaretOffset(node: HTMLElement, offset: number) {
   range.setStart(node, offset);
   range.setEnd(node, offset);
 
+  // @owner [P1] window依存
   const selection = window.getSelection();
   if (!selection) {
     return;
@@ -118,6 +124,7 @@ function setCaretOffset(node: HTMLElement, offset: number) {
 
 function getNearestCaretOffset(x: number, y: number) {
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
+  // @owner [P1] document APIも直接アクセス
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {
     return caretPosition?.offset;

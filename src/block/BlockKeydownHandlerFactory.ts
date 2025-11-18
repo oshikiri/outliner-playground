@@ -5,6 +5,7 @@ import * as dom from "./../dom";
 import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
 
+// @owner [P1] このFactoryは毎レンダーごとにインスタンス化され大量のハンドラーを再生成するため、クラス構造よりhooksベースのメモ化が望ましいです
 export class BlockKeydownHandlerFactory {
   constructor(
     private block: BlockEntity,
@@ -23,6 +24,7 @@ export class BlockKeydownHandlerFactory {
     private updateBlockById: (blockId: string, block: BlockEntity) => void,
   ) {}
 
+  // @owner [P1] ここで返す関数は毎回新規生成されuseEffect等の依存に含めにくい構造です
   public generate(): React.KeyboardEventHandler {
     return (event: KeyboardEvent) => {
       const currentElement = this.contentRef.current;
@@ -58,11 +60,13 @@ export class BlockKeydownHandlerFactory {
       beforeText || "",
       afterText || "",
     );
+    // @owner [P1] setterへ値を直接渡さずラムダを挟む誤用
     this.setCaretPosition(() => ({ blockId: newBlock.id, caretOffset: 0 }));
   }
 
   private handleTab(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
+    // @owner [P1] BlockEntityを直接ミューテート
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
@@ -82,6 +86,7 @@ export class BlockKeydownHandlerFactory {
     }
 
     const { caretOffset } = this.getTextSegmentsAroundCaret();
+    // @owner [P1] setter誤用(同上)
     this.setCaretPosition(() => ({ blockId: this.block.id, caretOffset }));
   }
 
@@ -100,6 +105,7 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
+    // @owner [P1] ミューテーション
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
@@ -129,6 +135,7 @@ export class BlockKeydownHandlerFactory {
       return;
     }
 
+    // @owner [P1] ミューテーション
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
@@ -146,6 +153,7 @@ export class BlockKeydownHandlerFactory {
   private goToLineStart(event: KeyboardEvent) {
     event.preventDefault();
 
+    // @owner [P1] window APIへ強依存しSSR/テストで扱いにくい
     const pos = dom.getCaretPositionInBlock(window.getSelection());
     const newlineBeforeCaret = pos?.newlines?.findLast((newline: any) => {
       return newline.index < pos.anchorOffset;
@@ -164,6 +172,7 @@ export class BlockKeydownHandlerFactory {
   private goToLineEnd(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
 
+    // @owner [P1] window依存
     const pos = dom.getCaretPositionInBlock(window.getSelection());
     const newlineAfterCaret = pos?.newlines?.find((newline: any) => {
       return newline.index >= pos.anchorOffset;
@@ -183,6 +192,7 @@ export class BlockKeydownHandlerFactory {
   }
 
   private handleBackspace(event: KeyboardEvent, currentInnerText: string) {
+    // @owner [P1] ミューテーション
     this.block.content = currentInnerText;
 
     if (this.block.children.length > 0 || !dom.caretIsAtBlockStart()) {
@@ -196,8 +206,10 @@ export class BlockKeydownHandlerFactory {
 
     event.preventDefault();
     const prevContentLength = prevBlock.content.length;
+    // @owner [P1] ここでも破壊的変更
     prevBlock.content += this.block.content;
     const [parent, idx] = this.block.getParentAndIndex();
+    // @owner [P1] children配列を直接splice
     parent?.children.splice(idx, 1);
 
     this.updateBlockById(prevBlock.id, prevBlock);
@@ -229,11 +241,13 @@ export class BlockKeydownHandlerFactory {
   }
 
   private handleArrowRight(event: KeyboardEvent) {
+    // @owner [P1] window依存
     const position = dom.getCaretPositionInBlock(window.getSelection());
     if (!position) {
       return;
     }
     if (position.anchorOffset != position.wholeText?.length) {
+      // @owner [P1] != を使っており型安全性/ESLint不適合
       return;
     }
 

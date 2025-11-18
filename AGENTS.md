@@ -15,6 +15,9 @@
 
 - Place side effects outside render using `useEffect`, etc.
 - Prefer immutable updates for recursive structures such as the block tree.
+- Memoize event handlers/factories passed down the tree (`useCallback`, `useMemo`) so we do not recreate them every render.
+- Only use `key` props for array/iterator children; avoid attaching `key` to solitary elements.
+- Provide semantic landmarks/ARIA attributes and keep accessibility in sync with README guidance.
 
 ### jotai
 

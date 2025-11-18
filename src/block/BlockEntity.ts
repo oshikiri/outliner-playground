@@ -12,6 +12,7 @@ export default class BlockEntity {
     public content: string,
     public children: BlockEntity[] = [],
   ) {
+    // @owner [P1] NOTE: 引数オブジェクトを書き換えて親子関係を再設定するので純粋なデータモデルとは言えません
     this.content = content;
     children.forEach((child) => child.withParent(this));
     this.children = children;
@@ -102,6 +103,7 @@ export default class BlockEntity {
   }
 
   updateBlockById(id: string, updatedBlock: BlockEntity): BlockEntity {
+    // @owner [P1] NOTE: update系メソッドも外部状態に依存しており純粋関数になっていません
     if (this.id === id) {
       return updatedBlock;
     }
@@ -153,11 +155,14 @@ export default class BlockEntity {
     afterCaretText: string,
   ): BlockEntity | null {
     if (this.parent === null) {
+      // @owner [P1] warnログが多数残存
       console.warn("Cannot append new block to root-level block.");
       return null;
     }
 
+    // @owner [P1] consoleログの消し忘れ
     console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
+    // @owner [P1] contentをそのまま書き換えているのでUndo/redoに対応しづらい
     this.content = beforeCaretText;
 
     // 1. If the block has children, insert the new block as the first child.
@@ -179,11 +184,13 @@ export default class BlockEntity {
   indent(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
+      // @owner [P1] console.logがそのまま残っているため本番でノイズになります
       console.log("Block has no parent:", this);
       return parent;
     }
 
     if (currentIdx === 0) {
+      // @owner [P1] ここも同上
       console.log("Cannot indent block that is the first child of its parent.");
       return parent;
     }
@@ -206,10 +213,12 @@ export default class BlockEntity {
   outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
+      // @owner [P1] console.log残骸
       console.log("Block has no parent:", this);
       return { parent, grandparent: null };
     }
     if (!parent.parent) {
+      // @owner [P1] 同上
       console.log("Cannot outdent block that is a child of the root.");
       return { parent, grandparent: null };
     }
@@ -225,6 +234,7 @@ export default class BlockEntity {
 
     parent.children = siblingsBefore;
     this.parent = grandparent;
+    // @owner [P1] 直接代入が多く構造不整合を招きます
     this.children = [...this.children, ...siblingsAfter];
     this.children.forEach((b) => {
       b.parent = this;
@@ -241,6 +251,7 @@ export default class BlockEntity {
       id: this.id,
       content: this.content,
       children:
+        // @owner [P1] 厳密比較ではなく==を使っている
         this.children?.length == 0
           ? undefined
           : this.children?.map((child) => child.toJSON()),

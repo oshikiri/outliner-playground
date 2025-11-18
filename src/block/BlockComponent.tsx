@@ -10,6 +10,7 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
+  // @owner [P1] このコンポーネントはpropsで受け取ったBlockEntityをそのままmutateしておりReactとJotaiの不変データ原則を満たしていません
   const [rootBlock, setRootBlock] = useRootBlock();
   const [caretPosition, setCaretPosition] = useCaretPosition();
 
@@ -18,6 +19,7 @@ export default function BlockComponent({
     beforeCursor: string,
     afterCursor: string,
   ) => {
+    // @owner [P1] useCallbackを使わないため毎レンダー再生成され子へ渡るのでパフォーマンス懸念があります
     const block = rootBlock.findBlockById(id);
     if (!block) {
       throw new Error(`Block with id ${id} was not found`);
@@ -30,6 +32,7 @@ export default function BlockComponent({
       );
     }
 
+    // @owner [P1] ここも不要な`()=>`でラップしておりSetStateActionの直接指定ができていません
     setRootBlock(() => createBlock(rootBlock));
 
     return newBlock;
@@ -37,6 +40,7 @@ export default function BlockComponent({
   const updateBlockById = (id: string, block: BlockEntity) => {
     setRootBlock((prev) => prev.updateBlockById(id, block));
   };
+  // @owner [P1] こちらもuseCallback化されておらず参照安定性がありません
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +53,7 @@ export default function BlockComponent({
         contentRef.current,
         caretPosition.caretOffset,
       );
+      // @owner [P1] Text/HTMLElementの厳密な型判定をせずキャストしています
       const textNode = contentRef.current.childNodes[0] as HTMLElement;
       if (textNode) {
         dom.setCaretOffset(textNode, offset);
@@ -57,7 +62,9 @@ export default function BlockComponent({
   }, [caretPosition]);
 
   const onBlur = () => {
+    // @owner [P1] setterに直接値を渡せるのに毎回`()=>`ラップしておりJotaiのSetStateActionを無視しています
     setCaretPosition(() => null);
+    // @owner [P1] block.contentへ直接代入しているため不変性違反です
     block.content = contentRef.current?.innerText || "";
     updateBlockById(block.id, block);
   };
@@ -70,9 +77,11 @@ export default function BlockComponent({
     setCaretPosition,
     updateBlockById,
   );
+  // @owner [P1] FactoryインスタンスもuseMemo等でキャッシュしていないため毎レンダーconstructされます
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(event.clientX, event.clientY);
+    // @owner [P1] ここでも不要な`()=>`を噛ませています
     setCaretPosition(() => ({
       blockId: block.id,
       caretOffset: caretOffset ?? 0,
@@ -91,6 +100,7 @@ export default function BlockComponent({
             whitespace-pre-wrap break-all px-1
             empty:after:content-['\00a0']
           "
+          // @owner [P1] 単一要素にkeyを付けても意味がなくむしろ匂いです
           key={block.id + "-content"}
           ref={contentRef}
           contentEditable={isEditing || undefined}
@@ -101,8 +111,10 @@ export default function BlockComponent({
           role="textbox"
           aria-multiline={true}
         >
+          {/* @owner [P1] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}
           {block.content}
         </div>
+        {/* @owner [P1] 下段でも単一要素にkeyを付けています */}
         <div className="ml-5" key={block.id + "-children"}>
           {block.children?.map((child) => (
             <BlockComponent key={child.id} block={child} />
