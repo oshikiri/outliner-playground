@@ -1,5 +1,7 @@
 # AGENTS.md
 
+- Always communicate in Japanese.
+
 ## Coding styles
 
 ### JavaScript/TypeScript
