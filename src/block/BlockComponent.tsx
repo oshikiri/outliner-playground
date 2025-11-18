@@ -56,7 +56,7 @@ export default function BlockComponent({
       // @owner [P1] Text/HTMLElementの厳密な型判定をせずキャストしています
       const textNode = contentRef.current.childNodes[0] as HTMLElement;
       if (textNode) {
-        dom.setCaretOffset(textNode, offset);
+        dom.setCaretOffset(textNode, offset, window.getSelection());
       }
     }
   }, [caretPosition]);

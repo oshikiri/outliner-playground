@@ -10,7 +10,7 @@ export class BlockKeydownHandlerFactory {
   constructor(
     private block: BlockEntity,
     private contentRef: React.RefObject<HTMLElement | null>,
-    private getTextSegmentsAroundCaret: () => {
+    private getTextSegmentsAroundCaret: (selection: Selection | null) => {
       beforeText: string | undefined;
       afterText: string | undefined;
       caretOffset: number;
@@ -54,7 +54,9 @@ export class BlockKeydownHandlerFactory {
 
   private handleEnter(event: KeyboardEvent, currentInnerText: string) {
     event.preventDefault();
-    const { beforeText, afterText } = this.getTextSegmentsAroundCaret();
+    const { beforeText, afterText } = this.getTextSegmentsAroundCaret(
+      window.getSelection(),
+    );
     const newBlock = this.splitBlockAtCaret(
       this.block.id,
       beforeText || "",
@@ -84,7 +86,9 @@ export class BlockKeydownHandlerFactory {
       }
     }
 
-    const { caretOffset } = this.getTextSegmentsAroundCaret();
+    const { caretOffset } = this.getTextSegmentsAroundCaret(
+      window.getSelection(),
+    );
     this.setCaretPosition({ blockId: this.block.id, caretOffset });
   }
 
@@ -93,7 +97,10 @@ export class BlockKeydownHandlerFactory {
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
-    if (!currentElement || !dom.isCaretAtLastLine(this.block.content)) {
+    if (
+      !currentElement ||
+      !dom.isCaretAtLastLine(this.block.content, window.getSelection())
+    ) {
       return;
     }
 
@@ -107,7 +114,10 @@ export class BlockKeydownHandlerFactory {
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
-    const caretOffset = dom.getCurrentLineOffset(currentElement);
+    const caretOffset = dom.getCurrentLineOffset(
+      currentElement,
+      window.getSelection(),
+    );
     const lastRange = getNewlineRangeList(this.block.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.max(0, caretOffset - lastRange.l - 1)
@@ -123,7 +133,7 @@ export class BlockKeydownHandlerFactory {
     currentElement: HTMLElement | null,
     currentInnerText: string,
   ) {
-    if (!currentElement || !dom.isCaretAtFirstLine()) {
+    if (!currentElement || !dom.isCaretAtFirstLine(window.getSelection())) {
       return;
     }
 
@@ -137,7 +147,10 @@ export class BlockKeydownHandlerFactory {
     this.block.content = currentInnerText;
     this.updateBlockById(this.block.id, this.block);
 
-    const offsetAtPrev = dom.getCurrentLineOffset(currentElement);
+    const offsetAtPrev = dom.getCurrentLineOffset(
+      currentElement,
+      window.getSelection(),
+    );
     const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
     const nextCaretOffset = lastRange
       ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
@@ -193,7 +206,10 @@ export class BlockKeydownHandlerFactory {
     // @owner [P1] ミューテーション
     this.block.content = currentInnerText;
 
-    if (this.block.children.length > 0 || !dom.caretIsAtBlockStart()) {
+    if (
+      this.block.children.length > 0 ||
+      !dom.caretIsAtBlockStart(window.getSelection())
+    ) {
       return;
     }
 
@@ -222,7 +238,7 @@ export class BlockKeydownHandlerFactory {
   }
 
   private handleArrowLeft(event: KeyboardEvent) {
-    if (!dom.caretIsAtBlockStart()) {
+    if (!dom.caretIsAtBlockStart(window.getSelection())) {
       return;
     }
 

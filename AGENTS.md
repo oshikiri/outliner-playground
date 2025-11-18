@@ -15,6 +15,7 @@
 - Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
 - Use strict comparisons (`===`, `!==`) unless there is a clear need for loose equality, and keep that policy consistent across files.
 - console.log と console.warn を使うことは許容する。将来的にログライブラリを使うことを検討する
+- DOMヘルパーは `Selection` や `window` に直接依存させず、必要な値だけを引数で受け取ってテストしやすくしておく。
 
 ### React
 
