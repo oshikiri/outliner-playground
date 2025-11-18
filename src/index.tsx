@@ -41,19 +41,17 @@ function App(): JSX.Element {
       // @owner [P1] 元指摘のとおりlandmark/aria不足を解消する必要があります
       aria-label="outliner workspace"
     >
-      <Panel key="editor">
+      <Panel>
         {rootBlock.children.map((block: BlockEntity) => (
           <BlockComponent key={block.id} block={block} />
         ))}
       </Panel>
-      {/* @owner [P1] 上記Panelは単一要素なのでkey属性は不要です */}
-      <Panel key="stateJson">
+      <Panel>
         <pre className="text-xs whitespace-pre-wrap break-all">
           {JSON.stringify(rootBlock.toJSON(), null, 2)}
           {/* @owner [P1] JSON.stringifyを毎レンダーで実行しておりパフォーマンス懸念 */}
         </pre>
       </Panel>
-      {/* @owner [P1] こちらも同様にkey属性が意味をなしていません */}
     </div>
   );
 }
