@@ -52,5 +52,6 @@ function LinkSegment({ label, href }: LinkSegmentProps): JSX.Element {
 
 function sanitizeHref(href: string): string {
   const trimmed = href.trim();
+  // @owner [P1] FIXME: Basic XSS prevention by sanitizing javascript: links
   return trimmed.toLowerCase().startsWith("javascript:") ? "#" : trimmed;
 }
