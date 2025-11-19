@@ -75,7 +75,6 @@ export default function BlockComponent({
     setCaretPosition,
     updateBlockById,
   });
-  // @owner [P1] FactoryインスタンスもuseMemo等でキャッシュしていないため毎レンダーconstructされます
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(
