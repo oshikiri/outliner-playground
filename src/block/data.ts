@@ -1,6 +1,6 @@
 import Block from "./BlockEntity";
 
-const initialRootBlock = new Block("", [
+export const initialRootBlock = new Block("", [
   new Block("This is a playground for outliner-playground"),
   new Block(""),
   new Block("outliner-playground is a study of logseq-like outliner editors", [
@@ -53,5 +53,3 @@ const initialRootBlock = new Block("", [
     new Block("Undo/redo functionality"),
   ]),
 ]);
-
-export { initialRootBlock };

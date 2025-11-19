@@ -1,6 +1,6 @@
 import { getNewlineRangeList } from "../Range";
 
-function getTextSegmentsAroundCaret(selection: Selection | null) {
+export function getTextSegmentsAroundCaret(selection: Selection | null) {
   if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
   }
@@ -12,7 +12,10 @@ function getTextSegmentsAroundCaret(selection: Selection | null) {
   return { beforeText, afterText, caretOffset: range.startOffset };
 }
 
-function clampOffsetToTextLength(node: HTMLElement, startOffset: number) {
+export function clampOffsetToTextLength(
+  node: HTMLElement,
+  startOffset: number,
+) {
   const nextInnerText = node.innerText || "";
   if (startOffset >= nextInnerText.length) {
     return nextInnerText.length;
@@ -104,7 +107,7 @@ export function getCurrentLineOffset(
   return range.startOffset;
 }
 
-function setCaretOffset(
+export function setCaretOffset(
   node: HTMLElement,
   offset: number,
   selection: Selection | null,
@@ -120,7 +123,7 @@ function setCaretOffset(
   selection.addRange(range);
 }
 
-function getNearestCaretOffset(x: number, y: number) {
+export function getNearestCaretOffset(x: number, y: number) {
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
   // @owner [P1] document APIも直接アクセス
   const caretPosition = document.caretPositionFromPoint?.(x, y);
@@ -133,13 +136,5 @@ function getNearestCaretOffset(x: number, y: number) {
   if (caretRange) {
     return caretRange.startOffset;
   }
-
   return null;
 }
-
-export {
-  clampOffsetToTextLength,
-  setCaretOffset,
-  getTextSegmentsAroundCaret,
-  getNearestCaretOffset,
-};
