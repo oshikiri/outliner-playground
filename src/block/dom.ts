@@ -123,9 +123,12 @@ export function setCaretOffset(
   selection.addRange(range);
 }
 
-export function getNearestCaretOffset(x: number, y: number) {
+export function getNearestCaretOffset(
+  document: Document,
+  x: number,
+  y: number,
+) {
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
-  // @owner [P1] document APIも直接アクセス
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {
     return caretPosition?.offset;
