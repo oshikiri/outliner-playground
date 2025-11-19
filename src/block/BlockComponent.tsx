@@ -102,8 +102,7 @@ export default function BlockComponent({
             whitespace-pre-wrap break-all px-1
             empty:after:content-['\00a0']
           "
-          // @owner [P1] 単一要素にkeyを付けても意味がなくむしろ匂いです
-          key={block.id + "-content"}
+          key={block.id}
           ref={contentRef}
           contentEditable={isEditing || undefined}
           suppressContentEditableWarning={isEditing || undefined}
