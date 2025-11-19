@@ -1,10 +1,14 @@
-import { KeyboardEvent, useCallback } from "react";
-import React from "react";
+import {
+  KeyboardEvent,
+  useCallback,
+  KeyboardEventHandler,
+  RefObject,
+} from "react";
+
 import BlockEntity from "./BlockEntity";
 import * as dom from "./dom";
 import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
-import { getTextSegmentsAroundCaret } from "./dom";
 
 export function useBlockKeydownHandler({
   block,
@@ -12,7 +16,7 @@ export function useBlockKeydownHandler({
   splitBlockAtCaret,
   setCaretPosition,
   updateBlockById,
-}: UseBlockKeydownHandlerArgs): React.KeyboardEventHandler {
+}: UseBlockKeydownHandlerArgs): KeyboardEventHandler {
   return useCallback(
     (event: KeyboardEvent) => {
       const currentElement = contentRef.current;
@@ -51,7 +55,7 @@ export function useBlockKeydownHandler({
 
 function handleEnter(event: KeyboardEvent, context: KeydownHandlerContext) {
   event.preventDefault();
-  const { beforeText, afterText } = getTextSegmentsAroundCaret(
+  const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
     window.getSelection(),
   );
   const newBlock = context.splitBlockAtCaret(
@@ -84,7 +88,7 @@ function handleTab(event: KeyboardEvent, context: KeydownHandlerContext) {
     }
   }
 
-  const { caretOffset } = getTextSegmentsAroundCaret(window.getSelection());
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
   context.setCaretPosition({ blockId: context.block.id, caretOffset });
 }
 
@@ -269,16 +273,10 @@ function handleArrowRight(
 
 type UseBlockKeydownHandlerArgs = {
   block: BlockEntity;
-  contentRef: React.RefObject<HTMLElement | null>;
+  contentRef: RefObject<HTMLElement | null>;
   splitBlockAtCaret: SplitBlockAtCaret;
   setCaretPosition: (updateFn: UpdateCaretPosition) => void;
   updateBlockById: UpdateBlockById;
-};
-
-type GetTextSegmentsAroundCaret = (selection: Selection | null) => {
-  beforeText: string | undefined;
-  afterText: string | undefined;
-  caretOffset: number;
 };
 
 type SplitBlockAtCaret = (
