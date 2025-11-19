@@ -1,4 +1,10 @@
-import { JSX, StrictMode, type PropsWithChildren, useEffect } from "react";
+import {
+  JSX,
+  StrictMode,
+  type PropsWithChildren,
+  useEffect,
+  useMemo,
+} from "react";
 import { createRoot } from "react-dom/client";
 
 import BlockEntity, { createBlock } from "./block/BlockEntity";
@@ -32,6 +38,10 @@ function App(): JSX.Element {
   }, []);
   // @owner [P1] setRootBlock/setCaretPositionに依存しているのに依存配列が空でESLint-hooks違反
 
+  const jsonStr = useMemo(() => {
+    return JSON.stringify(rootBlock.toJSON(), null, 2);
+  }, [rootBlock]);
+
   return (
     <div
       className="flex justify-center h-full
@@ -47,10 +57,7 @@ function App(): JSX.Element {
         ))}
       </Panel>
       <Panel>
-        <pre className="text-xs whitespace-pre-wrap break-all">
-          {JSON.stringify(rootBlock.toJSON(), null, 2)}
-          {/* @owner [P1] JSON.stringifyを毎レンダーで実行しておりパフォーマンス懸念 */}
-        </pre>
+        <pre className="text-xs whitespace-pre-wrap break-all">{jsonStr}</pre>
       </Panel>
     </div>
   );
