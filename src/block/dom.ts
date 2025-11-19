@@ -1,4 +1,4 @@
-import { getNewlineRangeList } from "./Range";
+import { getNewlineRangeList } from "../Range";
 
 function getTextSegmentsAroundCaret(selection: Selection | null) {
   if (!selection || selection.rangeCount === 0) {
