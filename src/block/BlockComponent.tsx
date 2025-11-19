@@ -3,7 +3,7 @@ import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity, { createBlock } from "./BlockEntity";
 import * as dom from "./dom";
-import { BlockKeydownHandlerFactory } from "./BlockKeydownHandlerFactory";
+import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
 import MarkdownComponent from "../markdown/MarkdownComponent";
 
 export default function BlockComponent({
@@ -68,14 +68,13 @@ export default function BlockComponent({
     updateBlockById(block.id, block);
   };
 
-  const keyDownHandlerGenerator = new BlockKeydownHandlerFactory(
+  const onKeyDown = useBlockKeydownHandler({
     block,
     contentRef,
-    dom.getTextSegmentsAroundCaret,
     splitBlockAtCaret,
     setCaretPosition,
     updateBlockById,
-  );
+  });
   // @owner [P1] FactoryインスタンスもuseMemo等でキャッシュしていないため毎レンダーconstructされます
 
   const onClick: MouseEventHandler = (event) => {
@@ -107,7 +106,7 @@ export default function BlockComponent({
           suppressContentEditableWarning={isEditing || undefined}
           onClick={onClick}
           onBlur={onBlur}
-          onKeyDown={keyDownHandlerGenerator.generate()}
+          onKeyDown={onKeyDown}
           role="textbox"
           aria-multiline={true}
         >
