@@ -102,7 +102,6 @@ export default function BlockComponent({
             whitespace-pre-wrap break-all px-1
             empty:after:content-['\00a0']
           "
-          key={block.id}
           ref={contentRef}
           contentEditable={isEditing || undefined}
           suppressContentEditableWarning={isEditing || undefined}
@@ -119,8 +118,7 @@ export default function BlockComponent({
             <MarkdownComponent raw={block.content} />
           )}
         </div>
-        {/* @owner [P1] 下段でも単一要素にkeyを付けています */}
-        <div className="ml-5" key={block.id + "-children"}>
+        <div className="ml-5">
           {block.children?.map((child) => (
             <BlockComponent key={child.id} block={child} />
           ))}
