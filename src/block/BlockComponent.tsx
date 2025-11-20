@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, JSX, MouseEventHandler } from "react";
 
 import { useRootBlock, useCaretPosition } from "../state";
-import type BlockEntity from "./BlockEntity";
+import BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";
 import * as dom from "./dom";
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
@@ -12,7 +12,6 @@ export default function BlockComponent({
 }: {
   block: BlockEntity;
 }): JSX.Element {
-  // @owner [P1] このコンポーネントはpropsで受け取ったBlockEntityをそのままmutateしておりReactとJotaiの不変データ原則を満たしていません
   const [rootBlock, setRootBlock] = useRootBlock();
   const [caretPosition, setCaretPosition] = useCaretPosition();
 
@@ -60,13 +59,13 @@ export default function BlockComponent({
         dom.setCaretOffset(textNode, offset, window.getSelection());
       }
     }
-  }, [caretPosition]);
+  }, [caretPosition, isEditing]);
 
   const onBlur = () => {
     setCaretPosition(null);
-    // @owner [P1] block.contentへ直接代入しているため不変性違反です
-    block.content = contentRef.current?.innerText || "";
-    updateBlockById(block.id, block);
+    const updated = createBlock(block);
+    updated.content = contentRef.current?.innerText || "";
+    updateBlockById(block.id, updated);
   };
 
   const onKeyDown = useBlockKeydownHandler({
