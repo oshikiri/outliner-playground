@@ -1,4 +1,4 @@
-import { useRef, useEffect, JSX, MouseEventHandler } from "react";
+import { useRef, useEffect, useCallback, JSX, MouseEventHandler } from "react";
 
 import { useRootBlock, useCaretPosition } from "../state";
 import type BlockEntity from "./BlockEntity";
@@ -16,32 +16,32 @@ export default function BlockComponent({
   const [rootBlock, setRootBlock] = useRootBlock();
   const [caretPosition, setCaretPosition] = useCaretPosition();
 
-  const splitBlockAtCaret = (
-    id: string,
-    beforeCursor: string,
-    afterCursor: string,
-  ) => {
-    // @owner [P1] useCallbackを使わないため毎レンダー再生成され子へ渡るのでパフォーマンス懸念があります
-    const block = rootBlock.findBlockById(id);
-    if (!block) {
-      throw new Error(`Block with id ${id} was not found`);
-    }
+  const splitBlockAtCaret = useCallback(
+    (id: string, beforeCursor: string, afterCursor: string) => {
+      const block = rootBlock.findBlockById(id);
+      if (!block) {
+        throw new Error(`Block with id ${id} was not found`);
+      }
 
-    const newBlock = block.appendNewByNewline(beforeCursor, afterCursor);
-    if (!newBlock) {
-      throw new Error(
-        `Failed to append new block by splitting block with id ${id}`,
-      );
-    }
+      const newBlock = block.appendNewByNewline(beforeCursor, afterCursor);
+      if (!newBlock) {
+        throw new Error(
+          `Failed to append new block by splitting block with id ${id}`,
+        );
+      }
 
-    setRootBlock(createBlock(rootBlock));
+      setRootBlock((prev) => createBlock(prev));
 
-    return newBlock;
-  };
-  const updateBlockById = (id: string, block: BlockEntity) => {
-    setRootBlock((prev) => prev.updateBlockById(id, block));
-  };
-  // @owner [P1] こちらもuseCallback化されておらず参照安定性がありません
+      return newBlock;
+    },
+    [rootBlock, setRootBlock],
+  );
+  const updateBlockById = useCallback(
+    (id: string, block: BlockEntity) => {
+      setRootBlock((prev) => prev.updateBlockById(id, block));
+    },
+    [setRootBlock],
+  );
 
   const contentRef = useRef<HTMLDivElement>(null);
 
