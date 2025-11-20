@@ -36,8 +36,7 @@ function App(): JSX.Element {
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, []);
-  // @owner [P1] setRootBlock/setCaretPositionに依存しているのに依存配列が空でESLint-hooks違反
+  }, [setRootBlock, setCaretPosition]);
 
   const jsonStr = useMemo(() => {
     return JSON.stringify(rootBlock.toJSON(), null, 2);
@@ -49,8 +48,6 @@ function App(): JSX.Element {
         portrait:flex-col portrait:w-full
         landscape:flex-row"
       role="main"
-      // @owner [P1] 元指摘のとおりlandmark/aria不足を解消する必要があります
-      aria-label="outliner workspace"
     >
       <Panel>
         {rootBlock.children.map((block: BlockEntity) => (
