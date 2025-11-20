@@ -5,7 +5,7 @@ import {
   RefObject,
 } from "react";
 
-import BlockEntity from "./BlockEntity";
+import type BlockEntity from "./BlockEntity";
 import * as dom from "./dom";
 import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";

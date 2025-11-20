@@ -7,7 +7,8 @@ import {
 } from "react";
 import { createRoot } from "react-dom/client";
 
-import BlockEntity, { createBlock } from "./block/BlockEntity";
+import type BlockEntity from "./block/BlockEntity";
+import { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./block/data";
 import { useRootBlock, useCaretPosition } from "./state";

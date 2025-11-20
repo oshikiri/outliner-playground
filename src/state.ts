@@ -1,6 +1,6 @@
 import { atom, useAtom, type SetStateAction } from "jotai";
 
-import BlockEntity from "./block/BlockEntity";
+import type BlockEntity from "./block/BlockEntity";
 import { initialRootBlock } from "./block/data";
 
 export type CaretPosition = {

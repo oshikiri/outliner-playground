@@ -1,7 +1,8 @@
 import { useRef, useEffect, JSX, MouseEventHandler } from "react";
 
 import { useRootBlock, useCaretPosition } from "../state";
-import BlockEntity, { createBlock } from "./BlockEntity";
+import type BlockEntity from "./BlockEntity";
+import { createBlock } from "./BlockEntity";
 import * as dom from "./dom";
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
 import MarkdownComponent from "../markdown/MarkdownComponent";

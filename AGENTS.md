@@ -10,6 +10,7 @@
 - Use precise unions (`T | null`, `T | undefined`) instead of relying on implicit `any`.
 - Guard optional returns before chaining (e.g., check for `undefined` before calling methods).
 - Do not export types or helpers unless they are used outside the module. Keep internal details unexported to minimize surface area.
+- 型のみを利用するモジュールは `import type` を使ってインポートし、不要な実行時依存をできるだけ減らす
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 - Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
