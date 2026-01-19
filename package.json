@@ -14,18 +14,18 @@
   "author": "oshikiri",
   "license": "ISC",
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.11",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "prettier": "^3.6.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "jotai": "^2.15.1",
-    "tailwindcss": "^4.1.11",
-    "typescript": "^5.8.3",
-    "vite": "^7.1.12",
-    "vitest": "^4.0.2"
+    "@tailwindcss/vite": "4.1.18",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "5.1.2",
+    "prettier": "3.8.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "jotai": "2.16.2",
+    "tailwindcss": "4.1.18",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "4.0.17"
   },
   "browserslist": {
     "production": [
