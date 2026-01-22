@@ -62,9 +62,13 @@ export default function BlockComponent({
   }, [caretPosition, isEditing]);
 
   const onBlur = () => {
+    const currentElement = contentRef.current;
+    if (!currentElement) {
+      return;
+    }
     setCaretPosition(null);
     const updated = createBlock(block);
-    updated.content = contentRef.current?.innerText || "";
+    updated.content = currentElement.innerText || "";
     updateBlockById(block.id, updated);
   };
 
