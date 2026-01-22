@@ -1,6 +1,7 @@
 # AGENTS.md
 
 - Always communicate in Japanese.
+- 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
 
 ## Coding styles
 
