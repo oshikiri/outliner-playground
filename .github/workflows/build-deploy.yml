@@ -19,12 +19,13 @@ jobs:
         with:
           node-version: "24" # Active LTS https://nodejs.org/en/about/previous-releases
           cache: "npm"
-      - name: Build and test
+      - name: Build
         run: |
           npm ci
           npm run build
+      - name: Test
+        run: |
           npm test
-          ls -R dist/
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v4
