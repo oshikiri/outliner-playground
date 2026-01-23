@@ -1,7 +1,14 @@
 import { getNewlineRangeList } from "../Range";
 
-export function getTextSegmentsAroundCaret(selection: Selection | null) {
-  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
+type CaretTextSegments = {
+  beforeText: string;
+  afterText: string;
+  caretOffset: number;
+};
+
+export function getTextSegmentsAroundCaret(
+  selection: Selection | null,
+): CaretTextSegments {
   // [P3] Selection依存で純粋関数にしづらくテストしにくいので、必要な値(テキスト/offset)を引数化したい。
   if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
@@ -17,8 +24,7 @@ export function getTextSegmentsAroundCaret(selection: Selection | null) {
 export function clampOffsetToTextLength(
   node: HTMLElement,
   startOffset: number,
-) {
-  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
+): number {
   const nextInnerText = node.innerText || "";
   if (startOffset >= nextInnerText.length) {
     return nextInnerText.length;
@@ -133,8 +139,7 @@ export function getNearestCaretOffset(
   document: Document,
   x: number,
   y: number,
-) {
-  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
+): number | null {
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {

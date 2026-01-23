@@ -99,8 +99,7 @@ export default function BlockComponent({
   };
 
   return (
-    // [P3] key はリスト側でのみ有効なので、ここに付けると意図が伝わりづらい。
-    <div key={block.id} className="flex">
+    <div className="flex">
       <div aria-hidden={true}>・</div>
       <div className="flex-grow">
         <div
@@ -115,8 +114,8 @@ export default function BlockComponent({
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          // [P2] 非編集時は contentEditable=false でも role="textbox" のため、読み上げが編集可能と誤解しうる。
           role="textbox"
+          aria-readonly={!isEditing}
           aria-multiline={true}
         >
           {/* [P0] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}

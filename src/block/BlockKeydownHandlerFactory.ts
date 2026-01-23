@@ -10,6 +10,8 @@ import * as dom from "./dom";
 import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
 
+type CaretPosition = ReturnType<typeof dom.getCaretPositionInBlock>;
+
 export function useBlockKeydownHandler({
   block,
   contentRef,
@@ -44,9 +46,15 @@ export function useBlockKeydownHandler({
       } else if (event.key === "ArrowRight") {
         handleArrowRight(event, context);
       } else if (event.key === "a" && event.ctrlKey) {
-        goToLineStart(event, context);
+        const caretPosition = dom.getCaretPositionInBlock(
+          window.getSelection(),
+        );
+        goToLineStart(event, context, caretPosition);
       } else if (event.key === "e" && event.ctrlKey) {
-        goToLineEnd(event, context);
+        const caretPosition = dom.getCaretPositionInBlock(
+          window.getSelection(),
+        );
+        goToLineEnd(event, context, caretPosition);
       } else if (event.key === "Backspace") {
         handleBackspace(event, context);
       }
@@ -164,14 +172,18 @@ function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
   });
 }
 
-function goToLineStart(event: KeyboardEvent, context: KeydownHandlerContext) {
+function goToLineStart(
+  event: KeyboardEvent,
+  context: KeydownHandlerContext,
+  caretPosition: CaretPosition,
+) {
   event.preventDefault();
 
-  // [P3] window APIへ強依存しSSR/テストで扱いにくい
-  const pos = dom.getCaretPositionInBlock(window.getSelection());
-  const newlineBeforeCaret = pos?.newlines?.findLast((newline: any) => {
-    return newline.index < pos.anchorOffset;
-  });
+  const newlineBeforeCaret = caretPosition?.newlines?.findLast(
+    (newline: any) => {
+      return newline.index < caretPosition.anchorOffset;
+    },
+  );
   if (newlineBeforeCaret) {
     const newlineIndex = newlineBeforeCaret.index;
     context.setCaretPosition({
@@ -183,13 +195,15 @@ function goToLineStart(event: KeyboardEvent, context: KeydownHandlerContext) {
   }
 }
 
-function goToLineEnd(event: KeyboardEvent, context: KeydownHandlerContext) {
+function goToLineEnd(
+  event: KeyboardEvent,
+  context: KeydownHandlerContext,
+  caretPosition: CaretPosition,
+) {
   event.preventDefault();
 
-  // [P3] window依存
-  const pos = dom.getCaretPositionInBlock(window.getSelection());
-  const newlineAfterCaret = pos?.newlines?.find((newline: any) => {
-    return newline.index >= pos.anchorOffset;
+  const newlineAfterCaret = caretPosition?.newlines?.find((newline: any) => {
+    return newline.index >= caretPosition.anchorOffset;
   });
   if (newlineAfterCaret) {
     const newlineIndex = newlineAfterCaret.index;

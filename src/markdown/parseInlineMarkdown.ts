@@ -4,7 +4,6 @@ import type { Segment } from "./Segment";
  * Very rough inline markdown parser
  */
 export default function parseInlineMarkdown(raw: string): Segment[] {
-  // [P3] export関数の戻り値型は明示し、TSの意図を読みやすくしたい。
   const segments: Segment[] = [];
   const pattern = /(`[^`]*`|\[[^\]]+]\([^)]+\))/g;
   let lastIndex = 0;
