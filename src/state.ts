@@ -8,6 +8,7 @@ export type CaretPosition = {
   caretOffset: number;
 } | null;
 
+// [P3] state層がデモ用データに依存しているので、初期値注入に切り替えると層分離が明確になる。
 const rootBlockAtom = atom<BlockEntity>(initialRootBlock);
 const caretPositionAtom = atom<CaretPosition>(null);
 

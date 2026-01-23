@@ -1,6 +1,8 @@
 import { getNewlineRangeList } from "../Range";
 
 export function getTextSegmentsAroundCaret(selection: Selection | null) {
+  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
+  // [P3] Selection依存で純粋関数にしづらくテストしにくいので、必要な値(テキスト/offset)を引数化したい。
   if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
   }
@@ -16,6 +18,7 @@ export function clampOffsetToTextLength(
   node: HTMLElement,
   startOffset: number,
 ) {
+  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
   const nextInnerText = node.innerText || "";
   if (startOffset >= nextInnerText.length) {
     return nextInnerText.length;
@@ -27,6 +30,7 @@ export function isCaretAtLastLine(
   content: string,
   selection: Selection | null,
 ): boolean {
+  // [P2] 例: "abc\n" の末尾空行だと caretOffset=4 が最終行レンジに入らず false になり、下移動が発火しない。
   if (content.length === 0) {
     return true;
   }
@@ -99,6 +103,7 @@ export function getCurrentLineOffset(
   element: HTMLElement,
   selection: Selection | null,
 ): number {
+  // [P2] element を使っておらず selection のみで決まるため、将来的な仕様と実装の意図を整理したい。
   if (!selection) {
     return 0;
   }
@@ -112,6 +117,7 @@ export function setCaretOffset(
   offset: number,
   selection: Selection | null,
 ) {
+  // [P3] document.createRange に依存していてテストでスタブ化しづらいので注入可能にしたい。
   const range = document.createRange();
   range.setStart(node, offset);
   range.setEnd(node, offset);
@@ -128,6 +134,7 @@ export function getNearestCaretOffset(
   x: number,
   y: number,
 ) {
+  // [P3] export関数の戻り値型を明示して意図をはっきりさせたい。
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {

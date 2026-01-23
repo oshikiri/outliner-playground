@@ -15,7 +15,11 @@ export default function MarkdownComponent({
   return (
     <>
       {segments.map((segment, index) => (
-        <SegmentComponent key={`${segment.type}-${index}`} segment={segment} />
+        <SegmentComponent
+          // [P3] indexキーは差分更新で要素再利用がズレやすいため、安定キーを検討したい。
+          key={`${segment.type}-${index}`}
+          segment={segment}
+        />
       ))}
     </>
   );

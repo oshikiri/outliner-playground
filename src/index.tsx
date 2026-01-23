@@ -15,6 +15,7 @@ import { useRootBlock, useCaretPosition } from "./state";
 
 import "./styles.css";
 
+// [P3] non-null assertionはDOM存在前提なので、起動時にnullならクラッシュする。
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <StrictMode>
@@ -23,12 +24,15 @@ root.render(
 );
 
 function App(): JSX.Element {
+  // [P3] Preact運用なら react-dom/client のままだとReact/Preactが混在しやすく、互換層や型のズレが起きる。
+  // [P3] App がエディタ/JSONビュー/グローバルキー処理を兼務しており、再利用やテストがしづらい。
   const [rootBlock, setRootBlock] = useRootBlock();
   const [, setCaretPosition] = useCaretPosition();
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
+        // [P2] 仕様は localStorage も消すが、現状はメモリのみ初期化なので保存実装後は再読込で戻る。
         setRootBlock(createBlock(initialRootBlock));
         setCaretPosition(null);
         event.preventDefault();

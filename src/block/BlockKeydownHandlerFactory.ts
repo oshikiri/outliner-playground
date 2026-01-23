@@ -17,6 +17,8 @@ export function useBlockKeydownHandler({
   setCaretPosition,
   updateBlockById,
 }: UseBlockKeydownHandlerArgs): KeyboardEventHandler {
+  // [P3] キー分岐と状態更新が1箇所に集中しており、変更の影響範囲が広くテストも難しいため分割したい。
+  // [P3] 入力処理とモデル更新が混在しているため、コマンド層を挟むと責務が分離できる。
   return useCallback(
     (event: KeyboardEvent) => {
       const currentElement = contentRef.current;
@@ -69,9 +71,11 @@ function handleEnter(event: KeyboardEvent, context: KeydownHandlerContext) {
 function handleTab(event: KeyboardEvent, context: KeydownHandlerContext) {
   event.preventDefault();
 
-  // @owner [P1] BlockEntityを直接ミューテート
+  // [P3] BlockEntityを直接ミューテート
+  // [P2] DOM上の最新テキストをモデルに反映してからインデント処理を行う前提。
   context.block.content = context.currentElement?.innerText || "";
   context.updateBlockById(context.block.id, context.block);
+  // [P3] ミューテーションだと過去状態も書き換わり、差分比較やUndo/Redoが難しくなる。
 
   if (event.shiftKey) {
     const { parent, grandparent } = context.block.outdent();
@@ -93,10 +97,12 @@ function handleTab(event: KeyboardEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
+  // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
     !dom.isCaretAtLastLine(context.block.content, window.getSelection())
   ) {
+    // [P2] 例: "abc\n" の末尾空行だと caretOffset=4 が最終行レンジに入らず、↓で次ブロックに移動しない。
     return;
   }
 
@@ -106,7 +112,7 @@ function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
     return;
   }
 
-  // @owner [P1] ミューテーション
+  // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
   context.updateBlockById(context.block.id, context.block);
 
@@ -125,6 +131,7 @@ function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
+  // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
     !dom.isCaretAtFirstLine(window.getSelection())
@@ -137,8 +144,9 @@ function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
+  // [P1] 先頭ブロックでは prevBlock がルートになり、非表示のルートへカーソルが移動して見失う。
 
-  // @owner [P1] ミューテーション
+  // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
   context.updateBlockById(context.block.id, context.block);
 
@@ -159,7 +167,7 @@ function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
 function goToLineStart(event: KeyboardEvent, context: KeydownHandlerContext) {
   event.preventDefault();
 
-  // @owner [P1] window APIへ強依存しSSR/テストで扱いにくい
+  // [P3] window APIへ強依存しSSR/テストで扱いにくい
   const pos = dom.getCaretPositionInBlock(window.getSelection());
   const newlineBeforeCaret = pos?.newlines?.findLast((newline: any) => {
     return newline.index < pos.anchorOffset;
@@ -178,7 +186,7 @@ function goToLineStart(event: KeyboardEvent, context: KeydownHandlerContext) {
 function goToLineEnd(event: KeyboardEvent, context: KeydownHandlerContext) {
   event.preventDefault();
 
-  // @owner [P1] window依存
+  // [P3] window依存
   const pos = dom.getCaretPositionInBlock(window.getSelection());
   const newlineAfterCaret = pos?.newlines?.find((newline: any) => {
     return newline.index >= pos.anchorOffset;
@@ -198,7 +206,7 @@ function goToLineEnd(event: KeyboardEvent, context: KeydownHandlerContext) {
 }
 
 function handleBackspace(event: KeyboardEvent, context: KeydownHandlerContext) {
-  // @owner [P1] ミューテーション
+  // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
 
   if (
@@ -212,13 +220,15 @@ function handleBackspace(event: KeyboardEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
+  // [P1] 先頭ブロックでは prevBlock がルートになり、表示されないルートに結合されて内容が消えたように見える。
 
   event.preventDefault();
   const prevContentLength = prevBlock.content.length;
-  // @owner [P1] ここでも破壊的変更
+  // [P2] prevBlock と parent の整合性(親子関係/インデックス)が崩れていない前提で結合している。
+  // [P3] ここでも破壊的変更
   prevBlock.content += context.block.content;
   const [parent, idx] = context.block.getParentAndIndex();
-  // @owner [P1] children配列を直接splice
+  // [P3] children配列を直接splice
   parent?.children.splice(idx, 1);
 
   context.updateBlockById(prevBlock.id, prevBlock);
@@ -242,6 +252,7 @@ function handleArrowLeft(event: KeyboardEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
+  // [P1] 先頭ブロックでは prevBlock がルートになり、非表示のルートへカーソルが移動して見失う。
 
   context.setCaretPosition({
     blockId: prevBlock.id,
@@ -253,7 +264,7 @@ function handleArrowRight(
   event: KeyboardEvent,
   context: KeydownHandlerContext,
 ) {
-  // @owner [P1] window依存
+  // [P3] window依存
   const position = dom.getCaretPositionInBlock(window.getSelection());
   if (!position) {
     return;

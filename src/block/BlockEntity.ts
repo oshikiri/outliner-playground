@@ -5,6 +5,7 @@
  * is pre-order depth-first.
  */
 export default class BlockEntity {
+  // [P3] 走査/更新/シリアライズが1クラスに集約されているため、ドメインモデルと操作を分割したい。
   parent: BlockEntity | null = null;
   id: string = crypto.randomUUID();
 
@@ -12,7 +13,7 @@ export default class BlockEntity {
     public content: string,
     public children: BlockEntity[] = [],
   ) {
-    // @owner [P1] NOTE: 引数オブジェクトを書き換えて親子関係を再設定するので純粋なデータモデルとは言えません
+    // [P3] NOTE: 引数オブジェクトを書き換えて親子関係を再設定するので純粋なデータモデルとは言えません
     this.content = content;
     children.forEach((child) => child.withParent(this));
     this.children = children;
@@ -39,6 +40,7 @@ export default class BlockEntity {
     //   Go up the tree until we find a parent that has a closest next sibling
     let current: BlockEntity | null = this;
     while (current?.parent) {
+      // [P3] any の使用は型安全性を下げるため、戻り値の型を明示したい。
       const [parent, currentIdx]: any = current.getParentAndIndex();
       if (!parent || currentIdx === -1) {
         console.debug("no parent at getNextBlock");
@@ -103,7 +105,7 @@ export default class BlockEntity {
   }
 
   updateBlockById(id: string, updatedBlock: BlockEntity): BlockEntity {
-    // @owner [P1] NOTE: update系メソッドも外部状態に依存しており純粋関数になっていません
+    // [P3] NOTE: update系メソッドも外部状態に依存しており純粋関数になっていません
     if (this.id === id) {
       return updatedBlock;
     }
@@ -160,7 +162,7 @@ export default class BlockEntity {
     }
 
     console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
-    // @owner [P1] contentをそのまま書き換えているのでUndo/redoに対応しづらい
+    // [P3] contentをそのまま書き換えているのでUndo/redoに対応しづらい
     this.content = beforeCaretText;
 
     // 1. If the block has children, insert the new block as the first child.
@@ -228,7 +230,7 @@ export default class BlockEntity {
 
     parent.children = siblingsBefore;
     this.parent = grandparent;
-    // @owner [P1] 直接代入が多く構造不整合を招きます
+    // [P3] 直接代入が多く構造不整合を招きます
     this.children = [...this.children, ...siblingsAfter];
     this.children.forEach((b) => {
       b.parent = this;
@@ -259,6 +261,7 @@ type BlockJSON = {
 };
 
 export function createBlock(obj: any): BlockEntity {
+  // [P3] any を避け、BlockJSON などの明示的な型で受けたい。
   const children = obj.children?.map(createBlock) || [];
   const block = new BlockEntity(obj.content, children).withParent(obj.parent);
   block.id = obj.id;

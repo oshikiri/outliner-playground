@@ -40,6 +40,8 @@ export class IndexRange {
  * 4 5 6 7
  */
 export function getNewlineRangeList(content: string): RangeList {
+  // [P2] l/r は行内の先頭/末尾インデックス(末尾含む)を表す前提。
+  // [P2] 例: "abc\n" だと空の最終行がRangeListに入らず、caretOffset=4がどのRangeにも入らない。
   const rangeset: RangeList = new RangeList([]);
   const regex = /(\n)/g;
   let match: RegExpExecArray | null;

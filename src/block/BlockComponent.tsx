@@ -53,7 +53,8 @@ export default function BlockComponent({
         contentRef.current,
         caretPosition.caretOffset,
       );
-      // @owner [P1] Text/HTMLElementの厳密な型判定をせずキャストしています
+      // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
+      // [P3] Text/HTMLElementの厳密な型判定をせずキャストしています
       const textNode = contentRef.current.childNodes[0] as HTMLElement;
       if (textNode) {
         dom.setCaretOffset(textNode, offset, window.getSelection());
@@ -64,10 +65,12 @@ export default function BlockComponent({
   const onBlur = () => {
     const currentElement = contentRef.current;
     if (!currentElement) {
+      // [P2] blur時にDOMが外れていると caretPosition をクリアできず、編集モードが残留する。
       return;
     }
     setCaretPosition(null);
     const updated = createBlock(block);
+    // [P2] ミューテーション回避のため clone を作ってから content を更新している。
     updated.content = currentElement.innerText || "";
     updateBlockById(block.id, updated);
   };
@@ -79,6 +82,7 @@ export default function BlockComponent({
     setCaretPosition,
     updateBlockById,
   });
+  // [P3] 表示ロジックと状態遷移が密結合なので、UIと操作系を分割したい。
 
   const onClick: MouseEventHandler = (event) => {
     const caretOffset = dom.getNearestCaretOffset(
@@ -95,6 +99,7 @@ export default function BlockComponent({
   };
 
   return (
+    // [P3] key はリスト側でのみ有効なので、ここに付けると意図が伝わりづらい。
     <div key={block.id} className="flex">
       <div aria-hidden={true}>・</div>
       <div className="flex-grow">
@@ -110,10 +115,11 @@ export default function BlockComponent({
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
+          // [P2] 非編集時は contentEditable=false でも role="textbox" のため、読み上げが編集可能と誤解しうる。
           role="textbox"
           aria-multiline={true}
         >
-          {/* @owner [P1] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}
+          {/* [P0] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}
           {isEditing ? (
             block.content
           ) : (
@@ -121,6 +127,7 @@ export default function BlockComponent({
           )}
         </div>
         <div className="ml-5">
+          {/* [P3] 深いツリーで各キー入力ごとに全ブロックが再描画されやすく、メモ化/仮想化が欲しい。 */}
           {block.children?.map((child) => (
             <BlockComponent key={child.id} block={child} />
           ))}
