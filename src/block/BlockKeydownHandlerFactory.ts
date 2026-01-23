@@ -147,7 +147,10 @@ function handleArrowUp(event: KeydownEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
-  // [P1] 先頭ブロックでは prevBlock がルートになり、非表示のルートへカーソルが移動して見失う。
+  // Root blocks are hidden, so we should not move the caret to them.
+  if (prevBlock.parent === null) {
+    return;
+  }
 
   // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
@@ -226,9 +229,14 @@ function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
-  // [P1] 先頭ブロックでは prevBlock がルートになり、表示されないルートに結合されて内容が消えたように見える。
 
   event.preventDefault();
+
+  // Root blocks are hidden, so we should not move the caret to them.
+  if (prevBlock.parent === null) {
+    return;
+  }
+
   const prevContentLength = prevBlock.content.length;
   // [P2] prevBlock と parent の整合性(親子関係/インデックス)が崩れていない前提で結合している。
   // [P3] ここでも破壊的変更
@@ -258,7 +266,10 @@ function handleArrowLeft(event: KeydownEvent, context: KeydownHandlerContext) {
   if (!prevBlock) {
     return;
   }
-  // [P1] 先頭ブロックでは prevBlock がルートになり、非表示のルートへカーソルが移動して見失う。
+  // Root blocks are hidden, so we should not move the caret to them.
+  if (prevBlock.parent === null) {
+    return;
+  }
 
   context.setCaretPosition({
     blockId: prevBlock.id,
