@@ -1,10 +1,5 @@
-import {
-  useRef,
-  useEffect,
-  useCallback,
-  JSX,
-  MouseEventHandler,
-} from "preact/compat";
+import { useRef, useEffect, useCallback, JSX } from "preact/compat";
+import type { MouseEventHandler, TargetedMouseEvent } from "preact";
 
 import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity from "./BlockEntity";
@@ -90,7 +85,9 @@ export default function BlockComponent({
   });
   // [P3] 表示ロジックと状態遷移が密結合なので、UIと操作系を分割したい。
 
-  const onClick: MouseEventHandler<HTMLDivElement> = (event) => {
+  const onClick: MouseEventHandler<HTMLDivElement> = (
+    event: TargetedMouseEvent<HTMLDivElement>,
+  ) => {
     const caretOffset = dom.getNearestCaretOffset(
       document,
       event.clientX,

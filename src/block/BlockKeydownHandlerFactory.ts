@@ -1,9 +1,5 @@
-import {
-  KeyboardEvent,
-  useCallback,
-  KeyboardEventHandler,
-  RefObject,
-} from "preact/compat";
+import { useCallback, RefObject } from "preact/compat";
+import type { KeyboardEventHandler, TargetedKeyboardEvent } from "preact";
 
 import type BlockEntity from "./BlockEntity";
 import * as dom from "./dom";
@@ -11,6 +7,8 @@ import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
 
 type CaretPosition = ReturnType<typeof dom.getCaretPositionInBlock>;
+type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
+type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
 
 export function useBlockKeydownHandler({
   block,
@@ -18,11 +16,11 @@ export function useBlockKeydownHandler({
   splitBlockAtCaret,
   setCaretPosition,
   updateBlockById,
-}: UseBlockKeydownHandlerArgs): KeyboardEventHandler<HTMLDivElement> {
+}: UseBlockKeydownHandlerArgs): KeydownHandler {
   // [P3] キー分岐と状態更新が1箇所に集中しており、変更の影響範囲が広くテストも難しいため分割したい。
   // [P3] 入力処理とモデル更新が混在しているため、コマンド層を挟むと責務が分離できる。
   return useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
+    (event: KeydownEvent) => {
       const currentElement = contentRef.current;
       const context: KeydownHandlerContext = {
         block,
@@ -63,10 +61,7 @@ export function useBlockKeydownHandler({
   );
 }
 
-function handleEnter(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleEnter(event: KeydownEvent, context: KeydownHandlerContext) {
   event.preventDefault();
   const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
     window.getSelection(),
@@ -79,10 +74,7 @@ function handleEnter(
   context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
 }
 
-function handleTab(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
   event.preventDefault();
 
   // [P3] BlockEntityを直接ミューテート
@@ -110,10 +102,7 @@ function handleTab(
   context.setCaretPosition({ blockId: context.block.id, caretOffset });
 }
 
-function handleArrowDown(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
   // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
@@ -144,10 +133,7 @@ function handleArrowDown(
   });
 }
 
-function handleArrowUp(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleArrowUp(event: KeydownEvent, context: KeydownHandlerContext) {
   // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
@@ -179,7 +165,7 @@ function handleArrowUp(
 }
 
 function goToLineStart(
-  event: KeyboardEvent<HTMLDivElement>,
+  event: KeydownEvent,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
 ) {
@@ -202,7 +188,7 @@ function goToLineStart(
 }
 
 function goToLineEnd(
-  event: KeyboardEvent<HTMLDivElement>,
+  event: KeydownEvent,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
 ) {
@@ -225,10 +211,7 @@ function goToLineEnd(
   }
 }
 
-function handleBackspace(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
   // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
 
@@ -265,10 +248,7 @@ function handleBackspace(
   });
 }
 
-function handleArrowLeft(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleArrowLeft(event: KeydownEvent, context: KeydownHandlerContext) {
   if (!dom.caretIsAtBlockStart(window.getSelection())) {
     return;
   }
@@ -286,10 +266,7 @@ function handleArrowLeft(
   });
 }
 
-function handleArrowRight(
-  event: KeyboardEvent<HTMLDivElement>,
-  context: KeydownHandlerContext,
-) {
+function handleArrowRight(event: KeydownEvent, context: KeydownHandlerContext) {
   // [P3] window依存
   const position = dom.getCaretPositionInBlock(window.getSelection());
   if (!position) {
