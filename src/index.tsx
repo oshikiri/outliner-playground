@@ -31,7 +31,6 @@ function App(): JSX.Element {
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "k" && event.ctrlKey) {
-        // [P2] 仕様は localStorage も消すが、現状はメモリのみ初期化なので保存実装後は再読込で戻る。
         setRootBlock(createBlock(initialRootBlock));
         setCaretPosition(null);
         event.preventDefault();

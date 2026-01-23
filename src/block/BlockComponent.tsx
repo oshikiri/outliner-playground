@@ -70,8 +70,8 @@ export default function BlockComponent({
       return;
     }
     setCaretPosition(null);
+    // Clone the block to avoid direct mutation
     const updated = createBlock(block);
-    // [P2] ミューテーション回避のため clone を作ってから content を更新している。
     updated.content = currentElement.innerText || "";
     updateBlockById(block.id, updated);
   };
