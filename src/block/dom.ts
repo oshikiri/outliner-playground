@@ -105,11 +105,7 @@ function getTextFromNote(node: Node | null): string {
 /**
  * Get the offset of the cursor from the start of the line in a div.
  */
-export function getCurrentLineOffset(
-  element: HTMLElement,
-  selection: Selection | null,
-): number {
-  // [P2] element を使っておらず selection のみで決まるため、将来的な仕様と実装の意図を整理したい。
+export function getCurrentLineOffset(selection: Selection | null): number {
   if (!selection) {
     return 0;
   }

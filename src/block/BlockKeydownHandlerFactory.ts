@@ -124,10 +124,7 @@ function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
   context.block.content = context.currentElement?.innerText || "";
   context.updateBlockById(context.block.id, context.block);
 
-  const caretOffset = dom.getCurrentLineOffset(
-    context.currentElement,
-    window.getSelection(),
-  );
+  const caretOffset = dom.getCurrentLineOffset(window.getSelection());
   const lastRange = getNewlineRangeList(context.block.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.max(0, caretOffset - lastRange.l - 1)
@@ -158,10 +155,7 @@ function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
   context.block.content = context.currentElement?.innerText || "";
   context.updateBlockById(context.block.id, context.block);
 
-  const offsetAtPrev = dom.getCurrentLineOffset(
-    context.currentElement,
-    window.getSelection(),
-  );
+  const offsetAtPrev = dom.getCurrentLineOffset(window.getSelection());
   const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
