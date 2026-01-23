@@ -1,4 +1,4 @@
-import { Fragment, JSX } from "react";
+import { Fragment, JSX } from "preact/compat";
 
 import type { Segment } from "./Segment";
 

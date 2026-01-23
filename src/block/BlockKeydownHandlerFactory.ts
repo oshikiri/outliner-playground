@@ -3,7 +3,7 @@ import {
   useCallback,
   KeyboardEventHandler,
   RefObject,
-} from "react";
+} from "preact/compat";
 
 import type BlockEntity from "./BlockEntity";
 import * as dom from "./dom";
@@ -18,11 +18,11 @@ export function useBlockKeydownHandler({
   splitBlockAtCaret,
   setCaretPosition,
   updateBlockById,
-}: UseBlockKeydownHandlerArgs): KeyboardEventHandler {
+}: UseBlockKeydownHandlerArgs): KeyboardEventHandler<HTMLDivElement> {
   // [P3] キー分岐と状態更新が1箇所に集中しており、変更の影響範囲が広くテストも難しいため分割したい。
   // [P3] 入力処理とモデル更新が混在しているため、コマンド層を挟むと責務が分離できる。
   return useCallback(
-    (event: KeyboardEvent) => {
+    (event: KeyboardEvent<HTMLDivElement>) => {
       const currentElement = contentRef.current;
       const context: KeydownHandlerContext = {
         block,
@@ -63,7 +63,10 @@ export function useBlockKeydownHandler({
   );
 }
 
-function handleEnter(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleEnter(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   event.preventDefault();
   const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
     window.getSelection(),
@@ -76,7 +79,10 @@ function handleEnter(event: KeyboardEvent, context: KeydownHandlerContext) {
   context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
 }
 
-function handleTab(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleTab(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   event.preventDefault();
 
   // [P3] BlockEntityを直接ミューテート
@@ -104,7 +110,10 @@ function handleTab(event: KeyboardEvent, context: KeydownHandlerContext) {
   context.setCaretPosition({ blockId: context.block.id, caretOffset });
 }
 
-function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleArrowDown(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
@@ -135,7 +144,10 @@ function handleArrowDown(event: KeyboardEvent, context: KeydownHandlerContext) {
   });
 }
 
-function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleArrowUp(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
@@ -167,7 +179,7 @@ function handleArrowUp(event: KeyboardEvent, context: KeydownHandlerContext) {
 }
 
 function goToLineStart(
-  event: KeyboardEvent,
+  event: KeyboardEvent<HTMLDivElement>,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
 ) {
@@ -190,7 +202,7 @@ function goToLineStart(
 }
 
 function goToLineEnd(
-  event: KeyboardEvent,
+  event: KeyboardEvent<HTMLDivElement>,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
 ) {
@@ -213,7 +225,10 @@ function goToLineEnd(
   }
 }
 
-function handleBackspace(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleBackspace(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   // [P3] ミューテーション
   context.block.content = context.currentElement?.innerText || "";
 
@@ -250,7 +265,10 @@ function handleBackspace(event: KeyboardEvent, context: KeydownHandlerContext) {
   });
 }
 
-function handleArrowLeft(event: KeyboardEvent, context: KeydownHandlerContext) {
+function handleArrowLeft(
+  event: KeyboardEvent<HTMLDivElement>,
+  context: KeydownHandlerContext,
+) {
   if (!dom.caretIsAtBlockStart(window.getSelection())) {
     return;
   }
@@ -269,7 +287,7 @@ function handleArrowLeft(event: KeyboardEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowRight(
-  event: KeyboardEvent,
+  event: KeyboardEvent<HTMLDivElement>,
   context: KeydownHandlerContext,
 ) {
   // [P3] window依存

@@ -4,8 +4,8 @@ import {
   type PropsWithChildren,
   useEffect,
   useMemo,
-} from "react";
-import { createRoot } from "react-dom/client";
+} from "preact/compat";
+import { createRoot } from "preact/compat/client";
 
 import type BlockEntity from "./block/BlockEntity";
 import { createBlock } from "./block/BlockEntity";
@@ -24,7 +24,6 @@ root.render(
 );
 
 function App(): JSX.Element {
-  // [P3] Preact運用なら react-dom/client のままだとReact/Preactが混在しやすく、互換層や型のズレが起きる。
   // [P3] App がエディタ/JSONビュー/グローバルキー処理を兼務しており、再利用やテストがしづらい。
   const [rootBlock, setRootBlock] = useRootBlock();
   const [, setCaretPosition] = useCaretPosition();
@@ -65,7 +64,7 @@ function App(): JSX.Element {
   );
 }
 
-function Panel({ children }: PropsWithChildren) {
+function Panel({ children }: PropsWithChildren): JSX.Element {
   return (
     <div
       className="border border-gray-300

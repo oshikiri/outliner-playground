@@ -1,4 +1,4 @@
-import { JSX, useMemo } from "react";
+import { JSX, useMemo } from "preact/compat";
 
 import SegmentComponent from "./SegmentComponent";
 import parseInlineMarkdown from "./parseInlineMarkdown";

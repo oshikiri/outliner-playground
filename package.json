@@ -16,8 +16,6 @@
   "devDependencies": {
     "@tailwindcss/vite": "4.1.18",
     "@preact/preset-vite": "2.10.2",
-    "@types/react": "19.2.8",
-    "@types/react-dom": "19.2.3",
     "prettier": "3.8.0",
     "preact": "10.28.2",
     "jotai": "2.16.2",

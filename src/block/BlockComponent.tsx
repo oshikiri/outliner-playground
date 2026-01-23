@@ -1,4 +1,10 @@
-import { useRef, useEffect, useCallback, JSX, MouseEventHandler } from "react";
+import {
+  useRef,
+  useEffect,
+  useCallback,
+  JSX,
+  MouseEventHandler,
+} from "preact/compat";
 
 import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity from "./BlockEntity";
@@ -84,7 +90,7 @@ export default function BlockComponent({
   });
   // [P3] 表示ロジックと状態遷移が密結合なので、UIと操作系を分割したい。
 
-  const onClick: MouseEventHandler = (event) => {
+  const onClick: MouseEventHandler<HTMLDivElement> = (event) => {
     const caretOffset = dom.getNearestCaretOffset(
       document,
       event.clientX,
@@ -110,7 +116,6 @@ export default function BlockComponent({
           "
           ref={contentRef}
           contentEditable={isEditing || undefined}
-          suppressContentEditableWarning={isEditing || undefined}
           onClick={onClick}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
