@@ -50,8 +50,23 @@ function LinkSegment({ label, href }: LinkSegmentProps): JSX.Element {
   );
 }
 
+/**
+ * Sanitize a link href by stripping control/whitespace and allowing safe schemes only.
+ */
 function sanitizeHref(href: string): string {
   const trimmed = href.trim();
-  // [P0] FIXME: Basic XSS prevention by sanitizing javascript: links
-  return trimmed.toLowerCase().startsWith("javascript:") ? "#" : trimmed;
+  const normalized = trimmed.replace(/[\u0000-\u001f\u007f\s]+/g, "");
+  if (normalized === "") {
+    return "#";
+  }
+  const lower = normalized.toLowerCase();
+  const schemeMatch = /^[a-z][a-z0-9+.-]*:/.exec(lower);
+  if (schemeMatch) {
+    const scheme = schemeMatch[0].slice(0, -1);
+    const allowedSchemes = ["http", "https"];
+    if (!allowedSchemes.includes(scheme)) {
+      return "#";
+    }
+  }
+  return normalized;
 }

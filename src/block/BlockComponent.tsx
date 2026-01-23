@@ -120,7 +120,6 @@ export default function BlockComponent({
           aria-readonly={!isEditing}
           aria-multiline={true}
         >
-          {/* [P0] contentEditableへ危険な生文字列を挿入しておりXSS対策が未実装です */}
           {isEditing ? (
             block.content
           ) : (
