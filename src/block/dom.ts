@@ -115,10 +115,10 @@ export function getCurrentLineOffset(selection: Selection | null): number {
 }
 
 export function setCaretOffset(
-  node: HTMLElement,
+  node: Node,
   offset: number,
   selection: Selection | null,
-) {
+): void {
   // [P3] document.createRange に依存していてテストでスタブ化しづらいので注入可能にしたい。
   const range = document.createRange();
   range.setStart(node, offset);

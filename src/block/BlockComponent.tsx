@@ -55,10 +55,9 @@ export default function BlockComponent({
         caretPosition.caretOffset,
       );
       // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
-      // [P3] Text/HTMLElementの厳密な型判定をせずキャストしています
-      const textNode = contentRef.current.childNodes[0] as HTMLElement;
-      if (textNode) {
-        dom.setCaretOffset(textNode, offset, window.getSelection());
+      const firstNode = contentRef.current.firstChild;
+      if (firstNode) {
+        dom.setCaretOffset(firstNode, offset, window.getSelection());
       }
     }
   }, [caretPosition, isEditing]);
