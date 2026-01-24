@@ -2,7 +2,9 @@
 
 - Always communicate in Japanese.
 - 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
-- 実装後、ユーザーに返す前に `npm run build` `npm run format` `npm run test` を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
+- 実装後、ユーザーに返す前に以下を実行する:
+  - `npm run build` `npm run format` `npm run test` を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
+  - 現状の未コミットの差分を確認し、この差分の内容を表す英語のコミットメッセージを作成する
 
 ## Coding styles
 
@@ -19,6 +21,7 @@
 - Use strict comparisons (`===`, `!==`) unless there is a clear need for loose equality, and keep that policy consistent across files.
 - console.log と console.warn を使うことは許容する。将来的にログライブラリを使うことを検討する
 - DOMヘルパーは `Selection` や `window` に直接依存させず、必要な値だけを引数で受け取ってテストしやすくしておく。
+- 実装を進める際は、入力サイズ/頻度/副作用の観点で落とし穴がないかを必ず確認すること
 
 ### React
 
