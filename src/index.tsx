@@ -30,7 +30,6 @@ if (!rootElement) {
 }
 
 function App(): JSX.Element {
-  // [P3] App がエディタ/JSONビュー/グローバルキー処理を兼務しており、再利用やテストがしづらい。
   const [rootBlock, setRootBlock] = useRootBlock();
   const [, setCaretPosition] = useCaretPosition();
 
@@ -46,10 +45,6 @@ function App(): JSX.Element {
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [setRootBlock, setCaretPosition]);
 
-  const jsonStr = useMemo(() => {
-    return JSON.stringify(rootBlock.toJSON(), null, 2);
-  }, [rootBlock]);
-
   return (
     <div
       className="flex justify-center h-full
@@ -57,15 +52,31 @@ function App(): JSX.Element {
         landscape:flex-row"
       role="main"
     >
-      <Panel>
-        {rootBlock.children.map((block: BlockEntity) => (
-          <BlockComponent key={block.id} block={block} />
-        ))}
-      </Panel>
-      <Panel>
-        <pre className="text-xs whitespace-pre-wrap break-all">{jsonStr}</pre>
-      </Panel>
+      <EditorPanel rootBlock={rootBlock} />
+      <JsonPanel rootBlock={rootBlock} />
     </div>
+  );
+}
+
+function EditorPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
+  return (
+    <Panel>
+      {rootBlock.children.map((block: BlockEntity) => (
+        <BlockComponent key={block.id} block={block} />
+      ))}
+    </Panel>
+  );
+}
+
+function JsonPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
+  const jsonStr = useMemo(() => {
+    return JSON.stringify(rootBlock.toJSON(), null, 2);
+  }, [rootBlock]);
+
+  return (
+    <Panel>
+      <pre className="text-xs whitespace-pre-wrap break-all">{jsonStr}</pre>
+    </Panel>
   );
 }
 
