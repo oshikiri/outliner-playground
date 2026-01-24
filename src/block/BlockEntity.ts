@@ -40,8 +40,7 @@ export default class BlockEntity {
     //   Go up the tree until we find a parent that has a closest next sibling
     let current: BlockEntity | null = this;
     while (current?.parent) {
-      // [P3] any の使用は型安全性を下げるため、戻り値の型を明示したい。
-      const [parent, currentIdx]: any = current.getParentAndIndex();
+      const [parent, currentIdx] = current.getParentAndIndex();
       if (!parent || currentIdx === -1) {
         console.debug("no parent at getNextBlock");
         return null;
@@ -260,10 +259,10 @@ type BlockJSON = {
   children?: BlockJSON[];
 };
 
-export function createBlock(obj: any): BlockEntity {
-  // [P3] any を避け、BlockJSON などの明示的な型で受けたい。
+export function createBlock(obj: BlockEntity | BlockJSON): BlockEntity {
   const children = obj.children?.map(createBlock) || [];
-  const block = new BlockEntity(obj.content, children).withParent(obj.parent);
+  const parent = obj instanceof BlockEntity ? obj.parent : null;
+  const block = new BlockEntity(obj.content, children).withParent(parent);
   block.id = obj.id;
   return block;
 }
