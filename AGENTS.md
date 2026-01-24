@@ -2,6 +2,7 @@
 
 - Always communicate in Japanese.
 - 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
+- 実装後、ユーザーに返す前に `npm run build` `npm run format` `npm run test` を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
 
 ## Coding styles
 
