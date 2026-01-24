@@ -31,6 +31,8 @@ export class IndexRange {
 }
 
 /**
+ * Split `content` into index ranges per newline-delimited segment.
+ *
  * Example: content = "abc\ndef"
  *
  * |a|b|c|\n|
@@ -38,10 +40,14 @@ export class IndexRange {
  *
  * |d|e|f|
  * 4 5 6 7
+ *
+ * Returns: [[0, 3], [4, 7]]
+ *
+ * @param content - Raw text that may include "\n".
+ * @returns RangeList where each range is [l, r], and r is the index of "\n"
+ * or content.length for the final segment.
  */
 export function getNewlineRangeList(content: string): RangeList {
-  // [P2] l/r は行内の先頭/末尾インデックス(末尾含む)を表す前提。
-  // [P2] 例: "abc\n" だと空の最終行がRangeListに入らず、caretOffset=4がどのRangeにも入らない。
   const rangeset: RangeList = new RangeList([]);
   const regex = /(\n)/g;
   let match: RegExpExecArray | null;

@@ -31,4 +31,11 @@ describe("getNewlineRangeList", () => {
     expect(ranges[1]?.l).toBe(4);
     expect(ranges[1]?.r).toBe(7);
   });
+
+  it("does not include an empty trailing line when content ends with newline", () => {
+    const ranges = getNewlineRangeList("abc\n").getRanges();
+    expect(ranges).toHaveLength(1);
+    expect(ranges[0]?.l).toBe(0);
+    expect(ranges[0]?.r).toBe(3);
+  });
 });
