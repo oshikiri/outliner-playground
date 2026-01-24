@@ -2,6 +2,7 @@ import { useCallback, RefObject } from "preact/compat";
 import type { KeyboardEventHandler, TargetedKeyboardEvent } from "preact";
 
 import type BlockEntity from "./BlockEntity";
+import { createBlock } from "./BlockEntity";
 import * as dom from "./dom";
 import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
@@ -77,14 +78,13 @@ function handleEnter(event: KeydownEvent, context: KeydownHandlerContext) {
 function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
   event.preventDefault();
 
-  // [P3] BlockEntityを直接ミューテート
   // [P2] DOM上の最新テキストをモデルに反映してからインデント処理を行う前提。
-  context.block.content = context.currentElement?.innerText || "";
-  context.updateBlockById(context.block.id, context.block);
-  // [P3] ミューテーションだと過去状態も書き換わり、差分比較やUndo/Redoが難しくなる。
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
 
   if (event.shiftKey) {
-    const { parent, grandparent } = context.block.outdent();
+    const { parent, grandparent } = updatedBlock.outdent();
     if (parent) {
       context.updateBlockById(parent.id, parent);
     }
@@ -92,7 +92,7 @@ function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
       context.updateBlockById(grandparent.id, grandparent);
     }
   } else {
-    const parent = context.block.indent();
+    const parent = updatedBlock.indent();
     if (parent) {
       context.updateBlockById(parent.id, parent);
     }
@@ -117,12 +117,12 @@ function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
     return;
   }
 
-  // [P3] ミューテーション
-  context.block.content = context.currentElement?.innerText || "";
-  context.updateBlockById(context.block.id, context.block);
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
 
   const caretOffset = dom.getCurrentLineOffset(window.getSelection());
-  const lastRange = getNewlineRangeList(context.block.content).getLastRange();
+  const lastRange = getNewlineRangeList(updatedBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.max(0, caretOffset - lastRange.l - 1)
     : 0;
@@ -150,9 +150,9 @@ function handleArrowUp(event: KeydownEvent, context: KeydownHandlerContext) {
     return;
   }
 
-  // [P3] ミューテーション
-  context.block.content = context.currentElement?.innerText || "";
-  context.updateBlockById(context.block.id, context.block);
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
 
   const offsetAtPrev = dom.getCurrentLineOffset(window.getSelection());
   const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
@@ -213,8 +213,7 @@ function goToLineEnd(
 }
 
 function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
-  // [P3] ミューテーション
-  context.block.content = context.currentElement?.innerText || "";
+  const currentContent = context.currentElement?.innerText || "";
 
   if (
     context.block.children.length > 0 ||
@@ -238,7 +237,7 @@ function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
   const prevContentLength = prevBlock.content.length;
   // [P2] prevBlock と parent の整合性(親子関係/インデックス)が崩れていない前提で結合している。
   // [P3] ここでも破壊的変更
-  prevBlock.content += context.block.content;
+  prevBlock.content += currentContent;
   const [parent, idx] = context.block.getParentAndIndex();
   // [P3] children配列を直接splice
   parent?.children.splice(idx, 1);
