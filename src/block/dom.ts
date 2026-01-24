@@ -9,7 +9,6 @@ type CaretTextSegments = {
 export function getTextSegmentsAroundCaret(
   selection: Selection | null,
 ): CaretTextSegments {
-  // [P3] Selection依存で純粋関数にしづらくテストしにくいので、必要な値(テキスト/offset)を引数化したい。
   if (!selection || selection.rangeCount === 0) {
     return { beforeText: "", afterText: "", caretOffset: 0 };
   }
@@ -119,7 +118,6 @@ export function setCaretOffset(
   offset: number,
   selection: Selection | null,
 ): void {
-  // [P3] document.createRange に依存していてテストでスタブ化しづらいので注入可能にしたい。
   const range = document.createRange();
   range.setStart(node, offset);
   range.setEnd(node, offset);
