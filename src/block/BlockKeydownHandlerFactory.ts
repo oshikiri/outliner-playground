@@ -17,6 +17,7 @@ export function useBlockKeydownHandler({
   splitBlockAtCaret,
   setCaretPosition,
   updateBlockById,
+  getSelection,
 }: UseBlockKeydownHandlerArgs): KeydownHandler {
   // [P3] キー分岐と状態更新が1箇所に集中しており、変更の影響範囲が広くテストも難しいため分割したい。
   // [P3] 入力処理とモデル更新が混在しているため、コマンド層を挟むと責務が分離できる。
@@ -30,6 +31,7 @@ export function useBlockKeydownHandler({
         setCaretPosition,
         updateBlockById,
         currentElement,
+        getSelection: getSelection ?? (() => window.getSelection()),
       };
 
       if (event.key === "Enter" && !event.shiftKey) {
@@ -280,8 +282,7 @@ function handleArrowLeft(event: KeydownEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowRight(event: KeydownEvent, context: KeydownHandlerContext) {
-  // [P3] window依存
-  const position = dom.getCaretPositionInBlock(window.getSelection());
+  const position = dom.getCaretPositionInBlock(context.getSelection());
   if (!position) {
     return;
   }
@@ -304,6 +305,7 @@ type UseBlockKeydownHandlerArgs = {
   splitBlockAtCaret: SplitBlockAtCaret;
   setCaretPosition: (updateFn: UpdateCaretPosition) => void;
   updateBlockById: UpdateBlockById;
+  getSelection?: () => Selection | null;
 };
 
 type SplitBlockAtCaret = (
@@ -316,4 +318,5 @@ type UpdateBlockById = (blockId: string, block: BlockEntity) => void;
 
 type KeydownHandlerContext = UseBlockKeydownHandlerArgs & {
   currentElement: HTMLElement | null;
+  getSelection: () => Selection | null;
 };
