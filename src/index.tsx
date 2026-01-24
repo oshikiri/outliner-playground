@@ -15,13 +15,17 @@ import { useRootBlock, useCaretPosition } from "./state";
 
 import "./styles.css";
 
-// [P3] non-null assertionはDOM存在前提なので、起動時にnullならクラッシュする。
-const root = createRoot(document.getElementById("root")!);
-root.render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  console.warn('Root element "#root" was not found.');
+} else {
+  const root = createRoot(rootElement);
+  root.render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
 
 function App(): JSX.Element {
   // [P3] App がエディタ/JSONビュー/グローバルキー処理を兼務しており、再利用やテストがしづらい。
