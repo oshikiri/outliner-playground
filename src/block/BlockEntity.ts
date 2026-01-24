@@ -161,22 +161,30 @@ export default class BlockEntity {
     }
 
     console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
-    // [P3] contentをそのまま書き換えているのでUndo/redoに対応しづらい
-    this.content = beforeCaretText;
+    const [parent, idx] = this.getParentAndIndex();
+    if (!parent || idx === -1) {
+      console.warn("Cannot append new block without a parent.");
+      return null;
+    }
+    const updatedBlock = new BlockEntity(
+      beforeCaretText,
+      this.children,
+    ).withParent(parent);
+    updatedBlock.id = this.id;
+    parent.children[idx] = updatedBlock;
 
     // 1. If the block has children, insert the new block as the first child.
-    if (this.children.length > 0) {
-      const newBlock = new BlockEntity(afterCaretText, []).withParent(this);
-      this.children.splice(0, 0, newBlock);
+    if (updatedBlock.children.length > 0) {
+      const newBlock = new BlockEntity(afterCaretText, []).withParent(
+        updatedBlock,
+      );
+      updatedBlock.children = [newBlock, ...updatedBlock.children];
       return newBlock;
     }
 
     // 2. Otherwise, insert the new block as the next sibling.
-    const newBlock = new BlockEntity(afterCaretText, []).withParent(
-      this.parent,
-    );
-    const [_parent, idx] = this.getParentAndIndex();
-    this.parent?.children.splice(idx + 1, 0, newBlock);
+    const newBlock = new BlockEntity(afterCaretText, []).withParent(parent);
+    parent.children.splice(idx + 1, 0, newBlock);
     return newBlock;
   }
 
@@ -228,15 +236,13 @@ export default class BlockEntity {
     const siblingsAfter = parent.children.slice(currentIdx + 1);
 
     parent.children = siblingsBefore;
-    this.parent = grandparent;
-    // [P3] 直接代入が多く構造不整合を招きます
-    this.children = [...this.children, ...siblingsAfter];
-    this.children.forEach((b) => {
-      b.parent = this;
-    });
+    const updatedCurrent = new BlockEntity(this.content, [
+      ...this.children,
+      ...siblingsAfter,
+    ]).withParent(grandparent);
+    updatedCurrent.id = this.id;
 
-    grandparent.children[parentIdx] = parent;
-    grandparent.children.splice(parentIdx + 1, 0, this);
+    grandparent.children.splice(parentIdx + 1, 0, updatedCurrent);
 
     return { parent, grandparent };
   }
