@@ -1,16 +1,18 @@
-import { atom, useAtom, type SetStateAction } from "jotai";
+import { atom, getDefaultStore, useAtom, type SetStateAction } from "jotai";
 
-import type BlockEntity from "./block/BlockEntity";
-import { initialRootBlock } from "./block/data";
+import BlockEntity from "./block/BlockEntity";
 
 export type CaretPosition = {
   blockId: string;
   caretOffset: number;
 } | null;
 
-// [P3] state層がデモ用データに依存しているので、初期値注入に切り替えると層分離が明確になる。
-const rootBlockAtom = atom<BlockEntity>(initialRootBlock);
+const rootBlockAtom = atom<BlockEntity>(new BlockEntity(""));
 const caretPositionAtom = atom<CaretPosition>(null);
+
+export function initializeState(rootBlock: BlockEntity): void {
+  getDefaultStore().set(rootBlockAtom, rootBlock);
+}
 
 export function useRootBlock(): [BlockEntity, (updateFn: UpdateBlock) => void] {
   return useAtom(rootBlockAtom);

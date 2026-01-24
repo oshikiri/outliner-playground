@@ -11,9 +11,11 @@ import type BlockEntity from "./block/BlockEntity";
 import { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./block/data";
-import { useRootBlock, useCaretPosition } from "./state";
+import { initializeState, useRootBlock, useCaretPosition } from "./state";
 
 import "./styles.css";
+
+initializeState(createBlock(initialRootBlock));
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
