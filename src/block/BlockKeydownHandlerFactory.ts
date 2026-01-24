@@ -103,7 +103,6 @@ function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
-  // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
     !dom.isCaretAtLastLine(context.block.content, window.getSelection())
@@ -134,7 +133,6 @@ function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
 }
 
 function handleArrowUp(event: KeydownEvent, context: KeydownHandlerContext) {
-  // [P2] 仕様は折返し行(visual line)移動だが、実装は改行単位なので折返し内の上下移動が効かない。
   if (
     !context.currentElement ||
     !dom.isCaretAtFirstLine(window.getSelection())
