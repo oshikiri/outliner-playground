@@ -236,16 +236,21 @@ function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
 
   const prevContentLength = prevBlock.content.length;
   // [P2] prevBlock と parent の整合性(親子関係/インデックス)が崩れていない前提で結合している。
-  // [P3] ここでも破壊的変更
-  prevBlock.content += currentContent;
-  const [parent, idx] = context.block.getParentAndIndex();
-  // [P3] children配列を直接splice
-  parent?.children.splice(idx, 1);
-
-  context.updateBlockById(prevBlock.id, prevBlock);
-  if (parent) {
-    context.updateBlockById(parent.id, parent);
+  const [parent] = context.block.getParentAndIndex();
+  if (!parent) {
+    return;
   }
+  const parentClone = createBlock(parent);
+  const prevClone = parentClone.findBlockById(prevBlock.id);
+  if (!prevClone) {
+    return;
+  }
+  prevClone.content += currentContent;
+  parentClone.children = parentClone.children.filter(
+    (child) => child.id !== context.block.id,
+  );
+
+  context.updateBlockById(parentClone.id, parentClone);
 
   context.setCaretPosition({
     blockId: prevBlock.id,
