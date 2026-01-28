@@ -52,18 +52,7 @@
 
 ## Commits
 
-Use Conventional Commit prefixes:
-
-- `feat:` for user-visible functionality changes.
-- `fix:` for bug fixes or styling changes that affect the UI.
-- `test:` for adding or modifying tests.
-- `chore:` for maintenance updates (dependencies, tooling, token tweaks without visual impact).
-- `docs:` for documentation or comment changes.
-- `refactor:` for internal restructuring without modifying behaviour.
-
-Append `!` when a change is breaking.
-
-See Conventional Commits https://www.conventionalcommits.org/ja/v1.0.0/
+See `.codex/skills/create-git-commit/SKILL.md`
 
 ## TODOコメント
 
