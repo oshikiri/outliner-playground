@@ -68,7 +68,10 @@ export default function BlockComponent({
       // [P2] blur時にDOMが外れていると caretPosition をクリアできず、編集モードが残留する。
       return;
     }
-    setCaretPosition(null);
+    setCaretPosition((prev) => {
+      // Clear caret position only if it is for this block
+      return prev?.blockId === block.id ? null : prev;
+    });
     // Clone the block to avoid direct mutation
     const updated = createBlock(block);
     updated.content = currentElement.innerText || "";
