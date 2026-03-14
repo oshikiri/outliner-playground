@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: "24" # Active LTS https://nodejs.org/en/about/previous-releases
           cache: "npm"
@@ -28,10 +28,10 @@ jobs:
           npm test
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5.0.0
       - name: Upload artifact
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: "dist/"
 
@@ -49,4 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4.0.5
