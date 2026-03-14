@@ -2,8 +2,10 @@
 
 - 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
 - 実装後、ユーザーに返す前に以下を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
-  - `npm run build`
   - `npm run format`
+  - `npm run lint`
+  - `npm run knip`
+  - `npm run build`
   - `npm run test`
 
 ## Available Skills
