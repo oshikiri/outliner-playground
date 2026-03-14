@@ -10,10 +10,7 @@ export class RangeList {
   }
 
   getLastRange(): IndexRange | null {
-    if (this.ranges.length === 0) {
-      return null;
-    }
-    return this.ranges[this.ranges.length - 1];
+    return this.ranges.at(-1) ?? null;
   }
 }
 

@@ -1,4 +1,5 @@
-import { useRef, useEffect, useCallback, JSX } from "preact/compat";
+import { useRef, useEffect, useCallback } from "preact/compat";
+import type { JSX } from "preact/compat";
 import type { MouseEventHandler, TargetedMouseEvent } from "preact";
 
 import { useRootBlock, useCaretPosition } from "../state";

@@ -1,10 +1,5 @@
-import {
-  JSX,
-  StrictMode,
-  type PropsWithChildren,
-  useEffect,
-  useMemo,
-} from "preact/compat";
+import { StrictMode, useEffect, useMemo } from "preact/compat";
+import type { JSX, PropsWithChildren } from "preact/compat";
 import { createRoot } from "preact/compat/client";
 
 import type BlockEntity from "./block/BlockEntity";

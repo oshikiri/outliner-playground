@@ -38,11 +38,13 @@ function parseMatchedSegment(token: string): Segment {
   }
 
   const linkMatch = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-  if (linkMatch) {
+  const linkLabel = linkMatch?.[1];
+  const linkHref = linkMatch?.[2];
+  if (linkLabel !== undefined && linkHref !== undefined) {
     return {
       type: "link",
-      value: linkMatch[1],
-      href: linkMatch[2],
+      value: linkLabel,
+      href: linkHref,
     };
   }
 

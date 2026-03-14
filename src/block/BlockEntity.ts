@@ -33,7 +33,7 @@ export default class BlockEntity {
     // case 1: the current block has children
     //   Return the first child
     if (this.children.length > 0) {
-      return this.children[0];
+      return this.children[0] ?? null;
     }
 
     // case 2: the current block has no children
@@ -47,7 +47,7 @@ export default class BlockEntity {
       }
       // if a closest next sibling exists
       if (currentIdx < parent.children.length - 1) {
-        return parent.children[currentIdx + 1];
+        return parent.children[currentIdx + 1] ?? null;
       }
       current = parent;
     }
@@ -69,6 +69,9 @@ export default class BlockEntity {
       return parent;
     }
     const closestPreviousSibling = parent.children[currentIdx - 1];
+    if (!closestPreviousSibling) {
+      return null;
+    }
     return closestPreviousSibling.getLastDescendant();
   }
 
@@ -266,7 +269,7 @@ type BlockJSON = {
 };
 
 export function createBlock(obj: BlockEntity | BlockJSON): BlockEntity {
-  const children = obj.children?.map(createBlock) || [];
+  const children = obj.children?.map(createBlock) ?? [];
   const parent = obj instanceof BlockEntity ? obj.parent : null;
   const block = new BlockEntity(obj.content, children).withParent(parent);
   block.id = obj.id;

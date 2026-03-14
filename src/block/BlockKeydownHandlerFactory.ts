@@ -1,4 +1,5 @@
-import { useCallback, RefObject } from "preact/compat";
+import { useCallback } from "preact/compat";
+import type { RefObject } from "preact/compat";
 import type { KeyboardEventHandler, TargetedKeyboardEvent } from "preact";
 
 import type BlockEntity from "./BlockEntity";
@@ -174,11 +175,9 @@ function goToLineStart(
 ) {
   event.preventDefault();
 
-  const newlineBeforeCaret = caretPosition?.newlines?.findLast(
-    (newline: any) => {
-      return newline.index < caretPosition.anchorOffset;
-    },
-  );
+  const newlineBeforeCaret = caretPosition?.newlines?.findLast((newline) => {
+    return newline.index < caretPosition.anchorOffset;
+  });
   if (newlineBeforeCaret) {
     const newlineIndex = newlineBeforeCaret.index;
     context.setCaretPosition({
@@ -197,7 +196,7 @@ function goToLineEnd(
 ) {
   event.preventDefault();
 
-  const newlineAfterCaret = caretPosition?.newlines?.find((newline: any) => {
+  const newlineAfterCaret = caretPosition?.newlines?.find((newline) => {
     return newline.index >= caretPosition.anchorOffset;
   });
   if (newlineAfterCaret) {
