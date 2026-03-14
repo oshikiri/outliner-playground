@@ -10,13 +10,10 @@ description: Review code changes against this repository's coding style rules (T
 ## JavaScript/TypeScript
 
 - Public methods should declare explicit return types.
-- Do not use `any` without a clear reason.
 - Model nullable states explicitly with `T | null` or `T | undefined`.
-- Do not export types or helpers unless they are used outside the module. Keep internal details unexported to minimize surface area.
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 - Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
-- Use strict comparisons (`===`, `!==`) unless there is a clear need for loose equality, and keep that policy consistent across files.
 - console.log と console.warn を使うことは許容する。将来的にログライブラリを使うことを検討する
 - DOMヘルパーは `Selection` や `window` に直接依存させず、必要な値だけを引数で受け取ってテストしやすくしておく。
 
@@ -38,9 +35,8 @@ description: Review code changes against this repository's coding style rules (T
 
 ## Testing
 
-- Do not remove tests, and do not commit focused/skipped tests (`test.only`, `test.skip`).
+- Do not remove tests.
 
 ## Web security standards
 
-- Do not inject untrusted HTML into the DOM with `dangerouslySetInnerHTML` or equivalent APIs.
 - Validate untrusted URLs before rendering links or navigation targets.
