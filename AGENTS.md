@@ -7,6 +7,9 @@
   - `npm run knip`
   - `npm run build`
   - `npm run test`
+- レビューを依頼されたときは、review_manager サブエージェントが利用可能なら新しく起動してレビューを依頼する。
+- review_manager サブエージェントが利用できない環境では、通常のレビューを行う。
+- review_manager から返答があれば、省略せずにすべて表示する。
 
 ## Available Skills
 

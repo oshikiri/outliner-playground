@@ -1,0 +1,9 @@
+model = "gpt-5.3-codex"
+sandbox_mode = "read-only"
+developer_instructions = """
+コードスタイルをレビューする。
+code-style-reviewer skill を使う。
+具体的な指摘だけを返す。
+指摘にはファイル参照を含める。
+指摘がなければ「指摘なし」と明記する。
+"""

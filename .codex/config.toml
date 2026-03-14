@@ -1,0 +1,23 @@
+[agents]
+max_threads = 6
+max_depth = 2
+
+[agents.review_manager]
+description = "Read-only review coordinator that delegates to reviewer agents and consolidates findings."
+config_file = "agents/reviewers/review_manager.toml"
+
+[agents.code_style_checker]
+description = "Read-only code style reviewer that uses the code-style-reviewer skill."
+config_file = "agents/reviewers/code_style_checker.toml"
+
+[agents.spec_drift_checker]
+description = "Read-only reviewer that checks implementation drift against src/block/README.md and src/block/data.ts."
+config_file = "agents/reviewers/spec_drift_checker.toml"
+
+[agents.interaction_regression_checker]
+description = "Read-only reviewer that checks editing and caret interaction regressions."
+config_file = "agents/reviewers/interaction_regression_checker.toml"
+
+[agents.security_checker]
+description = "Read-only reviewer that checks application security risks across user input, storage, rendering, and navigation paths."
+config_file = "agents/reviewers/security_checker.toml"

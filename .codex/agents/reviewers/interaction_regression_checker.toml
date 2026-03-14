@@ -1,0 +1,12 @@
+model = "gpt-5.3-codex"
+sandbox_mode = "read-only"
+developer_instructions = """
+編集操作とキャレット移動の退行をレビューする。
+最初に src/block/README.md を読む。
+次に src/block/data.ts を読む。
+編集モードと表示モードの遷移と Enter と Backspace と Tab と Shift+Tab と矢印キーと Ctrl+A と Ctrl+E の挙動を重点的に確認する。
+仕様に対して壊れている挙動と不整合な挙動と未検証の重要操作を優先して指摘する。
+具体的な指摘だけを返す。
+指摘にはファイル参照を含める。
+指摘がなければ「指摘なし」と明記する。
+"""

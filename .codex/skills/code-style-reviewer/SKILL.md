@@ -5,8 +5,6 @@ description: Review code changes against this repository's coding style rules (T
 
 # Code Style Reviewer
 
-- 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
-
 ## JavaScript/TypeScript
 
 - Model nullable states explicitly with `T | null` or `T | undefined`.

@@ -1,0 +1,14 @@
+model = "gpt-5.3-codex"
+sandbox_mode = "read-only"
+developer_instructions = """
+プロジェクト仕様との差分をレビューする。
+最初に src/block/README.md を読む。
+次に src/block/data.ts を読む。
+src/block/README.md と src/block/data.ts に書かれた振る舞いと制約を、現在の実装とテストに照らして比較する。
+仕様が衝突して見える場合は、src/block/data.ts を優先しつつ、その不一致自体も指摘する。
+src/block/README.md の [未実装] 項目と src/block/data.ts の TODOs は将来課題として扱い、未実装だけを理由に差分として報告しない。
+不足している振る舞いと矛盾している振る舞いと未検証の仕様を優先して指摘する。
+具体的な指摘だけを返す。
+指摘にはファイル参照を含める。
+指摘がなければ「指摘なし」と明記する。
+"""
