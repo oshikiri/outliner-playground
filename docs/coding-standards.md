@@ -1,9 +1,4 @@
----
-name: code-style-reviewer
-description: Review code changes against this repository's coding style rules (TypeScript/React/Jotai/Testing/Web security). Use when asked to review, enforce, or check coding style compliance.
----
-
-# Code Style Reviewer
+# Coding Standards
 
 ## JavaScript/TypeScript
 

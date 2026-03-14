@@ -2,7 +2,8 @@ model = "gpt-5.3-codex"
 sandbox_mode = "read-only"
 developer_instructions = """
 コードスタイルをレビューする。
-code-style-reviewer skill を使う。
+最初に docs/coding-standards.md を読む。
+必要に応じて src/block/data.ts と src/block/README.md を読んで仕様との差を区別する。
 具体的な指摘だけを返す。
 指摘にはファイル参照を含める。
 指摘がなければ「指摘なし」と明記する。

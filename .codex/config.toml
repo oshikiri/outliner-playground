@@ -7,7 +7,7 @@ description = "Read-only review coordinator that delegates to reviewer agents an
 config_file = "agents/reviewers/review_manager.toml"
 
 [agents.code_style_checker]
-description = "Read-only code style reviewer that uses the code-style-reviewer skill."
+description = "Read-only code style reviewer that checks the repository code style guidelines."
 config_file = "agents/reviewers/code_style_checker.toml"
 
 [agents.spec_drift_checker]

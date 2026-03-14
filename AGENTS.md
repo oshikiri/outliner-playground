@@ -14,8 +14,6 @@
 ## Available Skills
 
 - `create-git-commit`: コミットメッセージ規約（Conventional Commits）
-- `code-style-reviewer`: コーディングスタイルのレビュー基準
-- `todo-comment-policy`: TODOコメントの書式/優先度/削除ルール
 
 ## npm
 
