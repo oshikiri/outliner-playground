@@ -5,24 +5,20 @@ description: Review code changes against this repository's coding style rules (T
 
 # Code Style Reviewer
 
-Review the code against the following rules.
-
 - 仕様は src/block/data.ts に記載している。仕様と実際の実装が乖離していないかを確認すること。
 
 ## JavaScript/TypeScript
 
 - Public methods should declare explicit return types.
-- Use precise unions (`T | null`, `T | undefined`) instead of relying on implicit `any`.
-- Guard optional returns before chaining (e.g., check for `undefined` before calling methods).
+- Do not use `any` without a clear reason.
+- Model nullable states explicitly with `T | null` or `T | undefined`.
 - Do not export types or helpers unless they are used outside the module. Keep internal details unexported to minimize surface area.
-- 型のみを利用するモジュールは `import type` を使ってインポートし、不要な実行時依存をできるだけ減らす
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 - Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
 - Use strict comparisons (`===`, `!==`) unless there is a clear need for loose equality, and keep that policy consistent across files.
 - console.log と console.warn を使うことは許容する。将来的にログライブラリを使うことを検討する
 - DOMヘルパーは `Selection` や `window` に直接依存させず、必要な値だけを引数で受け取ってテストしやすくしておく。
-- 実装を進める際は、入力サイズ/頻度/副作用の観点で落とし穴がないかを必ず確認すること
 
 ## React
 
@@ -30,10 +26,8 @@ Review the code against the following rules.
 - Prefer immutable updates for recursive structures such as the block tree.
 - Memoize event handlers/factories passed down the tree (`useCallback`, `useMemo`) so we do not recreate them every render.
 - Only use `key` props for array/iterator children; avoid attaching `key` to solitary elements.
-- Provide semantic landmarks/ARIA attributes and keep accessibility in sync with README guidance.
 - Extract repeated or branch-heavy JSX (e.g., map renderers) into focused child components to keep primary component bodies easy to scan.
-- Group domain-specific UI pieces (e.g., markdown renderers) into dedicated subdirectories so the src root stays tidy and discoverable.
-- Move helper components and pure parsing logic into their own modules when they are conceptually separate, so primary components remain focused.
+- Split oversized components when they start mixing domain-specific renderers or parsing helpers with unrelated UI logic.
 
 ## jotai
 
@@ -44,9 +38,9 @@ Review the code against the following rules.
 
 ## Testing
 
-- Use Vitest for unit tests.
 - Do not remove tests, and do not commit focused/skipped tests (`test.only`, `test.skip`).
 
 ## Web security standards
 
-- Avoid XSS
+- Do not inject untrusted HTML into the DOM with `dangerouslySetInnerHTML` or equivalent APIs.
+- Validate untrusted URLs before rendering links or navigation targets.
