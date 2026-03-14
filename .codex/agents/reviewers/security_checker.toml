@@ -6,7 +6,7 @@ developer_instructions = """
 差分がある場合は差分を起点にする。
 ただし差分に閉じず、影響範囲の trust boundary と入力経路とデータの流れをたどって確認する。
 差分がない場合や、ユーザーがセキュリティレビューを求めている場合は、対象機能の周辺だけではなくアプリ全体でレビューする。
-最初に src/block/README.md を読む。
+最初に docs/specs/ 以下の関連仕様を確認する。
 次に src/block/data.ts を読む。
 対象範囲にあるすべてのユーザー入力経路を洗い出して確認する。
 少なくとも text と code と link label の描画経路、href のサニタイズ経路、相対 URL と protocol-relative URL の扱い、contentEditable と paste と clipboard などの隣接する入力経路、localStorage などの保存経路、DOM への反映経路を確認する。

@@ -11,7 +11,7 @@ description = "Read-only code style reviewer that checks the repository code sty
 config_file = "agents/reviewers/code_style_checker.toml"
 
 [agents.spec_drift_checker]
-description = "Read-only reviewer that checks implementation drift against src/block/README.md and src/block/data.ts."
+description = "Read-only reviewer that checks implementation drift against docs/specs/*.md and src/block/data.ts."
 config_file = "agents/reviewers/spec_drift_checker.toml"
 
 [agents.interaction_regression_checker]
