@@ -13,3 +13,8 @@
 - `create-git-commit`: コミットメッセージ規約（Conventional Commits）
 - `code-style-reviewer`: コーディングスタイルのレビュー基準
 - `todo-comment-policy`: TODOコメントの書式/優先度/削除ルール
+
+## npm
+
+- `package.json` の `dependencies` / `devDependencies` を更新するときは、 `^` と `~` を使わず、必ず `x.y.z` の固定バージョンで記述すること。
+- `npm install` を使う場合は `--save-exact` を使うこと。

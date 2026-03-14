@@ -14,15 +14,15 @@
   "author": "oshikiri",
   "license": "ISC",
   "devDependencies": {
-    "@tailwindcss/vite": "4.1.18",
-    "@preact/preset-vite": "2.10.2",
-    "prettier": "3.8.0",
-    "preact": "10.28.2",
-    "jotai": "2.16.2",
-    "tailwindcss": "4.1.18",
+    "@preact/preset-vite": "2.10.3",
+    "@tailwindcss/vite": "4.2.1",
+    "jotai": "2.18.1",
+    "preact": "10.29.0",
+    "prettier": "3.8.1",
+    "tailwindcss": "4.2.1",
     "typescript": "5.9.3",
     "vite": "7.3.1",
-    "vitest": "4.0.17"
+    "vitest": "4.1.0"
   },
   "browserslist": {
     "production": [
