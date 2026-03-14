@@ -63,7 +63,7 @@ export default function BlockComponent({
     }
   }, [caretPosition, isEditing]);
 
-  const onBlur = () => {
+  const onBlur = (): void => {
     const currentElement = contentRef.current;
     if (!currentElement) {
       // [P2] blur時にDOMが外れていると caretPosition をクリアできず、編集モードが残留する。

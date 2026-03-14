@@ -29,7 +29,7 @@ function App(): JSX.Element {
   const [, setCaretPosition] = useCaretPosition();
 
   useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => {
+    const handleKeydown = (event: KeyboardEvent): void => {
       if (event.key === "k" && event.ctrlKey) {
         setRootBlock(createBlock(initialRootBlock));
         setCaretPosition(null);

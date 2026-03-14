@@ -9,7 +9,6 @@ description: Review code changes against this repository's coding style rules (T
 
 ## JavaScript/TypeScript
 
-- Public methods should declare explicit return types.
 - Model nullable states explicitly with `T | null` or `T | undefined`.
 - Align default export class/function names with the filename (e.g., `BlockEntity.ts` exports `BlockEntity`) to reduce cognitive overhead.
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.

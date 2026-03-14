@@ -65,7 +65,10 @@ export function useBlockKeydownHandler({
   );
 }
 
-function handleEnter(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleEnter(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   event.preventDefault();
   const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
     window.getSelection(),
@@ -78,7 +81,7 @@ function handleEnter(event: KeydownEvent, context: KeydownHandlerContext) {
   context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
 }
 
-function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
   event.preventDefault();
 
   // [P2] DOM上の最新テキストをモデルに反映してからインデント処理を行う前提。
@@ -105,7 +108,10 @@ function handleTab(event: KeydownEvent, context: KeydownHandlerContext) {
   context.setCaretPosition({ blockId: context.block.id, caretOffset });
 }
 
-function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleArrowDown(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   if (
     !context.currentElement ||
     !dom.isCaretAtLastLine(context.block.content, window.getSelection())
@@ -135,7 +141,10 @@ function handleArrowDown(event: KeydownEvent, context: KeydownHandlerContext) {
   });
 }
 
-function handleArrowUp(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleArrowUp(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   if (
     !context.currentElement ||
     !dom.isCaretAtFirstLine(window.getSelection())
@@ -172,7 +181,7 @@ function goToLineStart(
   event: KeydownEvent,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
-) {
+): void {
   event.preventDefault();
 
   const newlineBeforeCaret = caretPosition?.newlines?.findLast((newline) => {
@@ -193,7 +202,7 @@ function goToLineEnd(
   event: KeydownEvent,
   context: KeydownHandlerContext,
   caretPosition: CaretPosition,
-) {
+): void {
   event.preventDefault();
 
   const newlineAfterCaret = caretPosition?.newlines?.find((newline) => {
@@ -213,7 +222,10 @@ function goToLineEnd(
   }
 }
 
-function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleBackspace(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   const currentContent = context.currentElement?.innerText || "";
 
   if (
@@ -259,7 +271,10 @@ function handleBackspace(event: KeydownEvent, context: KeydownHandlerContext) {
   });
 }
 
-function handleArrowLeft(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleArrowLeft(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   if (!dom.caretIsAtBlockStart(window.getSelection())) {
     return;
   }
@@ -280,7 +295,10 @@ function handleArrowLeft(event: KeydownEvent, context: KeydownHandlerContext) {
   });
 }
 
-function handleArrowRight(event: KeydownEvent, context: KeydownHandlerContext) {
+function handleArrowRight(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
   const position = dom.getCaretPositionInBlock(context.getSelection());
   if (!position) {
     return;

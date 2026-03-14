@@ -40,6 +40,13 @@ export default tseslint.config(
           message: "Do not inject HTML with insertAdjacentHTML.",
         },
       ],
+      "@typescript-eslint/explicit-function-return-type": [
+        "error",
+        {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
+        },
+      ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-this-alias": "off",
     },
