@@ -1,6 +1,6 @@
-import { StrictMode, useEffect, useMemo } from "preact/compat";
-import type { JSX, PropsWithChildren } from "preact/compat";
-import { createRoot } from "preact/compat/client";
+import { render } from "preact";
+import type { ComponentChildren, JSX } from "preact";
+import { useEffect, useMemo } from "preact/hooks";
 
 import type BlockEntity from "./block/BlockEntity";
 import { createBlock } from "./block/BlockEntity";
@@ -16,12 +16,7 @@ const rootElement = document.getElementById("root");
 if (!rootElement) {
   console.warn('Root element "#root" was not found.');
 } else {
-  const root = createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
+  render(<App />, rootElement);
 }
 
 function App(): JSX.Element {
@@ -75,7 +70,7 @@ function JsonPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
   );
 }
 
-function Panel({ children }: PropsWithChildren): JSX.Element {
+function Panel({ children }: { children?: ComponentChildren }): JSX.Element {
   return (
     <div
       className="border border-gray-300

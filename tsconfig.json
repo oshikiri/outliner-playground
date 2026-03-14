@@ -21,7 +21,7 @@
     "noUnusedParameters": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "types": ["preact/compat", "preact"]
+    "types": ["preact"]
   },
   "include": ["src"]
 }

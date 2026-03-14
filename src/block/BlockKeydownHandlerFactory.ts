@@ -1,6 +1,9 @@
-import { useCallback } from "preact/compat";
-import type { RefObject } from "preact/compat";
-import type { KeyboardEventHandler, TargetedKeyboardEvent } from "preact";
+import type {
+  KeyboardEventHandler,
+  RefObject,
+  TargetedKeyboardEvent,
+} from "preact";
+import { useCallback } from "preact/hooks";
 
 import type BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";

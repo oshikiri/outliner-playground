@@ -1,5 +1,5 @@
-import { Fragment } from "preact/compat";
-import type { JSX } from "preact/compat";
+import { Fragment } from "preact";
+import type { JSX } from "preact";
 
 import type { Segment } from "./Segment";
 

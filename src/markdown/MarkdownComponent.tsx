@@ -1,5 +1,5 @@
-import { useMemo } from "preact/compat";
-import type { JSX } from "preact/compat";
+import type { JSX } from "preact";
+import { useMemo } from "preact/hooks";
 
 import SegmentComponent from "./SegmentComponent";
 import parseInlineMarkdown from "./parseInlineMarkdown";
