@@ -1,10 +1,13 @@
-# BlockComponent
+# Outliner Editor
 
 基本的にLogseqの挙動をベースにする。
 
+この仕様は、複数の block で構成される Outliner Editor 全体の挙動を扱う。
+各 block を表示・編集する UI 単位は BlockComponent と呼ぶ。
+
 ## 編集モード/表示モード
 
-BlockComponent には「編集モード」と「表示モード」の二種類のモードがある
+各 BlockComponent には「編集モード」と「表示モード」の二種類のモードがある
 
 - 編集モード: そのブロックのmarkdownテキストを編集できる
 - 表示モード: そのブロックのmarkdownを閲覧用にレンダリングする
