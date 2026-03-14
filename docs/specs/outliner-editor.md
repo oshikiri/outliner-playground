@@ -25,10 +25,7 @@
 
 ## Markdown記法
 
-- `[link](url)`
-  - 外部リンクのクリック（表示モード）： 新規タブでURLを開く。`rel="noreferrer"` を付与する。
-- inline code
-- [未実装] その他多数のMarkdown記法
+各 block 内で扱う Markdown の詳細は [Block Markdown](./block-markdown.md) を参照する。
 
 ## テキスト編集
 

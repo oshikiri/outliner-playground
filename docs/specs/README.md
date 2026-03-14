@@ -7,13 +7,13 @@
 
 - [Outliner Editor](./outliner-editor.md)
   - 複数の block で構成される Outliner Editor 全体の編集挙動を扱う。
+- [Block Markdown](./block-markdown.md)
+  - 各 block 内で扱う Markdown の対応範囲と表示ルールを扱う。
 
 ## 追加予定
 
 以下は追加を検討している spec であり、まだ正本ではない。
 
-- `markdown-inline.md`
-  - 表示モードで扱う inline markdown の対応範囲と解釈ルールを整理する。
 - `editor-state.md`
   - `rootBlock` `caretPosition` などのアプリ状態と初期化条件を整理する。
 - `block-tree.md`
