@@ -11,9 +11,9 @@
 - review_manager サブエージェントが利用できない環境では、通常のレビューを行う。
 - review_manager から返答があれば、省略せずにすべて表示する。
 
-## Available Skills
+## Available Commands
 
-- `create-git-commit`: コミットメッセージ規約（Conventional Commits）
+- `create-git-commit`: Conventional Commits に沿ってコミットメッセージ案を作る custom prompt
 
 ## npm
 
