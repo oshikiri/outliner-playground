@@ -1,4 +1,4 @@
-export class RangeList {
+class RangeList {
   constructor(private ranges: IndexRange[]) {}
 
   getRanges(): IndexRange[] {

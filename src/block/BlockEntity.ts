@@ -137,7 +137,7 @@ export default class BlockEntity {
       return this;
     }
 
-    for (let child of this.children) {
+    for (const child of this.children) {
       const found = child.findBlockById(id);
       if (found) {
         return found;

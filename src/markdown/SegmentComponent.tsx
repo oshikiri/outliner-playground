@@ -56,7 +56,12 @@ function LinkSegment({ label, href }: LinkSegmentProps): JSX.Element {
  */
 function sanitizeHref(href: string): string {
   const trimmed = href.trim();
-  const normalized = trimmed.replace(/[\u0000-\u001f\u007f\s]+/g, "");
+  const normalized = Array.from(trimmed)
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code > 0x1f && code !== 0x7f && char.trim() !== "";
+    })
+    .join("");
   if (normalized === "") {
     return "#";
   }
