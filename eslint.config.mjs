@@ -2,6 +2,8 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+import primaryFunctionFirst from "./eslint/rules/primaryFunctionFirst.mjs";
+
 export default tseslint.config(
   {
     ignores: ["dist/**", "node_modules/**", ".vite/**", ".vscode/**"],
@@ -10,6 +12,13 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ["**/*.{ts,tsx}"],
+    plugins: {
+      local: {
+        rules: {
+          "primary-function-first": primaryFunctionFirst,
+        },
+      },
+    },
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -49,6 +58,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-this-alias": "off",
+      "local/primary-function-first": "warn",
     },
   },
   {

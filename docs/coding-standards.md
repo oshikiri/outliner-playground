@@ -3,7 +3,6 @@
 ## JavaScript/TypeScript
 
 - Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
-- Present the primary export (component/function) before helper implementations so readers encounter high-level intent first.
 - Keep DOM helpers independent from `Selection` and `window` by passing only the required values as arguments so they remain easy to test.
 
 ## React
