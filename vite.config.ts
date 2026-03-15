@@ -7,6 +7,11 @@ export default defineConfig({
   base: "./",
   plugins: [preact(), tailwindcss()],
   test: {
+    coverage: {
+      exclude: ["eslint/**"],
+      provider: "v8",
+      reporter: ["text", "html"],
+    },
     environment: "node",
     globals: true,
     include: ["src/**/*.test.ts", "eslint/**/*.test.mjs"],

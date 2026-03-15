@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "format": "prettier --write . --list-different",
     "pretest": "prettier --check .",
-    "test": "tsc --noEmit && vitest"
+    "test": "tsc --noEmit && vitest",
+    "test:coverage": "tsc --noEmit && vitest run --coverage"
   },
   "author": "oshikiri",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "@eslint/js": "10.0.1",
     "@preact/preset-vite": "2.10.3",
     "@tailwindcss/vite": "4.2.1",
+    "@vitest/coverage-v8": "4.1.0",
     "eslint": "10.0.3",
     "globals": "17.4.0",
     "jotai": "2.18.1",
