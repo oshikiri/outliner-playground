@@ -6,7 +6,7 @@ import {
   waitFor,
 } from "@testing-library/preact";
 import type { JSX } from "preact";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import BlockComponent from "./BlockComponent";
 import BlockEntity from "./BlockEntity";
@@ -151,6 +151,10 @@ describe("編集モード/表示モード", () => {
 });
 
 describe("ブロック分割", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
   it("[OE-SPLIT-001] Enter でキャレット位置を前後に分割する", async () => {
     renderEditor(["hello"]);
 

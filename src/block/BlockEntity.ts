@@ -194,19 +194,21 @@ export default class BlockEntity {
   indent(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      console.log("Block has no parent:", this);
+      console.warn("Block has no parent:", this);
       return parent;
     }
 
     if (currentIdx === 0) {
-      console.log("Cannot indent block that is the first child of its parent.");
+      console.warn(
+        "Cannot indent block that is the first child of its parent.",
+      );
       return parent;
     }
 
     const siblingsBefore = parent.children.slice(0, currentIdx);
     const prevSibling = siblingsBefore[siblingsBefore.length - 1];
     if (!prevSibling) {
-      console.log("No previous sibling to indent to.");
+      console.warn("No previous sibling to indent to.");
       return parent;
     }
     this.parent = prevSibling;
@@ -221,17 +223,17 @@ export default class BlockEntity {
   outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      console.log("Block has no parent:", this);
+      console.warn("Block has no parent:", this);
       return { parent, grandparent: null };
     }
     if (!parent.parent) {
-      console.log("Cannot outdent block that is a child of the root.");
+      console.warn("Cannot outdent block that is a child of the root.");
       return { parent, grandparent: null };
     }
 
     const [grandparent, parentIdx] = parent.getParentAndIndex();
     if (!grandparent || parentIdx === -1) {
-      console.log("Parent has no parent:", parent);
+      console.warn("Parent has no parent:", parent);
       return { parent, grandparent };
     }
 

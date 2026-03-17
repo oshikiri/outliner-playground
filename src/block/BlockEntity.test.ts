@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import BlockEntity from "./BlockEntity";
 
 describe("ブロック分割・結合", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
   it("[OE-SPLIT-005] hidden root 自体は分割しない", () => {
     const root = new BlockEntity("");
 
