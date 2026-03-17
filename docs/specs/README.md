@@ -26,3 +26,8 @@
 - 仕様を追加するときは、まずこの README の目次を更新する。
 - ファイル名は、責務が分かる英小文字の kebab-case にそろえる。
 - 実装に先行してメモを書く場合は、未確定の内容だと分かるように記述する。
+- テストで固定したい要件には、`[OE-...-001]` のような ID を付ける。
+- 新しいテストを追加するときは、対応する spec ID をテスト名に含める。
+- `npm run check:traceability` は spec ID と test ID の対応漏れを report する。
+- `npm run check:traceability:strict` は対応漏れがあると失敗する。
+- review では、ID の有無だけでなく、テスト内容がその spec を表現できているかも確認する。

@@ -21,3 +21,7 @@ config_file = "agents/reviewers/interaction_regression_checker.toml"
 [agents.security_checker]
 description = "Read-only reviewer that checks application security risks across user input, storage, rendering, and navigation paths."
 config_file = "agents/reviewers/security_checker.toml"
+
+[agents.spec_test_traceability_checker]
+description = "Read-only reviewer that checks spec-test traceability, including spec IDs, test IDs, and missing coverage of changed behavior."
+config_file = "agents/reviewers/spec_test_traceability_checker.toml"

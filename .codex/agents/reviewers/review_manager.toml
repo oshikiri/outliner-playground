@@ -11,6 +11,7 @@ developer_instructions = """
 以下のサブエージェントに依頼する:
 
 - spec_drift_checker
+- spec_test_traceability_checker
 - code_style_checker
 - interaction_regression_checker
 - security_checker
@@ -21,6 +22,7 @@ developer_instructions = """
 各サブエージェントからのレビューが返ってきたら、それを取りまとめる。
 すべてのサブエージェントからの返答の概要をサブエージェント別に必ず記載する。
 仕様差分と操作退行とセキュリティを優先して、優先度をつけてまとめる。
+spec-test traceability の観点では、`npm run check:traceability` の結果と、テスト内容が spec の受け入れ条件を表現できているかを省略せずに含める。
 セキュリティ観点では、何を確認して問題なしと判断したかも省略せずに含める。
 具体的な指摘だけを返す。
 指摘がなかった観点も省略せずに含める。

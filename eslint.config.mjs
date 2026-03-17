@@ -70,6 +70,14 @@ export default tseslint.config(
     },
   },
   {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     files: ["src/**/*.test.ts"],
     rules: {
       "no-restricted-properties": [

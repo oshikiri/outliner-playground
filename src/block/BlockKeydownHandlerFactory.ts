@@ -81,6 +81,9 @@ function handleEnter(
     beforeText || "",
     afterText || "",
   );
+  if (context.currentElement) {
+    context.currentElement.innerText = beforeText || "";
+  }
   context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
 }
 
