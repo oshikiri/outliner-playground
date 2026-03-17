@@ -214,6 +214,97 @@ describe("ブロック分割", () => {
   });
 });
 
+describe("ブロック結合", () => {
+  it("[OE-JOIN-001][OE-JOIN-003][OE-JOIN-004] 行頭 Backspace でひとつ上のブロック末尾へ結合し結合元を削除する", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("second"));
+
+    const editable = await waitForEditableTextbox("second");
+    editable.innerText = "second";
+    installSelectionMock(editable.firstChild, 0);
+
+    fireEvent.keyDown(editable, { key: "Backspace" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("firstsecond");
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: "first".length,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("firstsecond");
+    });
+  });
+
+  it("[OE-JOIN-002] ひとつ上のブロックは pre-order depth-first 走査で直前のブロックとする", async () => {
+    const grandchild = new BlockEntity("grandchild");
+    const previous = new BlockEntity("previous", [grandchild]);
+    const target = new BlockEntity("target");
+    renderRootBlock(new BlockEntity("", [previous, target]));
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 0);
+
+    fireEvent.keyDown(editable, { key: "Backspace" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("previous");
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["grandchildtarget"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.children[0]?.id,
+        caretOffset: "grandchild".length,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("grandchildtarget");
+    });
+  });
+
+  it("[OE-JOIN-005] 子ブロックを持つ場合は Backspace 結合が発火しない", async () => {
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("target", [child]);
+    renderRootBlock(new BlockEntity("", [target]));
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 0);
+
+    fireEvent.keyDown(editable, { key: "Backspace" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("target");
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["child"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 0,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("target");
+    });
+  });
+});
+
 describe("階層操作", () => {
   beforeEach(() => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
