@@ -252,6 +252,42 @@ export default class BlockEntity {
     return { parent, grandparent };
   }
 
+  moveUp(): BlockEntity | null {
+    const [parent, currentIdx] = this.getParentAndIndex();
+    if (!parent || currentIdx <= 0) {
+      return parent;
+    }
+
+    const prevSibling = parent.children[currentIdx - 1];
+    if (!prevSibling) {
+      return parent;
+    }
+
+    parent.children[currentIdx - 1] = this;
+    parent.children[currentIdx] = prevSibling;
+    return parent;
+  }
+
+  moveDown(): BlockEntity | null {
+    const [parent, currentIdx] = this.getParentAndIndex();
+    if (
+      !parent ||
+      currentIdx === -1 ||
+      currentIdx >= parent.children.length - 1
+    ) {
+      return parent;
+    }
+
+    const nextSibling = parent.children[currentIdx + 1];
+    if (!nextSibling) {
+      return parent;
+    }
+
+    parent.children[currentIdx] = nextSibling;
+    parent.children[currentIdx + 1] = this;
+    return parent;
+  }
+
   toJSON(): BlockJSON {
     return {
       id: this.id,

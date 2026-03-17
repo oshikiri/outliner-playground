@@ -42,8 +42,12 @@ export function useBlockKeydownHandler({
         handleEnter(event, context);
       } else if (event.key === "Tab") {
         handleTab(event, context);
+      } else if (event.key === "ArrowDown" && event.ctrlKey) {
+        handleMoveBlockDown(event, context);
       } else if (event.key === "ArrowDown") {
         handleArrowDown(event, context);
+      } else if (event.key === "ArrowUp" && event.ctrlKey) {
+        handleMoveBlockUp(event, context);
       } else if (event.key === "ArrowUp") {
         handleArrowUp(event, context);
       } else if (event.key === "ArrowLeft") {
@@ -147,6 +151,25 @@ function handleArrowDown(
   });
 }
 
+function handleMoveBlockDown(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
+  event.preventDefault();
+
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
+
+  const parent = updatedBlock.moveDown();
+  if (parent) {
+    context.updateBlockById(parent.id, parent);
+  }
+
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
+  context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
+}
+
 function handleArrowUp(
   event: KeydownEvent,
   context: KeydownHandlerContext,
@@ -181,6 +204,25 @@ function handleArrowUp(
     blockId: prevBlock.id,
     caretOffset: nextCaretOffset,
   });
+}
+
+function handleMoveBlockUp(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
+  event.preventDefault();
+
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
+
+  const parent = updatedBlock.moveUp();
+  if (parent) {
+    context.updateBlockById(parent.id, parent);
+  }
+
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
+  context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
 }
 
 function goToLineStart(

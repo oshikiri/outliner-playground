@@ -155,7 +155,7 @@ describe("ブロック分割", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
-  it("[OE-SPLIT-001] Enter でキャレット位置を前後に分割する", async () => {
+  it("[OE-SPLIT-001][OE-SPLIT-002][OE-SPLIT-004] Enter で前半を現在ブロックに残し子がない場合は次の兄弟として分割する", async () => {
     renderEditor(["hello"]);
 
     fireEvent.click(getTextboxByText("hello"));
@@ -179,6 +179,152 @@ describe("ブロック分割", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("llo");
+    });
+  });
+
+  it("[OE-SPLIT-001][OE-SPLIT-002][OE-SPLIT-003] Enter で前半を現在ブロックに残し子がある場合は先頭の子ブロックとして分割する", async () => {
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("hello", [child]);
+    renderRootBlock(new BlockEntity("", [target]));
+
+    fireEvent.click(getTextboxByText("hello"));
+
+    const editable = await waitForEditableTextbox("hello");
+    editable.innerText = "hello";
+    installSelectionMock(editable.firstChild, 2);
+
+    fireEvent.keyDown(editable, { key: "Enter" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("he");
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["llo", "child"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.children[0]?.id,
+        caretOffset: 0,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("llo");
+    });
+  });
+});
+
+describe("階層操作", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  it("[OE-INDENT-001] Tab で前の兄弟ブロックの子としてインデントする", async () => {
+    renderEditor(["first", "target"]);
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 2);
+
+    fireEvent.keyDown(editable, { key: "Tab" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("first");
+      expect(rootBlock.children[0]?.children[0]?.content).toBe("target");
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.children[0]?.id,
+        caretOffset: 2,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+    });
+  });
+
+  it("[OE-INDENT-002] Tab で先頭の兄弟ブロックはインデントしない", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("first"));
+
+    const editable = await waitForEditableTextbox("first");
+    editable.innerText = "first";
+    installSelectionMock(editable.firstChild, 1);
+
+    fireEvent.keyDown(editable, { key: "Tab" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "first",
+        "second",
+      ]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 1,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("first");
+    });
+  });
+
+  it("[OE-OUTDENT-001][OE-OUTDENT-002] Shift+Tab で親の直後へ移動し後続兄弟を子として吸収する", async () => {
+    const first = new BlockEntity("first");
+    const grandchild = new BlockEntity("grandchild");
+    const target = new BlockEntity("target", [grandchild]);
+    const trailing = new BlockEntity("trailing");
+    const parent = new BlockEntity("parent", [first, target, trailing]);
+    renderRootBlock(new BlockEntity("", [parent]));
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 3);
+
+    fireEvent.keyDown(editable, { key: "Tab", shiftKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "parent",
+        "target",
+      ]);
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["first"]);
+      expect(
+        rootBlock.children[1]?.children.map((block) => block.content),
+      ).toEqual(["grandchild", "trailing"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[1]?.id,
+        caretOffset: 3,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+    });
+  });
+
+  it("[OE-OUTDENT-003] Shift+Tab で hidden root 直下のブロックはアウトデントしない", async () => {
+    renderEditor(["first"]);
+
+    fireEvent.click(getTextboxByText("first"));
+
+    const editable = await waitForEditableTextbox("first");
+    editable.innerText = "first";
+    installSelectionMock(editable.firstChild, 2);
+
+    fireEvent.keyDown(editable, { key: "Tab", shiftKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "first",
+      ]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 2,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("first");
     });
   });
 });
@@ -264,6 +410,116 @@ describe("キー移動", () => {
   });
 });
 
+describe("ブロック順序変更", () => {
+  it("[OE-REORDER-001] Ctrl+↑ で子孫を保ったまま一つ前の兄弟ブロックと位置を入れ替える", async () => {
+    const first = new BlockEntity("first");
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("target", [child]);
+    renderRootBlock(new BlockEntity("", [first, target]));
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 1);
+
+    fireEvent.keyDown(editable, { key: "ArrowUp", ctrlKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "target",
+        "first",
+      ]);
+      expect(rootBlock.children[0]?.children[0]?.content).toBe("child");
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 1,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+    });
+  });
+
+  it("[OE-REORDER-002] Ctrl+↑ で先頭の兄弟ブロックは移動しない", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("first"));
+
+    const editable = await waitForEditableTextbox("first");
+    editable.innerText = "first";
+    installSelectionMock(editable.firstChild, 2);
+
+    fireEvent.keyDown(editable, { key: "ArrowUp", ctrlKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "first",
+        "second",
+      ]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 2,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("first");
+    });
+  });
+
+  it("[OE-REORDER-003] Ctrl+↓ で子孫を保ったまま一つ後の兄弟ブロックと位置を入れ替える", async () => {
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("target", [child]);
+    const second = new BlockEntity("second");
+    renderRootBlock(new BlockEntity("", [target, second]));
+
+    fireEvent.click(getTextboxByText("target"));
+
+    const editable = await waitForEditableTextbox("target");
+    editable.innerText = "target";
+    installSelectionMock(editable.firstChild, 3);
+
+    fireEvent.keyDown(editable, { key: "ArrowDown", ctrlKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "second",
+        "target",
+      ]);
+      expect(rootBlock.children[1]?.children[0]?.content).toBe("child");
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[1]?.id,
+        caretOffset: 3,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+    });
+  });
+
+  it("[OE-REORDER-004] Ctrl+↓ で末尾の兄弟ブロックは移動しない", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("second"));
+
+    const editable = await waitForEditableTextbox("second");
+    editable.innerText = "second";
+    installSelectionMock(editable.firstChild, 4);
+
+    fireEvent.keyDown(editable, { key: "ArrowDown", ctrlKey: true });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "first",
+        "second",
+      ]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[1]?.id,
+        caretOffset: 4,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("second");
+    });
+  });
+});
+
 function TestEditor(): JSX.Element {
   const [rootBlock] = useRootBlock();
 
@@ -282,6 +538,10 @@ function renderEditor(contents: string[]): void {
     "",
     contents.map((content) => new BlockEntity(content)),
   );
+  renderRootBlock(rootBlock);
+}
+
+function renderRootBlock(rootBlock: BlockEntity): void {
   initializeState(rootBlock);
   render(<TestEditor />);
 }

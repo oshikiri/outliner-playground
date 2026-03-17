@@ -16,7 +16,7 @@ describe("ブロック分割・結合", () => {
     expect(root.children).toHaveLength(0);
   });
 
-  it("[OE-SPLIT-002][OE-SPLIT-004] 子がない場合は次の兄弟ブロックとして分割する", () => {
+  it("子がない場合は次の兄弟ブロックとして分割する", () => {
     const block = new BlockEntity("hello");
     const sibling = new BlockEntity("after");
     const root = new BlockEntity("", [block, sibling]);
@@ -32,7 +32,7 @@ describe("ブロック分割・結合", () => {
     expect(root.children[1]?.parent).toBe(root);
   });
 
-  it("[OE-SPLIT-002][OE-SPLIT-003] 子がある場合は先頭の子ブロックとして分割する", () => {
+  it("子がある場合は先頭の子ブロックとして分割する", () => {
     const child = new BlockEntity("child");
     const block = new BlockEntity("hello", [child]);
     const root = new BlockEntity("", [block]);
@@ -51,7 +51,7 @@ describe("ブロック分割・結合", () => {
 });
 
 describe("階層操作", () => {
-  it("[OE-INDENT-001] 前の兄弟ブロックの子としてインデントする", () => {
+  it("前の兄弟ブロックの子としてインデントする", () => {
     const first = new BlockEntity("first");
     const target = new BlockEntity("target");
     const root = new BlockEntity("", [first, target]);
@@ -66,7 +66,7 @@ describe("階層操作", () => {
     expect(target.parent).toBe(first);
   });
 
-  it("[OE-INDENT-002] 先頭の兄弟ブロックはインデントしない", () => {
+  it("先頭の兄弟ブロックはインデントしない", () => {
     const first = new BlockEntity("first");
     const second = new BlockEntity("second");
     const root = new BlockEntity("", [first, second]);
@@ -80,7 +80,7 @@ describe("階層操作", () => {
     expect(first.parent).toBe(root);
   });
 
-  it("[OE-OUTDENT-001][OE-OUTDENT-002] アウトデント時は親の直後に移動し後続兄弟を子として吸収する", () => {
+  it("アウトデント時は親の直後に移動し後続兄弟を子として吸収する", () => {
     const first = new BlockEntity("first");
     const grandchild = new BlockEntity("grandchild");
     const target = new BlockEntity("target", [grandchild]);
@@ -103,7 +103,7 @@ describe("階層操作", () => {
     expect(outdented?.parent).toBe(root);
   });
 
-  it("[OE-OUTDENT-003] hidden root の直下にある block はアウトデントしない", () => {
+  it("hidden root の直下にある block はアウトデントしない", () => {
     const child = new BlockEntity("child");
     const root = new BlockEntity("", [child]);
 
@@ -114,6 +114,42 @@ describe("階層操作", () => {
     expect(root.children).toHaveLength(1);
     expect(root.children[0]).toBe(child);
     expect(child.parent).toBe(root);
+  });
+});
+
+describe("ブロック順序変更", () => {
+  it("子孫を保ったまま一つ前の兄弟ブロックと位置を入れ替える", () => {
+    const first = new BlockEntity("first");
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("target", [child]);
+    const root = new BlockEntity("", [first, target]);
+
+    const updatedParent = target.moveUp();
+
+    expect(updatedParent).toBe(root);
+    expect(root.children.map((block) => block.content)).toEqual([
+      "target",
+      "first",
+    ]);
+    expect(root.children[0]?.children[0]).toBe(child);
+    expect(child.parent).toBe(target);
+  });
+
+  it("子孫を保ったまま一つ後の兄弟ブロックと位置を入れ替える", () => {
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("target", [child]);
+    const second = new BlockEntity("second");
+    const root = new BlockEntity("", [target, second]);
+
+    const updatedParent = target.moveDown();
+
+    expect(updatedParent).toBe(root);
+    expect(root.children.map((block) => block.content)).toEqual([
+      "second",
+      "target",
+    ]);
+    expect(root.children[1]?.children[0]).toBe(child);
+    expect(child.parent).toBe(target);
   });
 });
 
