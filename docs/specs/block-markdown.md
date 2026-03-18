@@ -38,9 +38,9 @@
 
 ## 描画ルール
 
-- plain text はそのまま文字列として描画する。
-- inline code は `<code>` 要素で描画する。
-- link は `<a>` 要素で描画する。
+- [BM-RENDER-001] plain text はそのまま文字列として描画する。
+- [BM-RENDER-002] inline code は `<code>` 要素で描画する。
+- [BM-RENDER-003] link は `<a>` 要素で描画する。
   - `target="_blank"` を付与する。
   - `rel="noreferrer"` を付与する。
 
