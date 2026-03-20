@@ -115,20 +115,91 @@ export function getCurrentLineOffset(selection: Selection | null): number {
   return range.startOffset;
 }
 
+/**
+ * Place the caret at a plain-text offset.
+ *
+ * @param node - A text node or a container element that owns descendant text
+ * nodes.
+ * @param offset - The plain-text character offset from the start of `node`.
+ * When `node` is an element, the offset is resolved across descendant text
+ * nodes in document order.
+ * @param selection - The selection object to update. If `null`, this function
+ * resolves the target position but does not mutate browser selection state.
+ * @returns Nothing.
+ *
+ * @remarks
+ * If `offset` exceeds the available text length, the caret is placed at the
+ * end of the last text node. If no text node exists, the caret is placed on
+ * the container itself.
+ */
 export function setCaretOffset(
   node: Node,
   offset: number,
   selection: Selection | null,
 ): void {
+  const target = resolveCaretTarget(node, offset);
   const range = document.createRange();
-  range.setStart(node, offset);
-  range.setEnd(node, offset);
+  range.setStart(target.node, target.offset);
+  range.setEnd(target.node, target.offset);
 
   if (!selection) {
     return;
   }
   selection.removeAllRanges();
   selection.addRange(range);
+}
+
+/**
+ * Resolve a plain-text offset to a concrete DOM position.
+ *
+ * @param node - A text node or container element that defines the offset base.
+ * @param offset - The plain-text character offset from the start of `node`.
+ * @returns The concrete DOM node and local offset that correspond to the
+ * requested plain-text position.
+ *
+ * @remarks
+ * Descendant text nodes are traversed in document order so callers do not have
+ * to depend on a specific `contentEditable` subtree shape.
+ */
+function resolveCaretTarget(
+  node: Node,
+  offset: number,
+): { node: Node; offset: number } {
+  if (node.nodeType === Node.TEXT_NODE) {
+    const textNode = node as Text;
+    return {
+      node: textNode,
+      offset: Math.min(offset, textNode.data.length),
+    };
+  }
+
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  let remaining = offset;
+  let current = walker.nextNode();
+  let lastTextNode: Text | null = null;
+
+  while (current) {
+    const textNode = current as Text;
+    if (remaining <= textNode.data.length) {
+      return { node: textNode, offset: remaining };
+    }
+
+    remaining -= textNode.data.length;
+    lastTextNode = textNode;
+    current = walker.nextNode();
+  }
+
+  if (lastTextNode) {
+    return {
+      node: lastTextNode,
+      offset: lastTextNode.data.length,
+    };
+  }
+
+  return {
+    node,
+    offset: Math.min(offset, node.childNodes.length),
+  };
 }
 
 export function getNearestCaretOffset(

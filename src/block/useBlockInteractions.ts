@@ -134,11 +134,7 @@ function focusContentAtCaret(
   element.focus();
 
   const offset = dom.clampOffsetToTextLength(element, caretOffset);
-  // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
-  const firstNode = element.firstChild;
-  if (firstNode) {
-    dom.setCaretOffset(firstNode, offset, window.getSelection());
-  }
+  dom.setCaretOffset(element, offset, window.getSelection());
 }
 
 function cloneBlockWithContent(
