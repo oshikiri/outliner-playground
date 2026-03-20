@@ -23,53 +23,71 @@ export function useBlockKeydownHandler({
   updateBlockById,
   getSelection,
 }: UseBlockKeydownHandlerArgs): KeydownHandler {
-  // [P3] キー分岐と状態更新が1箇所に集中しており、変更の影響範囲が広くテストも難しいため分割したい。
-  // [P3] 入力処理とモデル更新が混在しているため、コマンド層を挟むと責務が分離できる。
+  // [P3] 各コマンド内では入力処理とモデル更新が混在しているため、状態更新の責務分離は別途進めたい。
   return useCallback(
     (event: KeydownEvent) => {
-      const currentElement = contentRef.current;
-      const context: KeydownHandlerContext = {
-        block,
-        contentRef,
-        splitBlockAtCaret,
-        setCaretPosition,
-        updateBlockById,
-        currentElement,
-        getSelection: getSelection ?? (() => window.getSelection()),
-      };
-
-      if (event.key === "Enter" && !event.shiftKey) {
-        handleEnter(event, context);
-      } else if (event.key === "Tab") {
-        handleTab(event, context);
-      } else if (event.key === "ArrowDown" && event.ctrlKey) {
-        handleMoveBlockDown(event, context);
-      } else if (event.key === "ArrowDown") {
-        handleArrowDown(event, context);
-      } else if (event.key === "ArrowUp" && event.ctrlKey) {
-        handleMoveBlockUp(event, context);
-      } else if (event.key === "ArrowUp") {
-        handleArrowUp(event, context);
-      } else if (event.key === "ArrowLeft") {
-        handleArrowLeft(event, context);
-      } else if (event.key === "ArrowRight") {
-        handleArrowRight(event, context);
-      } else if (event.key === "a" && event.ctrlKey) {
-        const caretPosition = dom.getCaretPositionInBlock(
-          window.getSelection(),
-        );
-        goToLineStart(event, context, caretPosition);
-      } else if (event.key === "e" && event.ctrlKey) {
-        const caretPosition = dom.getCaretPositionInBlock(
-          window.getSelection(),
-        );
-        goToLineEnd(event, context, caretPosition);
-      } else if (event.key === "Backspace") {
-        handleBackspace(event, context);
-      }
+      dispatchKeydownEvent(
+        event,
+        createKeydownHandlerContext({
+          block,
+          contentRef,
+          splitBlockAtCaret,
+          setCaretPosition,
+          updateBlockById,
+          getSelection,
+        }),
+      );
     },
-    [block, contentRef, splitBlockAtCaret, setCaretPosition, updateBlockById],
+    [
+      block,
+      contentRef,
+      getSelection,
+      splitBlockAtCaret,
+      setCaretPosition,
+      updateBlockById,
+    ],
   );
+}
+
+function createKeydownHandlerContext(
+  args: UseBlockKeydownHandlerArgs,
+): KeydownHandlerContext {
+  return {
+    ...args,
+    currentElement: args.contentRef.current,
+    getSelection: args.getSelection ?? (() => window.getSelection()),
+  };
+}
+
+function dispatchKeydownEvent(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
+  if (event.key === "Enter" && !event.shiftKey) {
+    handleEnter(event, context);
+  } else if (event.key === "Tab") {
+    handleTab(event, context);
+  } else if (event.key === "ArrowDown" && event.ctrlKey) {
+    handleMoveBlockDown(event, context);
+  } else if (event.key === "ArrowDown") {
+    handleArrowDown(event, context);
+  } else if (event.key === "ArrowUp" && event.ctrlKey) {
+    handleMoveBlockUp(event, context);
+  } else if (event.key === "ArrowUp") {
+    handleArrowUp(event, context);
+  } else if (event.key === "ArrowLeft") {
+    handleArrowLeft(event, context);
+  } else if (event.key === "ArrowRight") {
+    handleArrowRight(event, context);
+  } else if (event.key === "a" && event.ctrlKey) {
+    const caretPosition = dom.getCaretPositionInBlock(window.getSelection());
+    goToLineStart(event, context, caretPosition);
+  } else if (event.key === "e" && event.ctrlKey) {
+    const caretPosition = dom.getCaretPositionInBlock(window.getSelection());
+    goToLineEnd(event, context, caretPosition);
+  } else if (event.key === "Backspace") {
+    handleBackspace(event, context);
+  }
 }
 
 function handleEnter(
