@@ -23,7 +23,6 @@ export function useBlockKeydownHandler({
   updateBlockById,
   getSelection,
 }: UseBlockKeydownHandlerArgs): KeydownHandler {
-  // [P3] 各コマンド内では入力処理とモデル更新が混在しているため、状態更新の責務分離は別途進めたい。
   return useCallback(
     (event: KeydownEvent) => {
       dispatchKeydownEvent(
@@ -113,9 +112,7 @@ function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
   event.preventDefault();
 
   // [P2] DOM上の最新テキストをモデルに反映してからインデント処理を行う前提。
-  const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
-  context.updateBlockById(updatedBlock.id, updatedBlock);
+  const updatedBlock = syncCurrentBlockContent(context);
 
   if (event.shiftKey) {
     const { parent, grandparent } = updatedBlock.outdent();
@@ -154,9 +151,7 @@ function handleArrowDown(
     return;
   }
 
-  const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
-  context.updateBlockById(updatedBlock.id, updatedBlock);
+  const updatedBlock = syncCurrentBlockContent(context);
 
   const caretOffset = dom.getCurrentLineOffset(window.getSelection());
   const lastRange = getNewlineRangeList(updatedBlock.content).getLastRange();
@@ -175,9 +170,7 @@ function handleMoveBlockDown(
 ): void {
   event.preventDefault();
 
-  const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
-  context.updateBlockById(updatedBlock.id, updatedBlock);
+  const updatedBlock = syncCurrentBlockContent(context);
 
   const parent = updatedBlock.moveDown();
   if (parent) {
@@ -209,9 +202,7 @@ function handleArrowUp(
     return;
   }
 
-  const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
-  context.updateBlockById(updatedBlock.id, updatedBlock);
+  syncCurrentBlockContent(context);
 
   const offsetAtPrev = dom.getCurrentLineOffset(window.getSelection());
   const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
@@ -230,9 +221,7 @@ function handleMoveBlockUp(
 ): void {
   event.preventDefault();
 
-  const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
-  context.updateBlockById(updatedBlock.id, updatedBlock);
+  const updatedBlock = syncCurrentBlockContent(context);
 
   const parent = updatedBlock.moveUp();
   if (parent) {
@@ -241,6 +230,13 @@ function handleMoveBlockUp(
 
   const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
   context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
+}
+
+function syncCurrentBlockContent(context: KeydownHandlerContext): BlockEntity {
+  const updatedBlock = createBlock(context.block);
+  updatedBlock.content = context.currentElement?.innerText || "";
+  context.updateBlockById(updatedBlock.id, updatedBlock);
+  return updatedBlock;
 }
 
 function goToLineStart(
