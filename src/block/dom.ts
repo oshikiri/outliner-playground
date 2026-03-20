@@ -1,4 +1,4 @@
-import { getNewlineRangeList } from "../Range";
+import { getNewlineRanges } from "../Range";
 
 type CaretTextSegments = {
   beforeText: string;
@@ -47,7 +47,7 @@ export function isCaretAtLastLine(
     return true;
   }
 
-  const lastlineRange = getNewlineRangeList(content).getLastRange();
+  const lastlineRange = getNewlineRanges(content).at(-1) ?? null;
   if (!lastlineRange) {
     return false;
   }

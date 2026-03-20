@@ -8,7 +8,6 @@ import { useCallback } from "preact/hooks";
 import type BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";
 import * as dom from "./dom";
-import { getNewlineRangeList } from "../Range";
 import type { UpdateCaretPosition } from "../state";
 
 type CaretPosition = ReturnType<typeof dom.getCaretPositionInBlock>;
@@ -126,6 +125,7 @@ function handleArrowDown(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
+  // TODO: 既知課題。判定に context.block.content を使うと同期前の内容を参照する可能性がある。currentElement.innerText を同期した値で判定する。
   if (
     !context.currentElement ||
     !dom.isCaretAtLastLine(context.block.content, context.getSelection())
@@ -142,10 +142,13 @@ function handleArrowDown(
   const updatedBlock = syncCurrentBlockContent(context);
 
   const caretOffset = getCurrentLineOffset(context);
-  const lastRange = getNewlineRangeList(updatedBlock.content).getLastRange();
-  const nextCaretOffset = lastRange
-    ? Math.max(0, caretOffset - lastRange.l - 1)
-    : 0;
+  const currentLineStart = getLineStartOffset(
+    updatedBlock.content,
+    caretOffset,
+  );
+  const offsetInLine = Math.max(0, caretOffset - currentLineStart);
+  const nextFirstLineLength = getFirstLineLength(nextBlock.content);
+  const nextCaretOffset = Math.min(offsetInLine, nextFirstLineLength);
   setCaretPositionForBlock(context, nextBlock.id, nextCaretOffset);
 }
 
@@ -177,13 +180,19 @@ function handleArrowUp(
     return;
   }
 
-  syncCurrentBlockContent(context);
+  const updatedBlock = syncCurrentBlockContent(context);
 
-  const offsetAtPrev = getCurrentLineOffset(context);
-  const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
-  const nextCaretOffset = lastRange
-    ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
-    : 0;
+  const caretOffset = getCurrentLineOffset(context);
+  const currentLineStart = getLineStartOffset(
+    updatedBlock.content,
+    caretOffset,
+  );
+  const offsetInLine = Math.max(0, caretOffset - currentLineStart);
+  const prevLastLineStart = getLastLineStartOffset(prevBlock.content);
+  const nextCaretOffset = Math.min(
+    prevLastLineStart + offsetInLine,
+    prevBlock.content.length,
+  );
   setCaretPositionForBlock(context, prevBlock.id, nextCaretOffset);
 }
 
@@ -236,6 +245,27 @@ function getCurrentCaretOffset(context: KeydownHandlerContext): number {
 
 function getCurrentLineOffset(context: KeydownHandlerContext): number {
   return dom.getCurrentLineOffset(context.getSelection());
+}
+
+function getLineStartOffset(content: string, caretOffset: number): number {
+  if (caretOffset <= 0) {
+    return 0;
+  }
+
+  const previousNewline = content.lastIndexOf("\n", caretOffset - 1);
+  return previousNewline + 1;
+}
+
+function getLastLineStartOffset(content: string): number {
+  return content.lastIndexOf("\n") + 1;
+}
+
+function getFirstLineLength(content: string): number {
+  const firstNewline = content.indexOf("\n");
+  if (firstNewline === -1) {
+    return content.length;
+  }
+  return firstNewline;
 }
 
 function setCaretPositionForBlock(

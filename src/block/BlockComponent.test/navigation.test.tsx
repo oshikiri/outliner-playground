@@ -10,7 +10,7 @@ import {
 } from "./testUtils";
 
 describe("キー移動", () => {
-  it("[OE-MOVE-005] 1行だけのブロックで ArrowDown を押すと次のブロックを編集モードにする", async () => {
+  it("[OE-MOVE-008] 1行だけのブロックで ArrowDown を押すと次のブロックを編集モードにする", async () => {
     renderEditor(["first", "second"]);
 
     const editable = await beginEditing("first", {
@@ -23,9 +23,10 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("second");
-      expect(getCaretPositionState()?.blockId).toBe(
-        getRootBlockState().children[1]?.id,
-      );
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: "first".length,
+      });
     });
   });
 
@@ -40,9 +41,10 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("first");
-      expect(getCaretPositionState()?.blockId).toBe(
-        getRootBlockState().children[0]?.id,
-      );
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 0,
+      });
     });
   });
 
@@ -60,9 +62,10 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("next");
-      expect(getCaretPositionState()?.blockId).toBe(
-        getRootBlockState().children[1]?.id,
-      );
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: 2,
+      });
     });
   });
 
@@ -80,9 +83,31 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("next");
-      expect(getCaretPositionState()?.blockId).toBe(
-        getRootBlockState().children[1]?.id,
-      );
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: 0,
+      });
+    });
+  });
+
+  it("[OE-MOVE-009] 次ブロック先頭行が短い場合 ArrowDown 後の caretOffset は先頭行末尾にクランプされる", async () => {
+    renderEditor(["ab\ncdef", "x\nyz"]);
+
+    const editable = await beginEditing("ab\ncdef", {
+      content: "ab\ncdef",
+      caretOffset: 6,
+    });
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("x\nyz");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: 1,
+      });
     });
   });
 
@@ -100,9 +125,31 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("prev");
-      expect(getCaretPositionState()?.blockId).toBe(
-        getRootBlockState().children[0]?.id,
-      );
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 1,
+      });
+    });
+  });
+
+  it("[OE-MOVE-010] 前ブロックが末尾改行で終わるとき ArrowUp 後の caretOffset は空行先頭にクランプされる", async () => {
+    renderEditor(["abc\n", "xy"]);
+
+    const editable = await beginEditing("xy", {
+      content: "xy",
+      caretOffset: 1,
+    });
+
+    fireEvent.keyDown(editable, { key: "ArrowUp" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("abc\n");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 4,
+      });
     });
   });
 
