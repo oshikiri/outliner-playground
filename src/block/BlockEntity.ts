@@ -265,8 +265,7 @@ export default class BlockEntity {
       return parent;
     }
 
-    parent.children[currentIdx - 1] = this;
-    parent.children[currentIdx] = prevSibling;
+    swapChildren(parent.children, currentIdx - 1, currentIdx);
     return parent;
   }
 
@@ -285,8 +284,7 @@ export default class BlockEntity {
       return parent;
     }
 
-    parent.children[currentIdx] = nextSibling;
-    parent.children[currentIdx + 1] = this;
+    swapChildren(parent.children, currentIdx, currentIdx + 1);
     return parent;
   }
 
@@ -314,4 +312,19 @@ export function createBlock(obj: BlockEntity | BlockJSON): BlockEntity {
   const block = new BlockEntity(obj.content, children).withParent(parent);
   block.id = obj.id;
   return block;
+}
+
+function swapChildren(
+  children: BlockEntity[],
+  leftIndex: number,
+  rightIndex: number,
+): void {
+  const leftChild = children[leftIndex];
+  const rightChild = children[rightIndex];
+  if (!leftChild || !rightChild) {
+    return;
+  }
+
+  children[leftIndex] = rightChild;
+  children[rightIndex] = leftChild;
 }
