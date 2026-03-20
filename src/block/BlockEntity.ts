@@ -15,7 +15,9 @@ export default class BlockEntity {
   ) {
     // [P3] NOTE: 引数オブジェクトを書き換えて親子関係を再設定するので純粋なデータモデルとは言えません
     this.content = content;
-    children.forEach((child) => child.withParent(this));
+    for (const child of children) {
+      child.withParent(this);
+    }
     this.children = children;
   }
 

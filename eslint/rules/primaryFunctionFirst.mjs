@@ -59,7 +59,7 @@ export default {
 function collectTopLevelFunctions(program) {
   const functions = [];
 
-  program.body.forEach((statement, index) => {
+  for (const [index, statement] of program.body.entries()) {
     const declaration = unwrapTopLevelStatement(statement);
 
     if (declaration?.type === "FunctionDeclaration" && declaration.id != null) {
@@ -68,19 +68,19 @@ function collectTopLevelFunctions(program) {
         name: declaration.id.name,
         reportNode: declaration.id,
       });
-      return;
+      continue;
     }
 
     if (declaration?.type !== "VariableDeclaration") {
-      return;
+      continue;
     }
 
-    declaration.declarations.forEach((declarator) => {
+    for (const declarator of declaration.declarations) {
       if (
         declarator.id.type !== "Identifier" ||
         !isFunctionExpression(declarator.init)
       ) {
-        return;
+        continue;
       }
 
       functions.push({
@@ -88,8 +88,8 @@ function collectTopLevelFunctions(program) {
         name: declarator.id.name,
         reportNode: declarator.id,
       });
-    });
-  });
+    }
+  }
 
   return functions;
 }
@@ -143,14 +143,14 @@ function findSoleExportedFunctionName(program, names) {
       continue;
     }
 
-    declaration.declarations.forEach((declarator) => {
+    for (const declarator of declaration.declarations) {
       if (
         declarator.id.type === "Identifier" &&
         isFunctionExpression(declarator.init)
       ) {
         exportedNames.push(declarator.id.name);
       }
-    });
+    }
   }
 
   if (exportedNames.length !== 1) {

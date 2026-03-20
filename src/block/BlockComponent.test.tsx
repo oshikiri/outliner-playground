@@ -34,8 +34,12 @@ vi.mock("../state", async () => {
     initializeState(rootBlock: unknown): void {
       rootBlockState = rootBlock;
       caretPositionState = null;
-      rootListeners.forEach((listener) => listener(rootBlockState));
-      caretListeners.forEach((listener) => listener(caretPositionState));
+      for (const listener of rootListeners) {
+        listener(rootBlockState);
+      }
+      for (const listener of caretListeners) {
+        listener(caretPositionState);
+      }
     },
     useRootBlock(): [
       unknown,
@@ -52,7 +56,9 @@ vi.mock("../state", async () => {
         update: unknown | ((prev: unknown) => unknown),
       ): void => {
         rootBlockState = applyUpdate(rootBlockState, update);
-        rootListeners.forEach((listener) => listener(rootBlockState));
+        for (const listener of rootListeners) {
+          listener(rootBlockState);
+        }
       };
 
       return [value, updateValue];
@@ -72,7 +78,9 @@ vi.mock("../state", async () => {
         update: unknown | ((prev: unknown) => unknown),
       ): void => {
         caretPositionState = applyUpdate(caretPositionState, update);
-        caretListeners.forEach((listener) => listener(caretPositionState));
+        for (const listener of caretListeners) {
+          listener(caretPositionState);
+        }
       };
 
       return [value, updateValue];
