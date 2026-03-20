@@ -12,16 +12,26 @@ export default function MarkdownComponent({
   raw,
 }: MarkdownComponentProps): JSX.Element {
   const segments = useMemo(() => parseInlineMarkdown(raw), [raw]);
+  const seenSignatures = new Map<string, number>();
 
   return (
     <>
-      {segments.map((segment, index) => (
-        <SegmentComponent
-          // [P3] indexキーは差分更新で要素再利用がズレやすいため、安定キーを検討したい。
-          key={`${segment.type}-${index}`}
-          segment={segment}
-        />
-      ))}
+      {segments.map((segment) => {
+        const signature =
+          segment.type === "link"
+            ? `${segment.type}:${segment.value}:${segment.href}`
+            : `${segment.type}:${segment.value}`;
+
+        const occurrence = seenSignatures.get(signature) ?? 0;
+        seenSignatures.set(signature, occurrence + 1);
+
+        return (
+          <SegmentComponent
+            key={`${signature}:${occurrence}`}
+            segment={segment}
+          />
+        );
+      })}
     </>
   );
 }
