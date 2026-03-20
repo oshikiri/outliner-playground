@@ -114,7 +114,7 @@ export default class BlockEntity {
       return updatedBlock;
     }
 
-    if (!this.children || this.children.length === 0) {
+    if (this.children.length === 0) {
       return this;
     }
 
@@ -295,9 +295,9 @@ export default class BlockEntity {
       id: this.id,
       content: this.content,
       children:
-        this.children?.length === 0
+        this.children.length === 0
           ? undefined
-          : this.children?.map((child) => child.toJSON()),
+          : this.children.map((child) => child.toJSON()),
     };
   }
 }

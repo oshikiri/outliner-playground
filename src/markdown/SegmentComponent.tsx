@@ -3,6 +3,8 @@ import type { JSX } from "preact";
 
 import type { Segment } from "./Segment";
 
+const ALLOWED_LINK_SCHEMES = ["http", "https"];
+
 type SegmentProps = {
   segment: Segment;
 };
@@ -55,24 +57,28 @@ function LinkSegment({ label, href }: LinkSegmentProps): JSX.Element {
  * Sanitize a link href by stripping control/whitespace and allowing safe schemes only.
  */
 function sanitizeHref(href: string): string {
-  const trimmed = href.trim();
-  const normalized = Array.from(trimmed)
+  const normalized = stripUnsafeHrefChars(href);
+  if (normalized === "") {
+    return "#";
+  }
+
+  const lower = normalized.toLowerCase();
+  const schemeMatch = /^[a-z][a-z0-9+.-]*:/.exec(lower);
+  if (schemeMatch) {
+    const scheme = schemeMatch[0].slice(0, -1);
+    if (!ALLOWED_LINK_SCHEMES.includes(scheme)) {
+      return "#";
+    }
+  }
+
+  return normalized;
+}
+
+function stripUnsafeHrefChars(href: string): string {
+  return Array.from(href.trim())
     .filter((char) => {
       const code = char.charCodeAt(0);
       return code > 0x1f && code !== 0x7f && char.trim() !== "";
     })
     .join("");
-  if (normalized === "") {
-    return "#";
-  }
-  const lower = normalized.toLowerCase();
-  const schemeMatch = /^[a-z][a-z0-9+.-]*:/.exec(lower);
-  if (schemeMatch) {
-    const scheme = schemeMatch[0].slice(0, -1);
-    const allowedSchemes = ["http", "https"];
-    if (!allowedSchemes.includes(scheme)) {
-      return "#";
-    }
-  }
-  return normalized;
 }

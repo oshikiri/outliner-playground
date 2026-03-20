@@ -45,19 +45,19 @@ export class IndexRange {
  * or content.length for the final segment.
  */
 export function getNewlineRangeList(content: string): RangeList {
-  const rangeset: RangeList = new RangeList([]);
-  const regex = /(\n)/g;
+  const rangeList: RangeList = new RangeList([]);
+  const regex = /\n/g;
   let match: RegExpExecArray | null;
 
   let l = 0;
   while ((match = regex.exec(content)) !== null) {
-    rangeset.pushRange(l, match.index);
+    rangeList.pushRange(l, match.index);
     l = match.index + 1;
   }
 
   if (l < content.length) {
-    rangeset.pushRange(l, content.length);
+    rangeList.pushRange(l, content.length);
   }
 
-  return rangeset;
+  return rangeList;
 }
