@@ -40,4 +40,48 @@ describe("Block Markdown の描画ルール", () => {
     expect(link.getAttribute("target")).toBe("_blank");
     expect(link.getAttribute("rel")).toBe("noreferrer");
   });
+
+  it("[BM-RENDER-004] link の href は描画前に空白文字と制御文字を除去して正規化する", () => {
+    render(
+      <SegmentComponent
+        segment={{
+          type: "link",
+          value: "OpenAI",
+          href: " \nhttps://openai.com/\tpath\u0000 ",
+        }}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: "OpenAI" });
+    expect(link.getAttribute("href")).toBe("https://openai.com/path");
+  });
+
+  it.each([
+    "http://example.com",
+    "https://example.com",
+    "/path",
+    "foo/bar",
+    "?query",
+    "#fragment",
+    "//example.com/path",
+  ])("[BM-RENDER-005] 許可された href %s はそのまま描画する", (href) => {
+    render(
+      <SegmentComponent segment={{ type: "link", value: "OpenAI", href }} />,
+    );
+
+    const link = screen.getByRole("link", { name: "OpenAI" });
+    expect(link.getAttribute("href")).toBe(href);
+  });
+
+  it.each(["javascript:alert(1)", "mailto:test@example.com", " \n\t\u0000 "])(
+    '[BM-RENDER-006] 非許可の href %s は "#" に置き換える',
+    (href) => {
+      render(
+        <SegmentComponent segment={{ type: "link", value: "OpenAI", href }} />,
+      );
+
+      const link = screen.getByRole("link", { name: "OpenAI" });
+      expect(link.getAttribute("href")).toBe("#");
+    },
+  );
 });

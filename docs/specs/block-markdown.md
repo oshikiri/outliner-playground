@@ -1,7 +1,7 @@
 # Block Markdown
 
 この仕様は、Outliner Editor の各 block 内で扱う Markdown の現状仕様をまとめたものである。
-対象は `src/markdown/` 配下の実装であり、block 全体の編集挙動は [Outliner Editor](./outliner-editor.md) で扱う。
+block 全体の編集挙動は [Outliner Editor](./outliner-editor.md) で扱う。
 
 ## 対応範囲
 
@@ -14,10 +14,12 @@
 
 それ以外の入力は plain text として扱う。
 
-- [非対応] strong、emphasis、image など、対応していない記法は解釈しない。
-- [非対応] escaped 記法は考慮しない。
-- [非対応] nested な Markdown 解釈は行わない。
-- [実装制約] parser はラフな実装であり、CommonMark 準拠は目的にしていない。
+### スコープ外
+
+- strong、emphasis、image など、対応していない記法は解釈しない。
+- escaped 記法は考慮しない。
+- nested な Markdown 解釈は行わない。
+- CommonMark 準拠は目的にしていない。
 
 ## Inline Code
 
@@ -43,13 +45,9 @@
 - [BM-RENDER-003] link は `<a>` 要素で描画する。
   - `target="_blank"` を付与する。
   - `rel="noreferrer"` を付与する。
-
-## Link Href のサニタイズ
-
-- 描画時に `href` を trim する。
-- 制御文字と空白文字を除去して正規化する。
-- 正規化後に空文字列になった場合は `"#"` を使う。
-- 明示的な scheme がある場合は `http` と `https` だけを許可する。
-  - それ以外の scheme は `"#"` に置き換える。
-- 明示的な scheme がない場合は、そのまま許可する。
-  - そのため、relative URL と protocol-relative URL は許可される。
+- [BM-RENDER-004] link の `href` は描画前にサニタイズする。
+  - 空白文字と制御文字を除去した結果を使う。
+- [BM-RENDER-005] link の `href` としては、`http` と `https` の URL、および relative URL と protocol-relative URL を許可する。
+  - relative URL には、`/path`、`foo/bar`、`?query`、`#fragment` を含む。
+  - protocol-relative URL には、`//example.com/path` のような形式を含む。
+- [BM-RENDER-006] 上記以外の値は `"#"` に置き換える。
