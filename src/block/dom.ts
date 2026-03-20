@@ -24,7 +24,7 @@ export function clampOffsetToTextLength(
   node: HTMLElement,
   startOffset: number,
 ): number {
-  const nextInnerText = node.innerText || "";
+  const nextInnerText = node.innerText ?? "";
   if (startOffset >= nextInnerText.length) {
     return nextInnerText.length;
   }

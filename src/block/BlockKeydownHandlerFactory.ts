@@ -99,11 +99,11 @@ function handleEnter(
   );
   const newBlock = context.splitBlockAtCaret(
     context.block.id,
-    beforeText || "",
-    afterText || "",
+    beforeText ?? "",
+    afterText ?? "",
   );
   if (context.currentElement) {
-    context.currentElement.innerText = beforeText || "";
+    context.currentElement.innerText = beforeText ?? "";
   }
   context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
 }
@@ -234,7 +234,7 @@ function handleMoveBlockUp(
 
 function syncCurrentBlockContent(context: KeydownHandlerContext): BlockEntity {
   const updatedBlock = createBlock(context.block);
-  updatedBlock.content = context.currentElement?.innerText || "";
+  updatedBlock.content = context.currentElement?.innerText ?? "";
   context.updateBlockById(updatedBlock.id, updatedBlock);
   return updatedBlock;
 }
@@ -279,7 +279,7 @@ function goToLineEnd(
   } else {
     context.setCaretPosition({
       blockId: context.block.id,
-      caretOffset: context.currentElement?.innerText.length || 0,
+      caretOffset: context.currentElement?.innerText.length ?? 0,
     });
   }
 }
@@ -288,7 +288,7 @@ function handleBackspace(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  const currentContent = context.currentElement?.innerText || "";
+  const currentContent = context.currentElement?.innerText ?? "";
 
   if (
     context.block.children.length > 0 ||

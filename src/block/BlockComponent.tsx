@@ -70,7 +70,7 @@ export default function BlockComponent({
     }
     // Clone the block to avoid direct mutation
     const updated = createBlock(block);
-    updated.content = currentElement.innerText || "";
+    updated.content = currentElement.innerText ?? "";
     updateBlockById(block.id, updated);
 
     window.requestAnimationFrame(() => {
