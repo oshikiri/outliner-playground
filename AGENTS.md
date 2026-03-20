@@ -1,22 +1,24 @@
 # AGENTS.md
 
 - 仕様は docs/specs/ 以下に保存している。
-- 実装後、ユーザーに返す前に以下を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
+- console.log と console.warn を使うことは許容する。
+  - 将来的にログライブラリを使うことを検討する
+
+## 作業の終了条件
+
+- レビューすべき大きな変更があった場合は、少なくともビルドと変更に関係する主要なテストが通る状態にしてから、`review-diff` command で差分レビューを実施する。
+- ユーザーに返す前に以下を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
   - `npm run format`
   - `npm run lint`
   - `npm run knip`
   - `npm run build`
   - `npm run test`
   - `npm run check:traceability:strict`
-- レビューを依頼されたときは、review_manager サブエージェントが利用可能なら新しく起動してレビューを依頼する。
-  - review_manager サブエージェントが利用できない環境では、通常のレビューを行う。
-  - review_manager から返答があれば、省略せずにすべて表示する。
-- console.log と console.warn を使うことは許容する。
-  - 将来的にログライブラリを使うことを検討する
 
 ## Available Commands
 
 - `create-git-commit`: Conventional Commits に沿ってコミットメッセージ案を作る custom prompt
+- `review-diff`: 現在の git 差分に対して差分レビューを実施する custom prompt
 
 ## npm
 
