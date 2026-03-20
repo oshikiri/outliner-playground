@@ -1,113 +1,16 @@
-import type { JSX, MouseEventHandler, TargetedMouseEvent } from "preact";
-import { useCallback, useEffect, useRef } from "preact/hooks";
+import type { JSX } from "preact";
 
-import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity from "./BlockEntity";
-import { createBlock } from "./BlockEntity";
-import * as dom from "./dom";
-import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
 import MarkdownComponent from "../markdown/MarkdownComponent";
+import { useBlockInteractions } from "./useBlockInteractions";
 
 export default function BlockComponent({
   block,
 }: {
   block: BlockEntity;
 }): JSX.Element {
-  const [rootBlock, setRootBlock] = useRootBlock();
-  const [caretPosition, setCaretPosition] = useCaretPosition();
-
-  const splitBlockAtCaret = useCallback(
-    (id: string, beforeCursor: string, afterCursor: string) => {
-      const block = rootBlock.findBlockById(id);
-      if (!block) {
-        throw new Error(`Block with id ${id} was not found`);
-      }
-
-      const newBlock = block.appendNewByNewline(beforeCursor, afterCursor);
-      if (!newBlock) {
-        throw new Error(
-          `Failed to append new block by splitting block with id ${id}`,
-        );
-      }
-
-      setRootBlock((prev) => createBlock(prev));
-
-      return newBlock;
-    },
-    [rootBlock, setRootBlock],
-  );
-  const updateBlockById = useCallback(
-    (id: string, block: BlockEntity) => {
-      setRootBlock((prev) => prev.updateBlockById(id, block));
-    },
-    [setRootBlock],
-  );
-
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const isEditing = block.id === caretPosition?.blockId;
-  useEffect(() => {
-    if (isEditing && contentRef.current) {
-      contentRef.current.focus();
-
-      const offset = dom.clampOffsetToTextLength(
-        contentRef.current,
-        caretPosition.caretOffset,
-      );
-      // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
-      const firstNode = contentRef.current.firstChild;
-      if (firstNode) {
-        dom.setCaretOffset(firstNode, offset, window.getSelection());
-      }
-    }
-  }, [caretPosition, isEditing]);
-
-  const onBlur = (): void => {
-    const currentElement = contentRef.current;
-    if (!currentElement) {
-      // [P2] blur時にDOMが外れていると caretPosition をクリアできず、編集モードが残留する。
-      return;
-    }
-    // Clone the block to avoid direct mutation
-    const updated = createBlock(block);
-    updated.content = currentElement.innerText ?? "";
-    updateBlockById(block.id, updated);
-
-    window.requestAnimationFrame(() => {
-      if (document.activeElement === contentRef.current) {
-        return;
-      }
-      setCaretPosition((prev) => {
-        // Clear caret position only if it is for this block
-        return prev?.blockId === block.id ? null : prev;
-      });
-    });
-  };
-
-  const onKeyDown = useBlockKeydownHandler({
-    block,
-    contentRef,
-    splitBlockAtCaret,
-    setCaretPosition,
-    updateBlockById,
-  });
-  // [P3] 表示ロジックと状態遷移が密結合なので、UIと操作系を分割したい。
-
-  const onClick: MouseEventHandler<HTMLDivElement> = (
-    event: TargetedMouseEvent<HTMLDivElement>,
-  ) => {
-    const caretOffset = dom.getNearestCaretOffset(
-      document,
-      event.clientX,
-      event.clientY,
-    );
-    setCaretPosition({
-      blockId: block.id,
-      caretOffset: caretOffset ?? 0,
-    });
-    event.stopPropagation();
-    return;
-  };
+  const { contentRef, isEditing, onBlur, onClick, onKeyDown } =
+    useBlockInteractions(block);
 
   return (
     <div className="flex">
