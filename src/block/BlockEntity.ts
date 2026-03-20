@@ -5,7 +5,6 @@
  * is pre-order depth-first.
  */
 export default class BlockEntity {
-  // [P3] 走査/更新/シリアライズが1クラスに集約されているため、ドメインモデルと操作を分割したい。
   parent: BlockEntity | null = null;
   id: string = crypto.randomUUID();
 
@@ -13,7 +12,6 @@ export default class BlockEntity {
     public content: string,
     public children: BlockEntity[] = [],
   ) {
-    // [P3] NOTE: 引数オブジェクトを書き換えて親子関係を再設定するので純粋なデータモデルとは言えません
     this.content = content;
     for (const child of children) {
       child.withParent(this);
@@ -109,7 +107,6 @@ export default class BlockEntity {
   }
 
   updateBlockById(id: string, updatedBlock: BlockEntity): BlockEntity {
-    // [P3] NOTE: update系メソッドも外部状態に依存しており純粋関数になっていません
     if (this.id === id) {
       return updatedBlock;
     }

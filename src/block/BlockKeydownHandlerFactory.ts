@@ -111,7 +111,6 @@ function handleEnter(
 function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
   event.preventDefault();
 
-  // [P2] DOM上の最新テキストをモデルに反映してからインデント処理を行う前提。
   const updatedBlock = syncCurrentBlockContent(context);
 
   if (event.shiftKey) {
@@ -315,7 +314,6 @@ function handleBackspace(
   }
 
   const prevContentLength = prevBlock.content.length;
-  // [P2] prevBlock と parent の整合性(親子関係/インデックス)が崩れていない前提で結合している。
   const [parent] = context.block.getParentAndIndex();
   if (!parent) {
     return;

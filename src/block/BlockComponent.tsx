@@ -38,7 +38,6 @@ export default function BlockComponent({
           )}
         </div>
         <div className="ml-5">
-          {/* [P3] 深いツリーで各キー入力ごとに全ブロックが再描画されやすく、メモ化/仮想化が欲しい。 */}
           {block.children.map((child) => (
             <BlockComponent key={child.id} block={child} />
           ))}
