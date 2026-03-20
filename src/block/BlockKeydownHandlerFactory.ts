@@ -105,33 +105,21 @@ function handleEnter(
   if (context.currentElement) {
     context.currentElement.innerText = beforeText ?? "";
   }
-  context.setCaretPosition({ blockId: newBlock.id, caretOffset: 0 });
+  setCaretPositionForBlock(context, newBlock.id, 0);
 }
 
 function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
   event.preventDefault();
 
-  const updatedBlock = syncCurrentBlockContent(context);
+  syncCurrentBlockAndRestoreCaret(context, (updatedBlock) => {
+    if (event.shiftKey) {
+      const { parent, grandparent } = updatedBlock.outdent();
+      updateBlocksById(context, parent, grandparent);
+      return;
+    }
 
-  if (event.shiftKey) {
-    const { parent, grandparent } = updatedBlock.outdent();
-    if (parent) {
-      context.updateBlockById(parent.id, parent);
-    }
-    if (grandparent) {
-      context.updateBlockById(grandparent.id, grandparent);
-    }
-  } else {
-    const parent = updatedBlock.indent();
-    if (parent) {
-      context.updateBlockById(parent.id, parent);
-    }
-  }
-
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(
-    context.getSelection(),
-  );
-  context.setCaretPosition({ blockId: context.block.id, caretOffset });
+    updateBlocksById(context, updatedBlock.indent());
+  });
 }
 
 function handleArrowDown(
@@ -153,15 +141,12 @@ function handleArrowDown(
 
   const updatedBlock = syncCurrentBlockContent(context);
 
-  const caretOffset = dom.getCurrentLineOffset(context.getSelection());
+  const caretOffset = getCurrentLineOffset(context);
   const lastRange = getNewlineRangeList(updatedBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.max(0, caretOffset - lastRange.l - 1)
     : 0;
-  context.setCaretPosition({
-    blockId: nextBlock.id,
-    caretOffset: nextCaretOffset,
-  });
+  setCaretPositionForBlock(context, nextBlock.id, nextCaretOffset);
 }
 
 function handleMoveBlockDown(
@@ -170,17 +155,9 @@ function handleMoveBlockDown(
 ): void {
   event.preventDefault();
 
-  const updatedBlock = syncCurrentBlockContent(context);
-
-  const parent = updatedBlock.moveDown();
-  if (parent) {
-    context.updateBlockById(parent.id, parent);
-  }
-
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(
-    context.getSelection(),
-  );
-  context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
+  syncCurrentBlockAndRestoreCaret(context, (updatedBlock) => {
+    updateBlocksById(context, updatedBlock.moveDown());
+  });
 }
 
 function handleArrowUp(
@@ -196,25 +173,18 @@ function handleArrowUp(
 
   event.preventDefault();
   const prevBlock = context.block.getPrevBlock();
-  if (!prevBlock) {
-    return;
-  }
-  // Root blocks are hidden, so we should not move the caret to them.
-  if (prevBlock.parent === null) {
+  if (!isVisibleBlock(prevBlock)) {
     return;
   }
 
   syncCurrentBlockContent(context);
 
-  const offsetAtPrev = dom.getCurrentLineOffset(context.getSelection());
+  const offsetAtPrev = getCurrentLineOffset(context);
   const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
     : 0;
-  context.setCaretPosition({
-    blockId: prevBlock.id,
-    caretOffset: nextCaretOffset,
-  });
+  setCaretPositionForBlock(context, prevBlock.id, nextCaretOffset);
 }
 
 function handleMoveBlockUp(
@@ -223,17 +193,9 @@ function handleMoveBlockUp(
 ): void {
   event.preventDefault();
 
-  const updatedBlock = syncCurrentBlockContent(context);
-
-  const parent = updatedBlock.moveUp();
-  if (parent) {
-    context.updateBlockById(parent.id, parent);
-  }
-
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(
-    context.getSelection(),
-  );
-  context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
+  syncCurrentBlockAndRestoreCaret(context, (updatedBlock) => {
+    updateBlocksById(context, updatedBlock.moveUp());
+  });
 }
 
 function syncCurrentBlockContent(context: KeydownHandlerContext): BlockEntity {
@@ -241,6 +203,47 @@ function syncCurrentBlockContent(context: KeydownHandlerContext): BlockEntity {
   updatedBlock.content = context.currentElement?.innerText ?? "";
   context.updateBlockById(updatedBlock.id, updatedBlock);
   return updatedBlock;
+}
+
+function syncCurrentBlockAndRestoreCaret(
+  context: KeydownHandlerContext,
+  updateTree: (updatedBlock: BlockEntity) => void,
+): void {
+  const updatedBlock = syncCurrentBlockContent(context);
+  updateTree(updatedBlock);
+  setCaretPositionForBlock(
+    context,
+    updatedBlock.id,
+    getCurrentCaretOffset(context),
+  );
+}
+
+function updateBlocksById(
+  context: KeydownHandlerContext,
+  ...blocks: (BlockEntity | null)[]
+): void {
+  for (const block of blocks) {
+    if (!block) {
+      continue;
+    }
+    context.updateBlockById(block.id, block);
+  }
+}
+
+function getCurrentCaretOffset(context: KeydownHandlerContext): number {
+  return dom.getTextSegmentsAroundCaret(context.getSelection()).caretOffset;
+}
+
+function getCurrentLineOffset(context: KeydownHandlerContext): number {
+  return dom.getCurrentLineOffset(context.getSelection());
+}
+
+function setCaretPositionForBlock(
+  context: KeydownHandlerContext,
+  blockId: string,
+  caretOffset: number,
+): void {
+  context.setCaretPosition({ blockId, caretOffset });
 }
 
 function goToLineStart(
@@ -255,12 +258,9 @@ function goToLineStart(
   });
   if (newlineBeforeCaret) {
     const newlineIndex = newlineBeforeCaret.index;
-    context.setCaretPosition({
-      blockId: context.block.id,
-      caretOffset: newlineIndex + 1,
-    });
+    setCaretPositionForBlock(context, context.block.id, newlineIndex + 1);
   } else {
-    context.setCaretPosition({ blockId: context.block.id, caretOffset: 0 });
+    setCaretPositionForBlock(context, context.block.id, 0);
   }
 }
 
@@ -276,15 +276,13 @@ function goToLineEnd(
   });
   if (newlineAfterCaret) {
     const newlineIndex = newlineAfterCaret.index;
-    context.setCaretPosition({
-      blockId: context.block.id,
-      caretOffset: newlineIndex,
-    });
+    setCaretPositionForBlock(context, context.block.id, newlineIndex);
   } else {
-    context.setCaretPosition({
-      blockId: context.block.id,
-      caretOffset: context.currentElement?.innerText.length ?? 0,
-    });
+    setCaretPositionForBlock(
+      context,
+      context.block.id,
+      context.currentElement?.innerText.length ?? 0,
+    );
   }
 }
 
@@ -302,16 +300,11 @@ function handleBackspace(
   }
 
   const prevBlock = context.block.getPrevBlock();
-  if (!prevBlock) {
+  if (!isVisibleBlock(prevBlock)) {
     return;
   }
 
   event.preventDefault();
-
-  // Root blocks are hidden, so we should not move the caret to them.
-  if (prevBlock.parent === null) {
-    return;
-  }
 
   const prevContentLength = prevBlock.content.length;
   const [parent] = context.block.getParentAndIndex();
@@ -330,10 +323,7 @@ function handleBackspace(
 
   context.updateBlockById(parentClone.id, parentClone);
 
-  context.setCaretPosition({
-    blockId: prevBlock.id,
-    caretOffset: prevContentLength,
-  });
+  setCaretPositionForBlock(context, prevBlock.id, prevContentLength);
 }
 
 function handleArrowLeft(
@@ -346,18 +336,11 @@ function handleArrowLeft(
 
   event.preventDefault();
   const prevBlock = context.block.getPrevBlock();
-  if (!prevBlock) {
-    return;
-  }
-  // Root blocks are hidden, so we should not move the caret to them.
-  if (prevBlock.parent === null) {
+  if (!isVisibleBlock(prevBlock)) {
     return;
   }
 
-  context.setCaretPosition({
-    blockId: prevBlock.id,
-    caretOffset: prevBlock.content.length,
-  });
+  setCaretPositionForBlock(context, prevBlock.id, prevBlock.content.length);
 }
 
 function handleArrowRight(
@@ -378,7 +361,11 @@ function handleArrowRight(
     return;
   }
 
-  context.setCaretPosition({ blockId: nextBlock.id, caretOffset: 0 });
+  setCaretPositionForBlock(context, nextBlock.id, 0);
+}
+
+function isVisibleBlock(block: BlockEntity | null): block is BlockEntity {
+  return block !== null && block.parent !== null;
 }
 
 type UseBlockKeydownHandlerArgs = {
