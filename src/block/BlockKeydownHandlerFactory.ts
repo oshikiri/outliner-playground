@@ -79,10 +79,10 @@ function dispatchKeydownEvent(
   } else if (event.key === "ArrowRight") {
     handleArrowRight(event, context);
   } else if (event.key === "a" && event.ctrlKey) {
-    const caretPosition = dom.getCaretPositionInBlock(window.getSelection());
+    const caretPosition = dom.getCaretPositionInBlock(context.getSelection());
     goToLineStart(event, context, caretPosition);
   } else if (event.key === "e" && event.ctrlKey) {
-    const caretPosition = dom.getCaretPositionInBlock(window.getSelection());
+    const caretPosition = dom.getCaretPositionInBlock(context.getSelection());
     goToLineEnd(event, context, caretPosition);
   } else if (event.key === "Backspace") {
     handleBackspace(event, context);
@@ -95,7 +95,7 @@ function handleEnter(
 ): void {
   event.preventDefault();
   const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
-    window.getSelection(),
+    context.getSelection(),
   );
   const newBlock = context.splitBlockAtCaret(
     context.block.id,
@@ -129,7 +129,9 @@ function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
     }
   }
 
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(
+    context.getSelection(),
+  );
   context.setCaretPosition({ blockId: context.block.id, caretOffset });
 }
 
@@ -139,7 +141,7 @@ function handleArrowDown(
 ): void {
   if (
     !context.currentElement ||
-    !dom.isCaretAtLastLine(context.block.content, window.getSelection())
+    !dom.isCaretAtLastLine(context.block.content, context.getSelection())
   ) {
     // [P2] 例: "abc\n" の末尾空行だと caretOffset=4 が最終行レンジに入らず、↓で次ブロックに移動しない。
     return;
@@ -153,7 +155,7 @@ function handleArrowDown(
 
   const updatedBlock = syncCurrentBlockContent(context);
 
-  const caretOffset = dom.getCurrentLineOffset(window.getSelection());
+  const caretOffset = dom.getCurrentLineOffset(context.getSelection());
   const lastRange = getNewlineRangeList(updatedBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.max(0, caretOffset - lastRange.l - 1)
@@ -177,7 +179,9 @@ function handleMoveBlockDown(
     context.updateBlockById(parent.id, parent);
   }
 
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(
+    context.getSelection(),
+  );
   context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
 }
 
@@ -187,7 +191,7 @@ function handleArrowUp(
 ): void {
   if (
     !context.currentElement ||
-    !dom.isCaretAtFirstLine(window.getSelection())
+    !dom.isCaretAtFirstLine(context.getSelection())
   ) {
     return;
   }
@@ -204,7 +208,7 @@ function handleArrowUp(
 
   syncCurrentBlockContent(context);
 
-  const offsetAtPrev = dom.getCurrentLineOffset(window.getSelection());
+  const offsetAtPrev = dom.getCurrentLineOffset(context.getSelection());
   const lastRange = getNewlineRangeList(prevBlock.content).getLastRange();
   const nextCaretOffset = lastRange
     ? Math.min(lastRange.l + offsetAtPrev + 1, lastRange.r)
@@ -228,7 +232,9 @@ function handleMoveBlockUp(
     context.updateBlockById(parent.id, parent);
   }
 
-  const { caretOffset } = dom.getTextSegmentsAroundCaret(window.getSelection());
+  const { caretOffset } = dom.getTextSegmentsAroundCaret(
+    context.getSelection(),
+  );
   context.setCaretPosition({ blockId: updatedBlock.id, caretOffset });
 }
 
@@ -292,7 +298,7 @@ function handleBackspace(
 
   if (
     context.block.children.length > 0 ||
-    !dom.caretIsAtBlockStart(window.getSelection())
+    !dom.caretIsAtBlockStart(context.getSelection())
   ) {
     return;
   }
@@ -337,7 +343,7 @@ function handleArrowLeft(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  if (!dom.caretIsAtBlockStart(window.getSelection())) {
+  if (!dom.caretIsAtBlockStart(context.getSelection())) {
     return;
   }
 
