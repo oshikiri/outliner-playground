@@ -118,13 +118,9 @@ describe("編集モード/表示モード", () => {
   it("[OE-MODE-001][OE-MODE-005] 表示モードのブロックをクリックすると編集モードに遷移する", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("first"));
+    const editable = await beginEditing("first");
 
-    await waitFor(() => {
-      const editable = getEditableTextboxes();
-      expect(editable).toHaveLength(1);
-      expect(editable[0]?.textContent).toBe("first");
-    });
+    expect(editable.textContent).toBe("first");
   });
 
   it("[OE-MODE-002][OE-MODE-005] 別のブロックをクリックすると編集対象が切り替わる", async () => {
@@ -143,10 +139,7 @@ describe("編集モード/表示モード", () => {
   it("[OE-MODE-004] 外側へフォーカスが移ると変更を保存して表示モードに戻る", async () => {
     renderEditor(["first"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    editable.innerText = "updated";
+    const editable = await beginEditing("first", { content: "updated" });
 
     const outside = screen.getByRole("button", { name: "outside" });
     outside.focus();
@@ -208,11 +201,10 @@ describe("ブロック分割", () => {
   it("[OE-SPLIT-001][OE-SPLIT-002][OE-SPLIT-004] Enter で前半を現在ブロックに残し子がない場合は次の兄弟として分割する", async () => {
     renderEditor(["hello"]);
 
-    fireEvent.click(getTextboxByText("hello"));
-
-    const editable = await waitForEditableTextbox("hello");
-    editable.innerText = "hello";
-    installSelectionMock(editable.firstChild, 2);
+    const editable = await beginEditing("hello", {
+      content: "hello",
+      caretOffset: 2,
+    });
 
     fireEvent.keyDown(editable, { key: "Enter" });
 
@@ -237,11 +229,10 @@ describe("ブロック分割", () => {
     const target = new BlockEntity("hello", [child]);
     renderRootBlock(new BlockEntity("", [target]));
 
-    fireEvent.click(getTextboxByText("hello"));
-
-    const editable = await waitForEditableTextbox("hello");
-    editable.innerText = "hello";
-    installSelectionMock(editable.firstChild, 2);
+    const editable = await beginEditing("hello", {
+      content: "hello",
+      caretOffset: 2,
+    });
 
     fireEvent.keyDown(editable, { key: "Enter" });
 
@@ -268,11 +259,10 @@ describe("ブロック結合", () => {
   it("[OE-JOIN-001][OE-JOIN-003][OE-JOIN-004] 行頭 Backspace でひとつ上のブロック末尾へ結合し結合元を削除する", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("second"));
-
-    const editable = await waitForEditableTextbox("second");
-    editable.innerText = "second";
-    installSelectionMock(editable.firstChild, 0);
+    const editable = await beginEditing("second", {
+      content: "second",
+      caretOffset: 0,
+    });
 
     fireEvent.keyDown(editable, { key: "Backspace" });
 
@@ -297,11 +287,10 @@ describe("ブロック結合", () => {
     const target = new BlockEntity("target");
     renderRootBlock(new BlockEntity("", [previous, target]));
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 0);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 0,
+    });
 
     fireEvent.keyDown(editable, { key: "Backspace" });
 
@@ -328,11 +317,10 @@ describe("ブロック結合", () => {
     const target = new BlockEntity("target", [child]);
     renderRootBlock(new BlockEntity("", [target]));
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 0);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 0,
+    });
 
     fireEvent.keyDown(editable, { key: "Backspace" });
 
@@ -363,11 +351,10 @@ describe("階層操作", () => {
   it("[OE-INDENT-001] Tab で前の兄弟ブロックの子としてインデントする", async () => {
     renderEditor(["first", "target"]);
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 2);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 2,
+    });
 
     fireEvent.keyDown(editable, { key: "Tab" });
 
@@ -387,11 +374,10 @@ describe("階層操作", () => {
   it("[OE-INDENT-002] Tab で先頭の兄弟ブロックはインデントしない", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    editable.innerText = "first";
-    installSelectionMock(editable.firstChild, 1);
+    const editable = await beginEditing("first", {
+      content: "first",
+      caretOffset: 1,
+    });
 
     fireEvent.keyDown(editable, { key: "Tab" });
 
@@ -417,11 +403,10 @@ describe("階層操作", () => {
     const parent = new BlockEntity("parent", [first, target, trailing]);
     renderRootBlock(new BlockEntity("", [parent]));
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 3);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 3,
+    });
 
     fireEvent.keyDown(editable, { key: "Tab", shiftKey: true });
 
@@ -448,11 +433,10 @@ describe("階層操作", () => {
   it("[OE-OUTDENT-003] Shift+Tab で hidden root 直下のブロックはアウトデントしない", async () => {
     renderEditor(["first"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    editable.innerText = "first";
-    installSelectionMock(editable.firstChild, 2);
+    const editable = await beginEditing("first", {
+      content: "first",
+      caretOffset: 2,
+    });
 
     fireEvent.keyDown(editable, { key: "Tab", shiftKey: true });
 
@@ -474,10 +458,9 @@ describe("キー移動", () => {
   it("[OE-MOVE-005] 1行だけのブロックで ArrowDown を押すと次のブロックを編集モードにする", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    installSelectionMock(editable.firstChild, "first".length);
+    const editable = await beginEditing("first", {
+      caretOffset: "first".length,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowDown" });
 
@@ -494,10 +477,7 @@ describe("キー移動", () => {
   it("[OE-MOVE-005] 1行だけのブロックで ArrowUp を押すと前のブロックを編集モードにする", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("second"));
-
-    const editable = await waitForEditableTextbox("second");
-    installSelectionMock(editable.firstChild, 0);
+    const editable = await beginEditing("second", { caretOffset: 0 });
 
     fireEvent.keyDown(editable, { key: "ArrowUp" });
 
@@ -514,11 +494,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-006] 複数行ブロックの最後の行で ArrowDown を押すと次のブロックを編集モードにする", async () => {
     renderEditor(["ab\ncd", "next"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd"));
-
-    const editable = await waitForEditableTextbox("ab\ncd");
-    editable.innerText = "ab\ncd";
-    installSelectionMock(editable.firstChild, 5);
+    const editable = await beginEditing("ab\ncd", {
+      content: "ab\ncd",
+      caretOffset: 5,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowDown" });
 
@@ -535,11 +514,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-006] 末尾改行の最終行で ArrowDown を押すと次のブロックを編集モードにする", async () => {
     renderEditor(["abc\n", "next"]);
 
-    fireEvent.click(getTextboxByText("abc\n"));
-
-    const editable = await waitForEditableTextbox("abc\n");
-    editable.innerText = "abc\n";
-    installSelectionMock(editable.firstChild, 4);
+    const editable = await beginEditing("abc\n", {
+      content: "abc\n",
+      caretOffset: 4,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowDown" });
 
@@ -556,11 +534,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-006] 複数行ブロックの最初の行で ArrowUp を押すと前のブロックを編集モードにする", async () => {
     renderEditor(["prev", "ab\ncd"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd"));
-
-    const editable = await waitForEditableTextbox("ab\ncd");
-    editable.innerText = "ab\ncd";
-    installSelectionMock(editable.firstChild, 1);
+    const editable = await beginEditing("ab\ncd", {
+      content: "ab\ncd",
+      caretOffset: 1,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowUp" });
 
@@ -577,11 +554,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-007] 複数行ブロックの途中の行で ArrowDown を押すとブロック内移動に任せる", async () => {
     renderEditor(["ab\ncd\nef", "next"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd\nef"));
-
-    const editable = await waitForEditableTextbox("ab\ncd\nef");
-    editable.innerText = "ab\ncd\nef";
-    installSelectionMock(editable.firstChild, 1);
+    const editable = await beginEditing("ab\ncd\nef", {
+      content: "ab\ncd\nef",
+      caretOffset: 1,
+    });
 
     const eventNotCanceled = fireEvent.keyDown(editable, { key: "ArrowDown" });
 
@@ -596,11 +572,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-007] 複数行ブロックの途中の行で ArrowUp を押すとブロック内移動に任せる", async () => {
     renderEditor(["ab\ncd\nef", "next"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd\nef"));
-
-    const editable = await waitForEditableTextbox("ab\ncd\nef");
-    editable.innerText = "ab\ncd\nef";
-    installSelectionMock(editable.firstChild, 4);
+    const editable = await beginEditing("ab\ncd\nef", {
+      content: "ab\ncd\nef",
+      caretOffset: 4,
+    });
 
     const eventNotCanceled = fireEvent.keyDown(editable, { key: "ArrowUp" });
 
@@ -615,10 +590,7 @@ describe("キー移動", () => {
   it("[OE-MODE-003][OE-MOVE-001] カーソルがブロック先頭にある場合は一つ前のブロック末尾に移動する", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("second"));
-
-    const editable = await waitForEditableTextbox("second");
-    installSelectionMock(editable.firstChild, 0);
+    const editable = await beginEditing("second", { caretOffset: 0 });
 
     fireEvent.keyDown(editable, { key: "ArrowLeft" });
 
@@ -636,10 +608,9 @@ describe("キー移動", () => {
   it("[OE-MOVE-002] カーソルがブロック末尾にある場合は一つ後のブロック先頭に移動する", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    installSelectionMock(editable.firstChild, "first".length);
+    const editable = await beginEditing("first", {
+      caretOffset: "first".length,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowRight" });
 
@@ -657,10 +628,7 @@ describe("キー移動", () => {
   it("[OE-MOVE-003] Ctrl+A で現在行の行頭へ移動する", async () => {
     renderEditor(["ab\ncd"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd"));
-
-    const editable = await waitForEditableTextbox("ab\ncd");
-    installSelectionMock(editable.firstChild, 4);
+    const editable = await beginEditing("ab\ncd", { caretOffset: 4 });
 
     fireEvent.keyDown(editable, { key: "a", ctrlKey: true });
 
@@ -675,11 +643,10 @@ describe("キー移動", () => {
   it("[OE-MOVE-004] Ctrl+E で現在行の行末へ移動する", async () => {
     renderEditor(["ab\ncd"]);
 
-    fireEvent.click(getTextboxByText("ab\ncd"));
-
-    const editable = await waitForEditableTextbox("ab\ncd");
-    editable.innerText = "ab\ncd";
-    installSelectionMock(editable.firstChild, 3);
+    const editable = await beginEditing("ab\ncd", {
+      content: "ab\ncd",
+      caretOffset: 3,
+    });
 
     fireEvent.keyDown(editable, { key: "e", ctrlKey: true });
 
@@ -699,11 +666,10 @@ describe("ブロック順序変更", () => {
     const target = new BlockEntity("target", [child]);
     renderRootBlock(new BlockEntity("", [first, target]));
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 1);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 1,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowUp", ctrlKey: true });
 
@@ -725,11 +691,10 @@ describe("ブロック順序変更", () => {
   it("[OE-REORDER-002] Ctrl+↑ で先頭の兄弟ブロックは移動しない", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("first"));
-
-    const editable = await waitForEditableTextbox("first");
-    editable.innerText = "first";
-    installSelectionMock(editable.firstChild, 2);
+    const editable = await beginEditing("first", {
+      content: "first",
+      caretOffset: 2,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowUp", ctrlKey: true });
 
@@ -753,11 +718,10 @@ describe("ブロック順序変更", () => {
     const second = new BlockEntity("second");
     renderRootBlock(new BlockEntity("", [target, second]));
 
-    fireEvent.click(getTextboxByText("target"));
-
-    const editable = await waitForEditableTextbox("target");
-    editable.innerText = "target";
-    installSelectionMock(editable.firstChild, 3);
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 3,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowDown", ctrlKey: true });
 
@@ -779,11 +743,10 @@ describe("ブロック順序変更", () => {
   it("[OE-REORDER-004] Ctrl+↓ で末尾の兄弟ブロックは移動しない", async () => {
     renderEditor(["first", "second"]);
 
-    fireEvent.click(getTextboxByText("second"));
-
-    const editable = await waitForEditableTextbox("second");
-    editable.innerText = "second";
-    installSelectionMock(editable.firstChild, 4);
+    const editable = await beginEditing("second", {
+      content: "second",
+      caretOffset: 4,
+    });
 
     fireEvent.keyDown(editable, { key: "ArrowDown", ctrlKey: true });
 
@@ -884,6 +847,31 @@ async function waitForEditableTextbox(text: string): Promise<HTMLElement> {
   return editable;
 }
 
+/**
+ * Click a block, wait until it enters edit mode, and optionally seed its
+ * editable content and caret position.
+ *
+ * @param text - Visible text of the block to activate.
+ * @param options - Optional content and caret setup applied after editing starts.
+ * @returns The editable textbox element for the target block.
+ */
+async function beginEditing(
+  text: string,
+  options: BeginEditingOptions = {},
+): Promise<HTMLElement> {
+  fireEvent.click(getTextboxByText(text));
+
+  const editable = await waitForEditableTextbox(text);
+  if (options.content !== undefined) {
+    editable.innerText = options.content;
+  }
+  if (options.caretOffset !== undefined) {
+    installSelectionMock(editable.firstChild, options.caretOffset);
+  }
+
+  return editable;
+}
+
 function installSelectionMock(
   node: Node | null,
   offset: number,
@@ -937,4 +925,9 @@ type SelectionState = {
   getRangeAt: () => Range;
   rangeCount: number;
   removeAllRanges: () => void;
+};
+
+type BeginEditingOptions = {
+  content?: string;
+  caretOffset?: number;
 };
