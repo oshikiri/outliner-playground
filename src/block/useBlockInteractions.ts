@@ -6,6 +6,7 @@ import type {
 } from "preact";
 import { useCallback, useEffect, useRef } from "preact/hooks";
 
+import type { CaretPosition } from "../state";
 import { useRootBlock, useCaretPosition } from "../state";
 import BlockEntity, { createBlock } from "./BlockEntity";
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
@@ -66,17 +67,7 @@ export function useBlockInteractions(
 
   useEffect(() => {
     if (isEditing && contentRef.current) {
-      contentRef.current.focus();
-
-      const offset = dom.clampOffsetToTextLength(
-        contentRef.current,
-        caretPosition.caretOffset,
-      );
-      // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
-      const firstNode = contentRef.current.firstChild;
-      if (firstNode) {
-        dom.setCaretOffset(firstNode, offset, window.getSelection());
-      }
+      focusContentAtCaret(contentRef.current, caretPosition.caretOffset);
     }
   }, [caretPosition, isEditing]);
 
@@ -87,8 +78,10 @@ export function useBlockInteractions(
       return;
     }
 
-    const updated = createBlock(block);
-    updated.content = currentElement.innerText ?? "";
+    const updated = cloneBlockWithContent(
+      block,
+      currentElement.innerText ?? "",
+    );
     updateBlockById(block.id, updated);
 
     window.requestAnimationFrame(() => {
@@ -96,7 +89,7 @@ export function useBlockInteractions(
         return;
       }
       setCaretPosition((prev) => {
-        return prev?.blockId === block.id ? null : prev;
+        return clearCaretPositionForBlock(prev, block.id);
       });
     });
   }, [block, setCaretPosition, updateBlockById]);
@@ -132,4 +125,34 @@ export function useBlockInteractions(
     onClick,
     onKeyDown,
   };
+}
+
+function focusContentAtCaret(
+  element: HTMLDivElement,
+  caretOffset: number,
+): void {
+  element.focus();
+
+  const offset = dom.clampOffsetToTextLength(element, caretOffset);
+  // [P2] contentEditable内のDOM構造に依存するため、レンダリング順やノード構造が変わると挙動がズレる。
+  const firstNode = element.firstChild;
+  if (firstNode) {
+    dom.setCaretOffset(firstNode, offset, window.getSelection());
+  }
+}
+
+function cloneBlockWithContent(
+  block: BlockEntity,
+  content: string,
+): BlockEntity {
+  const updated = createBlock(block);
+  updated.content = content;
+  return updated;
+}
+
+function clearCaretPositionForBlock(
+  caretPosition: CaretPosition,
+  blockId: string,
+): CaretPosition {
+  return caretPosition?.blockId === blockId ? null : caretPosition;
 }
