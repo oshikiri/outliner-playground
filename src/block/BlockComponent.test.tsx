@@ -421,6 +421,126 @@ describe("階層操作", () => {
 });
 
 describe("キー移動", () => {
+  it("[OE-MOVE-005] 1行だけのブロックで ArrowDown を押すと次のブロックを編集モードにする", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("first"));
+
+    const editable = await waitForEditableTextbox("first");
+    installSelectionMock(editable.firstChild, "first".length);
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("second");
+      expect(getCaretPositionState()?.blockId).toBe(
+        getRootBlockState().children[1]?.id,
+      );
+    });
+  });
+
+  it("[OE-MOVE-005] 1行だけのブロックで ArrowUp を押すと前のブロックを編集モードにする", async () => {
+    renderEditor(["first", "second"]);
+
+    fireEvent.click(getTextboxByText("second"));
+
+    const editable = await waitForEditableTextbox("second");
+    installSelectionMock(editable.firstChild, 0);
+
+    fireEvent.keyDown(editable, { key: "ArrowUp" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("first");
+      expect(getCaretPositionState()?.blockId).toBe(
+        getRootBlockState().children[0]?.id,
+      );
+    });
+  });
+
+  it("[OE-MOVE-006] 複数行ブロックの最後の行で ArrowDown を押すと次のブロックを編集モードにする", async () => {
+    renderEditor(["ab\ncd", "next"]);
+
+    fireEvent.click(getTextboxByText("ab\ncd"));
+
+    const editable = await waitForEditableTextbox("ab\ncd");
+    editable.innerText = "ab\ncd";
+    installSelectionMock(editable.firstChild, 5);
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("next");
+      expect(getCaretPositionState()?.blockId).toBe(
+        getRootBlockState().children[1]?.id,
+      );
+    });
+  });
+
+  it("[OE-MOVE-006] 複数行ブロックの最初の行で ArrowUp を押すと前のブロックを編集モードにする", async () => {
+    renderEditor(["prev", "ab\ncd"]);
+
+    fireEvent.click(getTextboxByText("ab\ncd"));
+
+    const editable = await waitForEditableTextbox("ab\ncd");
+    editable.innerText = "ab\ncd";
+    installSelectionMock(editable.firstChild, 1);
+
+    fireEvent.keyDown(editable, { key: "ArrowUp" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("prev");
+      expect(getCaretPositionState()?.blockId).toBe(
+        getRootBlockState().children[0]?.id,
+      );
+    });
+  });
+
+  it("[OE-MOVE-007] 複数行ブロックの途中の行で ArrowDown を押すとブロック内移動に任せる", async () => {
+    renderEditor(["ab\ncd\nef", "next"]);
+
+    fireEvent.click(getTextboxByText("ab\ncd\nef"));
+
+    const editable = await waitForEditableTextbox("ab\ncd\nef");
+    editable.innerText = "ab\ncd\nef";
+    installSelectionMock(editable.firstChild, 1);
+
+    const eventNotCanceled = fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    expect(eventNotCanceled).toBe(true);
+    expect(getEditableTextboxes()[0]?.textContent).toBe("ab\ncd\nef");
+    expect(getCaretPositionState()).toEqual({
+      blockId: getRootBlockState().children[0]?.id,
+      caretOffset: 0,
+    });
+  });
+
+  it("[OE-MOVE-007] 複数行ブロックの途中の行で ArrowUp を押すとブロック内移動に任せる", async () => {
+    renderEditor(["ab\ncd\nef", "next"]);
+
+    fireEvent.click(getTextboxByText("ab\ncd\nef"));
+
+    const editable = await waitForEditableTextbox("ab\ncd\nef");
+    editable.innerText = "ab\ncd\nef";
+    installSelectionMock(editable.firstChild, 4);
+
+    const eventNotCanceled = fireEvent.keyDown(editable, { key: "ArrowUp" });
+
+    expect(eventNotCanceled).toBe(true);
+    expect(getEditableTextboxes()[0]?.textContent).toBe("ab\ncd\nef");
+    expect(getCaretPositionState()).toEqual({
+      blockId: getRootBlockState().children[0]?.id,
+      caretOffset: 0,
+    });
+  });
+
   it("[OE-MODE-003][OE-MOVE-001] カーソルがブロック先頭にある場合は一つ前のブロック末尾に移動する", async () => {
     renderEditor(["first", "second"]);
 
