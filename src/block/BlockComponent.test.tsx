@@ -6,10 +6,12 @@ import {
   waitFor,
 } from "@testing-library/preact";
 import type { JSX } from "preact";
+import { useEffect } from "preact/hooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import BlockComponent from "./BlockComponent";
 import BlockEntity from "./BlockEntity";
+import { useBlockInteractions } from "./useBlockInteractions";
 import { initializeState, useRootBlock } from "../state";
 
 let rootBlockState: unknown = null;
@@ -154,6 +156,46 @@ describe("編集モード/表示モード", () => {
     await waitFor(() => {
       expect(getEditableTextboxes()).toHaveLength(0);
       expect(screen.getByText("updated")).toBeTruthy();
+    });
+  });
+
+  it("[OE-MODE-004] blur 時に ref から DOM が外れていても変更を保存して表示モードに戻る", async () => {
+    const target = new BlockEntity("first");
+    const rootBlock = new BlockEntity("", [target]);
+    const refs: {
+      contentRef: { current: HTMLDivElement | null } | null;
+    } = {
+      contentRef: null,
+    };
+
+    initializeState(rootBlock);
+    caretPositionState = { blockId: target.id, caretOffset: 0 };
+
+    render(
+      <BlurFallbackHarness
+        block={target}
+        onReady={(contentRef) => {
+          refs.contentRef = contentRef;
+        }}
+      />,
+    );
+
+    const editable = await waitForEditableTextbox("first");
+    editable.innerText = "updated";
+
+    if (!refs.contentRef) {
+      throw new Error("contentRef was not captured.");
+    }
+    refs.contentRef.current = null;
+
+    const outside = screen.getByRole("button", { name: "outside" });
+    outside.focus();
+    fireEvent.blur(editable);
+
+    await waitFor(() => {
+      expect(getCaretPositionState()).toBeNull();
+      expect(getRootBlockState().children[0]?.content).toBe("updated");
+      expect(getEditableTextboxes()).toHaveLength(0);
     });
   });
 });
@@ -769,6 +811,34 @@ function TestEditor(): JSX.Element {
       {rootBlock.children.map((block) => (
         <BlockComponent key={block.id} block={block} />
       ))}
+    </div>
+  );
+}
+
+function BlurFallbackHarness({
+  block,
+  onReady,
+}: {
+  block: BlockEntity;
+  onReady: (contentRef: { current: HTMLDivElement | null }) => void;
+}): JSX.Element {
+  const { contentRef, isEditing, onBlur } = useBlockInteractions(block);
+
+  useEffect(() => {
+    onReady(contentRef);
+  }, [contentRef, onReady]);
+
+  return (
+    <div>
+      <button type="button">outside</button>
+      <div
+        ref={contentRef}
+        contentEditable={isEditing || undefined}
+        onBlur={onBlur}
+        role="textbox"
+      >
+        {block.content}
+      </div>
     </div>
   );
 }

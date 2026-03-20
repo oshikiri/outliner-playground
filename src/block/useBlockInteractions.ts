@@ -1,7 +1,9 @@
 import type {
+  FocusEventHandler,
   KeyboardEventHandler,
   MouseEventHandler,
   RefObject,
+  TargetedFocusEvent,
   TargetedMouseEvent,
 } from "preact";
 import { useCallback, useEffect, useRef } from "preact/hooks";
@@ -15,7 +17,7 @@ import * as dom from "./dom";
 type UseBlockInteractionsResult = {
   contentRef: RefObject<HTMLDivElement>;
   isEditing: boolean;
-  onBlur: () => void;
+  onBlur: FocusEventHandler<HTMLDivElement>;
   onClick: MouseEventHandler<HTMLDivElement>;
   onKeyDown: KeyboardEventHandler<HTMLDivElement>;
 };
@@ -71,28 +73,27 @@ export function useBlockInteractions(
     }
   }, [caretPosition, isEditing]);
 
-  const onBlur = useCallback((): void => {
-    const currentElement = contentRef.current;
-    if (!currentElement) {
-      // [P2] blur時にDOMが外れていると caretPosition をクリアできず、編集モードが残留する。
-      return;
-    }
+  const onBlur = useCallback(
+    (event: TargetedFocusEvent<HTMLDivElement>): void => {
+      const currentElement = contentRef.current ?? event.currentTarget;
 
-    const updated = cloneBlockWithContent(
-      block,
-      currentElement.innerText ?? "",
-    );
-    updateBlockById(block.id, updated);
+      const updated = cloneBlockWithContent(
+        block,
+        currentElement.innerText ?? "",
+      );
+      updateBlockById(block.id, updated);
 
-    window.requestAnimationFrame(() => {
-      if (document.activeElement === contentRef.current) {
-        return;
-      }
-      setCaretPosition((prev) => {
-        return clearCaretPositionForBlock(prev, block.id);
+      window.requestAnimationFrame(() => {
+        if (document.activeElement === currentElement) {
+          return;
+        }
+        setCaretPosition((prev) => {
+          return clearCaretPositionForBlock(prev, block.id);
+        });
       });
-    });
-  }, [block, setCaretPosition, updateBlockById]);
+    },
+    [block, setCaretPosition, updateBlockById],
+  );
 
   const onClick: MouseEventHandler<HTMLDivElement> = useCallback(
     (event: TargetedMouseEvent<HTMLDivElement>) => {
