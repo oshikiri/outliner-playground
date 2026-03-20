@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+  --app-bg: #f8fafc;
+  --app-fg: #0f172a;
+  --panel-bg: #ffffff;
+  --panel-border: #d1d5db;
+  --inline-code-bg: #e2e8f0;
+  --inline-link: #2563eb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --app-bg: #0f172a;
+    --app-fg: #e2e8f0;
+    --panel-bg: rgba(15, 23, 42, 0.4);
+    --panel-border: #334155;
+    --inline-code-bg: #334155;
+    --inline-link: #93c5fd;
+  }
+}
+
+@theme {
+  --color-app-bg: var(--app-bg);
+  --color-app-fg: var(--app-fg);
+  --color-panel-bg: var(--panel-bg);
+  --color-panel-border: var(--panel-border);
+  --color-inline-code-bg: var(--inline-code-bg);
+  --color-inline-link: var(--inline-link);
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--app-fg);
+}

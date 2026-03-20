@@ -29,7 +29,7 @@ type CodeSegmentProps = {
 
 function CodeSegment({ value }: CodeSegmentProps): JSX.Element {
   return (
-    <code className="rounded bg-slate-200 px-1 font-mono text-sm">
+    <code className="rounded bg-inline-code-bg px-1 font-mono text-sm">
       {value || "\u00a0"}
     </code>
   );
@@ -43,7 +43,7 @@ type LinkSegmentProps = {
 function LinkSegment({ label, href }: LinkSegmentProps): JSX.Element {
   return (
     <a
-      className="text-blue-600 underline"
+      className="text-inline-link underline"
       href={sanitizeHref(href)}
       rel="noreferrer"
       target="_blank"

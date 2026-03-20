@@ -73,7 +73,7 @@ function JsonPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
 function Panel({ children }: { children?: ComponentChildren }): JSX.Element {
   return (
     <div
-      className="border border-gray-300
+      className="border border-panel-border bg-panel-bg
         rounded p-2 overflow-auto
         portrait:h-1/2 portrait:w-full
         landscape:w-1/2"
