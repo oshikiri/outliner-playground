@@ -490,6 +490,27 @@ describe("キー移動", () => {
     });
   });
 
+  it("[OE-MOVE-006] 末尾改行の最終行で ArrowDown を押すと次のブロックを編集モードにする", async () => {
+    renderEditor(["abc\n", "next"]);
+
+    fireEvent.click(getTextboxByText("abc\n"));
+
+    const editable = await waitForEditableTextbox("abc\n");
+    editable.innerText = "abc\n";
+    installSelectionMock(editable.firstChild, 4);
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("next");
+      expect(getCaretPositionState()?.blockId).toBe(
+        getRootBlockState().children[1]?.id,
+      );
+    });
+  });
+
   it("[OE-MOVE-006] 複数行ブロックの最初の行で ArrowUp を押すと前のブロックを編集モードにする", async () => {
     renderEditor(["prev", "ab\ncd"]);
 

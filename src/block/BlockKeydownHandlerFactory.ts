@@ -143,7 +143,6 @@ function handleArrowDown(
     !context.currentElement ||
     !dom.isCaretAtLastLine(context.block.content, context.getSelection())
   ) {
-    // [P2] 例: "abc\n" の末尾空行だと caretOffset=4 が最終行レンジに入らず、↓で次ブロックに移動しない。
     return;
   }
 

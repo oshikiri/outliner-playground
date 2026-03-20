@@ -35,7 +35,6 @@ export function isCaretAtLastLine(
   content: string,
   selection: Selection | null,
 ): boolean {
-  // [P2] 例: "abc\n" の末尾空行だと caretOffset=4 が最終行レンジに入らず false になり、下移動が発火しない。
   if (content.length === 0) {
     return true;
   }
@@ -44,6 +43,9 @@ export function isCaretAtLastLine(
     return false;
   }
   const caretOffset = selection.anchorOffset;
+  if (caretOffset === content.length) {
+    return true;
+  }
 
   const lastlineRange = getNewlineRangeList(content).getLastRange();
   if (!lastlineRange) {
