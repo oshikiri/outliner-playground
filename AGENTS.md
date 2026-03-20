@@ -6,9 +6,6 @@
 
 ## 作業の終了条件
 
-- `review-diff` は、細かな修正ごとではなく、ユーザーに返す前のひとかたまりの差分に対して実施する。
-  - 途中の軽微な追従修正では再実施しない。
-  - ただし、大きな方針変更や別論点の差分が入った場合は再実施する。
 - ユーザーに返す前に以下を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
   - `npm run format`
   - `npm run lint`
@@ -20,7 +17,6 @@
 ## Available Commands
 
 - `create-git-commit`: Conventional Commits に沿ってコミットメッセージ案を作る custom prompt
-- `review-diff`: 現在の git 差分に対して差分レビューを実施する custom prompt
 
 ## npm
 
