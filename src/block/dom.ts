@@ -58,7 +58,7 @@ export function isCaretAtFirstLine(selection: Selection | null): boolean {
   }
 
   const pos = getCaretPositionInBlock(selection);
-  const isAtTop = pos?.newlines?.every?.((newline) => {
+  const isAtTop = pos?.newlines.every((newline) => {
     return pos.anchorOffset <= newline.index;
   });
 
@@ -137,7 +137,7 @@ export function getNearestCaretOffset(
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {
-    return caretPosition?.offset;
+    return caretPosition.offset;
   }
 
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretRangeFromPoint

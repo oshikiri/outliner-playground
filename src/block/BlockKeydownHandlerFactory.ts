@@ -365,7 +365,7 @@ function handleArrowRight(
   if (!position) {
     return;
   }
-  if (position.anchorOffset !== position.wholeText?.length) {
+  if (position.anchorOffset !== position.wholeText.length) {
     return;
   }
 
