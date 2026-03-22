@@ -43,7 +43,7 @@ export const initialRootBlock = new Block("", [
       ]),
       new Block("`ctrl+a`: move cursor to the beginning of the line"),
       new Block("`ctrl+e`: move cursor to the end of the line"),
-      new Block("`ctrl+k`: clear the localStorage"),
+      new Block("`ctrl+k`: reset to the initial data"),
     ]),
   ]),
   new Block("TODOs", [

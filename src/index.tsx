@@ -6,6 +6,7 @@ import type BlockEntity from "./block/BlockEntity";
 import { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./block/data";
+import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
 import { initializeState, useEditorSession, useRootBlock } from "./state";
 
 import "./styles.css";
@@ -28,11 +29,10 @@ function App(): JSX.Element {
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent): void => {
-      if (event.key === "k" && event.ctrlKey) {
-        setRootBlock(createBlock(initialRootBlock));
-        setEditorSession(null);
-        event.preventDefault();
-      }
+      handleGlobalEditorKeydown(event, {
+        resetRootBlock: () => setRootBlock(createBlock(initialRootBlock)),
+        resetEditorSession: () => setEditorSession(null),
+      });
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);

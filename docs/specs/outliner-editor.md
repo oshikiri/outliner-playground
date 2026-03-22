@@ -66,7 +66,7 @@
 
 - [未実装] 編集中 or ブロック構造変更時に「Ctrl+Z（undo）/Ctrl+Y（redo）」：
   → テキスト編集はエディタ内ヒストリー、ブロック移動や階層化などはアプリ側Undoで元に戻す。
-- 「Ctrl+K」: 状態を初期データに戻す
+- [OE-RESET-001] 「Ctrl+K」: 状態を初期データに戻す
   - `rootBlock` は初期データに置き換える
   - `caretPosition` は `null` に戻す
 
