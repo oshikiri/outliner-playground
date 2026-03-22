@@ -1,12 +1,12 @@
 # AGENTS.md
 
-- 仕様は docs/specs/ 以下に保存している。
-- console.log と console.warn を使うことは許容する。
-  - 将来的にログライブラリを使うことを検討する
+- Specifications are stored under `docs/specs/`.
+- Using `console.log` and `console.warn` is allowed.
+  - Consider introducing a logging library in the future.
 
-## 作業の終了条件
+## Completion Criteria
 
-- ユーザーに返す前に以下を実行する。エラーなどが発生した場合、それを直してエラーが解消できたことを確認してから返す。
+- Run the following before responding to the user. If any command fails, fix the issue and confirm that the error is resolved before replying.
   - `npm run format`
   - `npm run lint`
   - `npm run knip`
