@@ -14,10 +14,6 @@
   - `npm run test`
   - `npm run check:traceability:strict`
 
-## Available Commands
-
-- `create-git-commit`: Conventional Commits に沿ってコミットメッセージ案を作る custom prompt
-
 ## npm
 
 - `npm install` `npm ci` などでパッケージをインストールする際は必ずユーザーに許可を取る。
