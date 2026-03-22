@@ -15,6 +15,7 @@ import {
   getBlock,
   getChildBlocks,
   isBlockStore,
+  type BlockState,
   type BlockStore,
 } from "../blockStore";
 import BlockComponent from "../BlockComponent";
@@ -78,6 +79,48 @@ vi.mock("../../state", async () => {
       };
 
       return [value, updateValue];
+    },
+    useRootBlockValue(): BlockStore {
+      if (!rootBlockState) {
+        throw new Error("rootBlockState was not initialized.");
+      }
+      const [value, setValue] = hooks.useState(rootBlockState);
+
+      hooks.useEffect(() => {
+        rootListeners.add(setValue);
+        return () => rootListeners.delete(setValue);
+      }, []);
+
+      return value;
+    },
+    useSetRootBlock(): (update: BlockStoreUpdate) => void {
+      return (update: BlockStoreUpdate): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = applyUpdate(rootBlockState, update);
+        for (const listener of rootListeners) {
+          listener(rootBlockState);
+        }
+      };
+    },
+    useBlock(blockId: string): BlockState | null {
+      if (!rootBlockState) {
+        throw new Error("rootBlockState was not initialized.");
+      }
+      const [value, setValue] = hooks.useState(
+        getBlock(rootBlockState, blockId),
+      );
+
+      hooks.useEffect(() => {
+        const listener = (nextRootBlock: BlockStore): void => {
+          setValue(getBlock(nextRootBlock, blockId));
+        };
+        rootListeners.add(listener);
+        return () => rootListeners.delete(listener);
+      }, [blockId]);
+
+      return value;
     },
     useEditorSession(): [EditorSession, (update: EditorSessionUpdate) => void] {
       const [value, setValue] = hooks.useState(editorSessionState);

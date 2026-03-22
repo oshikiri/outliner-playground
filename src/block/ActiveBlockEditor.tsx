@@ -8,9 +8,14 @@ import type {
 import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
-import { getBlock, updateBlockContent } from "./blockStore";
+import { updateBlockContent } from "./blockStore";
 import * as caretDom from "./editor/caretDom";
-import { useEditorSession, useRootBlock } from "../state";
+import {
+  useBlock,
+  useEditorSession,
+  useRootBlockValue,
+  useSetRootBlock,
+} from "../state";
 
 type ActiveBlockEditorProps = {
   blockId: string;
@@ -21,10 +26,11 @@ export default function ActiveBlockEditor({
   blockId,
   onReady,
 }: ActiveBlockEditorProps): JSX.Element {
-  const [rootBlock, setRootBlock] = useRootBlock();
+  const rootBlock = useRootBlockValue();
+  const setRootBlock = useSetRootBlock();
   const [editorSession, setEditorSession] = useEditorSession();
   const contentRef = useRef<HTMLDivElement>(null);
-  const block = getBlock(rootBlock, blockId);
+  const block = useBlock(blockId);
 
   if (!block) {
     throw new Error(`Block "${blockId}" was not found.`);

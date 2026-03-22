@@ -2,20 +2,20 @@ import type { JSX, MouseEventHandler } from "preact";
 import { useCallback } from "preact/hooks";
 
 import ActiveBlockEditor from "./ActiveBlockEditor";
-import { getBlock, getChildBlocks, updateBlockContent } from "./blockStore";
+import { updateBlockContent } from "./blockStore";
 import { createEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
 import MarkdownComponent from "../markdown/MarkdownComponent";
-import { useEditorSession, useRootBlock } from "../state";
+import { useBlock, useEditorSession, useSetRootBlock } from "../state";
 
 export default function BlockComponent({
   blockId,
 }: {
   blockId: string;
 }): JSX.Element {
-  const [rootBlock, setRootBlock] = useRootBlock();
+  const setRootBlock = useSetRootBlock();
   const [editorSession, setEditorSession] = useEditorSession();
-  const block = getBlock(rootBlock, blockId);
+  const block = useBlock(blockId);
   if (!block) {
     throw new Error(`Block "${blockId}" was not found.`);
   }
@@ -73,8 +73,8 @@ export default function BlockComponent({
           </div>
         )}
         <div className="ml-5">
-          {getChildBlocks(rootBlock, block.id).map((child) => (
-            <BlockComponent key={child.id} blockId={child.id} />
+          {block.childrenIds.map((childId) => (
+            <BlockComponent key={childId} blockId={childId} />
           ))}
         </div>
       </div>
