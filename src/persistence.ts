@@ -1,11 +1,9 @@
 import {
   createBlockStore,
   createBlockTree,
-  updateBlockContent,
   type BlockStore,
   type BlockTreeLike,
 } from "./block/blockStore";
-import type { EditorSession } from "./state";
 
 const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
 
@@ -46,21 +44,6 @@ export function loadPersistedRootBlock(
     console.warn("Failed to load persisted rootBlock.", error);
     return fallbackRootBlock;
   }
-}
-
-export function resolvePersistedRootBlock(
-  rootBlock: BlockStore,
-  editorSession: EditorSession,
-): BlockStore {
-  if (!editorSession) {
-    return rootBlock;
-  }
-
-  return updateBlockContent(
-    rootBlock,
-    editorSession.activeBlockId,
-    editorSession.draftText,
-  );
 }
 
 export function persistRootBlock(

@@ -7,6 +7,7 @@ import {
   createBlockStore,
   createBlockTree,
   getChildBlocks,
+  updateBlockContent,
 } from "./block/blockStore";
 import { initialRootBlock } from "./block/data";
 import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
@@ -14,7 +15,6 @@ import {
   getBrowserStorage,
   loadPersistedRootBlock,
   persistRootBlock,
-  resolvePersistedRootBlock,
 } from "./persistence";
 import { initializeState, useEditorSession, useRootBlock } from "./state";
 
@@ -41,7 +41,15 @@ function App(): JSX.Element {
     return JSON.stringify(createBlockTree(rootBlock).toJSON(), null, 2);
   }, [rootBlock]);
   const persistedRootBlock = useMemo(() => {
-    return resolvePersistedRootBlock(rootBlock, editorSession);
+    if (!editorSession) {
+      return rootBlock;
+    }
+
+    return updateBlockContent(
+      rootBlock,
+      editorSession.activeBlockId,
+      editorSession.draftText,
+    );
   }, [editorSession, rootBlock]);
 
   useEffect(() => {

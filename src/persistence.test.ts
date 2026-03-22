@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import BlockEntity from "./block/BlockEntity";
-import { createBlockStore, createBlockTree } from "./block/blockStore";
 import {
-  loadPersistedRootBlock,
-  persistRootBlock,
-  resolvePersistedRootBlock,
-} from "./persistence";
+  createBlockStore,
+  createBlockTree,
+  updateBlockContent,
+} from "./block/blockStore";
+import { loadPersistedRootBlock, persistRootBlock } from "./persistence";
 
 const STORAGE_KEY = "outliner-playground.rootBlock";
 
@@ -62,11 +62,7 @@ describe("永続化", () => {
       throw new Error("Expected an active block.");
     }
 
-    const persisted = resolvePersistedRootBlock(rootBlock, {
-      activeBlockId: activeBlock.id,
-      caretOffset: "draft".length,
-      draftText: "draft",
-    });
+    const persisted = updateBlockContent(rootBlock, activeBlock.id, "draft");
 
     expect(createBlockTree(persisted).children[0]?.content).toBe("draft");
     expect(createBlockTree(rootBlock).children[0]?.content).toBe("committed");
