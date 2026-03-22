@@ -6,7 +6,7 @@ import type BlockEntity from "./block/BlockEntity";
 import { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./block/data";
-import { initializeState, useRootBlock, useCaretPosition } from "./state";
+import { initializeState, useEditorSession, useRootBlock } from "./state";
 
 import "./styles.css";
 
@@ -21,19 +21,19 @@ if (!rootElement) {
 
 function App(): JSX.Element {
   const [rootBlock, setRootBlock] = useRootBlock();
-  const [, setCaretPosition] = useCaretPosition();
+  const [, setEditorSession] = useEditorSession();
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent): void => {
       if (event.key === "k" && event.ctrlKey) {
         setRootBlock(createBlock(initialRootBlock));
-        setCaretPosition(null);
+        setEditorSession(null);
         event.preventDefault();
       }
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [setRootBlock, setCaretPosition]);
+  }, [setEditorSession, setRootBlock]);
 
   return (
     <div

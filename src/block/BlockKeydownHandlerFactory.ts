@@ -7,18 +7,21 @@ import { useCallback } from "preact/hooks";
 
 import type BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";
+import { createEditorSession } from "./editorSession";
 import * as dom from "./dom";
-import type { UpdateCaretPosition } from "../state";
+import type { EditorSession, UpdateEditorSession } from "../state";
 
 type CaretPosition = ReturnType<typeof dom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
 type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
+type ActiveEditorSession = Exclude<EditorSession, null>;
 
 export function useBlockKeydownHandler({
   block,
   contentRef,
+  editorSession,
   splitBlockAtCaret,
-  setCaretPosition,
+  setEditorSession,
   updateBlockById,
   getSelection,
 }: UseBlockKeydownHandlerArgs): KeydownHandler {
@@ -29,8 +32,9 @@ export function useBlockKeydownHandler({
         createKeydownHandlerContext({
           block,
           contentRef,
+          editorSession,
           splitBlockAtCaret,
-          setCaretPosition,
+          setEditorSession,
           updateBlockById,
           getSelection,
         }),
@@ -39,9 +43,10 @@ export function useBlockKeydownHandler({
     [
       block,
       contentRef,
+      editorSession,
       getSelection,
       splitBlockAtCaret,
-      setCaretPosition,
+      setEditorSession,
       updateBlockById,
     ],
   );
@@ -104,7 +109,7 @@ function handleEnter(
   if (context.currentElement) {
     context.currentElement.innerText = beforeText ?? "";
   }
-  setCaretPositionForBlock(context, newBlock.id, 0);
+  setEditorSessionForBlock(context, newBlock, 0);
 }
 
 function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
@@ -149,7 +154,7 @@ function handleArrowDown(
   const offsetInLine = Math.max(0, caretOffset - currentLineStart);
   const nextFirstLineLength = getFirstLineLength(nextBlock.content);
   const nextCaretOffset = Math.min(offsetInLine, nextFirstLineLength);
-  setCaretPositionForBlock(context, nextBlock.id, nextCaretOffset);
+  setEditorSessionForBlock(context, nextBlock, nextCaretOffset);
 }
 
 function handleMoveBlockDown(
@@ -193,7 +198,7 @@ function handleArrowUp(
     prevLastLineStart + offsetInLine,
     prevBlock.content.length,
   );
-  setCaretPositionForBlock(context, prevBlock.id, nextCaretOffset);
+  setEditorSessionForBlock(context, prevBlock, nextCaretOffset);
 }
 
 function handleMoveBlockUp(
@@ -220,9 +225,9 @@ function syncCurrentBlockAndRestoreCaret(
 ): void {
   const updatedBlock = syncCurrentBlockContent(context);
   updateTree(updatedBlock);
-  setCaretPositionForBlock(
+  setEditorSessionForBlock(
     context,
-    updatedBlock.id,
+    updatedBlock,
     getCurrentCaretOffset(context),
   );
 }
@@ -268,12 +273,12 @@ function getFirstLineLength(content: string): number {
   return firstNewline;
 }
 
-function setCaretPositionForBlock(
+function setEditorSessionForBlock(
   context: KeydownHandlerContext,
-  blockId: string,
+  block: BlockEntity,
   caretOffset: number,
 ): void {
-  context.setCaretPosition({ blockId, caretOffset });
+  context.setEditorSession(createEditorSession(block, caretOffset));
 }
 
 function goToLineStart(
@@ -288,9 +293,9 @@ function goToLineStart(
   });
   if (newlineBeforeCaret) {
     const newlineIndex = newlineBeforeCaret.index;
-    setCaretPositionForBlock(context, context.block.id, newlineIndex + 1);
+    setEditorSessionForBlock(context, context.block, newlineIndex + 1);
   } else {
-    setCaretPositionForBlock(context, context.block.id, 0);
+    setEditorSessionForBlock(context, context.block, 0);
   }
 }
 
@@ -306,11 +311,11 @@ function goToLineEnd(
   });
   if (newlineAfterCaret) {
     const newlineIndex = newlineAfterCaret.index;
-    setCaretPositionForBlock(context, context.block.id, newlineIndex);
+    setEditorSessionForBlock(context, context.block, newlineIndex);
   } else {
-    setCaretPositionForBlock(
+    setEditorSessionForBlock(
       context,
-      context.block.id,
+      context.block,
       context.currentElement?.innerText.length ?? 0,
     );
   }
@@ -353,7 +358,7 @@ function handleBackspace(
 
   context.updateBlockById(parentClone.id, parentClone);
 
-  setCaretPositionForBlock(context, prevBlock.id, prevContentLength);
+  setEditorSessionForBlock(context, prevClone, prevContentLength);
 }
 
 function handleArrowLeft(
@@ -370,7 +375,7 @@ function handleArrowLeft(
     return;
   }
 
-  setCaretPositionForBlock(context, prevBlock.id, prevBlock.content.length);
+  setEditorSessionForBlock(context, prevBlock, prevBlock.content.length);
 }
 
 function handleArrowRight(
@@ -391,7 +396,7 @@ function handleArrowRight(
     return;
   }
 
-  setCaretPositionForBlock(context, nextBlock.id, 0);
+  setEditorSessionForBlock(context, nextBlock, 0);
 }
 
 function isVisibleBlock(block: BlockEntity | null): block is BlockEntity {
@@ -401,8 +406,9 @@ function isVisibleBlock(block: BlockEntity | null): block is BlockEntity {
 type UseBlockKeydownHandlerArgs = {
   block: BlockEntity;
   contentRef: RefObject<HTMLElement | null>;
+  editorSession: ActiveEditorSession;
   splitBlockAtCaret: SplitBlockAtCaret;
-  setCaretPosition: (updateFn: UpdateCaretPosition) => void;
+  setEditorSession: (updateFn: UpdateEditorSession) => void;
   updateBlockById: UpdateBlockById;
   getSelection?: () => Selection | null;
 };

@@ -2,16 +2,18 @@ import { atom, getDefaultStore, useAtom, type SetStateAction } from "jotai";
 
 import BlockEntity from "./block/BlockEntity";
 
-export type CaretPosition = {
-  blockId: string;
+export type EditorSession = {
+  activeBlockId: string;
   caretOffset: number;
+  draftText: string;
 } | null;
 
 const rootBlockAtom = atom<BlockEntity>(new BlockEntity(""));
-const caretPositionAtom = atom<CaretPosition>(null);
+const editorSessionAtom = atom<EditorSession>(null);
 
 export function initializeState(rootBlock: BlockEntity): void {
   getDefaultStore().set(rootBlockAtom, rootBlock);
+  getDefaultStore().set(editorSessionAtom, null);
 }
 
 export function useRootBlock(): [BlockEntity, (updateFn: UpdateBlock) => void] {
@@ -20,11 +22,11 @@ export function useRootBlock(): [BlockEntity, (updateFn: UpdateBlock) => void] {
 
 type UpdateBlock = SetStateAction<BlockEntity>;
 
-export function useCaretPosition(): [
-  CaretPosition,
-  (updateFn: UpdateCaretPosition) => void,
+export function useEditorSession(): [
+  EditorSession,
+  (updateFn: UpdateEditorSession) => void,
 ] {
-  return useAtom(caretPositionAtom);
+  return useAtom(editorSessionAtom);
 }
 
-export type UpdateCaretPosition = SetStateAction<CaretPosition>;
+export type UpdateEditorSession = SetStateAction<EditorSession>;
