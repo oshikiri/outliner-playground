@@ -187,11 +187,11 @@ export function splitBlockAtCaret(
   };
   nextBlocksById[parentBlock.id] = {
     ...parentBlock,
-    childrenIds: [
-      ...parentBlock.childrenIds.slice(0, currentIndex + 1),
+    childrenIds: insertChildId(
+      parentBlock.childrenIds,
+      currentIndex + 1,
       newBlockId,
-      ...parentBlock.childrenIds.slice(currentIndex + 1),
-    ],
+    ),
   };
   nextBlocksById[newBlockId] = newBlock;
 
@@ -232,7 +232,7 @@ export function indentBlock(
   return withBlocks(rootBlock, {
     [parentBlock.id]: {
       ...parentBlock,
-      childrenIds: parentBlock.childrenIds.filter((id) => id !== blockId),
+      childrenIds: removeChildId(parentBlock.childrenIds, blockId),
     },
     [previousSibling.id]: {
       ...previousSibling,
@@ -275,11 +275,11 @@ export function outdentBlock(
     },
     [grandparentBlock.id]: {
       ...grandparentBlock,
-      childrenIds: [
-        ...grandparentBlock.childrenIds.slice(0, parentIndex + 1),
+      childrenIds: insertChildId(
+        grandparentBlock.childrenIds,
+        parentIndex + 1,
         blockId,
-        ...grandparentBlock.childrenIds.slice(parentIndex + 1),
-      ],
+      ),
     },
     [blockId]: {
       ...currentBlock,
@@ -419,24 +419,18 @@ export function joinBlockWithPreviousSibling(
       previousBlock.id === parentInfo.parent.id
         ? {
             ...nextPreviousBlock,
-            childrenIds: parentInfo.parent.childrenIds.filter(
-              (id) => id !== blockId,
-            ),
+            childrenIds: removeChildId(parentInfo.parent.childrenIds, blockId),
           }
         : nextPreviousBlock,
     [parentInfo.parent.id]:
       previousBlock.id === parentInfo.parent.id
         ? {
             ...nextPreviousBlock,
-            childrenIds: parentInfo.parent.childrenIds.filter(
-              (id) => id !== blockId,
-            ),
+            childrenIds: removeChildId(parentInfo.parent.childrenIds, blockId),
           }
         : {
             ...parentInfo.parent,
-            childrenIds: parentInfo.parent.childrenIds.filter(
-              (id) => id !== blockId,
-            ),
+            childrenIds: removeChildId(parentInfo.parent.childrenIds, blockId),
           },
   };
   delete nextBlocksById[blockId];
@@ -529,4 +523,16 @@ function withBlocks(
       ...blocks,
     },
   };
+}
+
+function insertChildId(
+  childrenIds: string[],
+  index: number,
+  childId: string,
+): string[] {
+  return [...childrenIds.slice(0, index), childId, ...childrenIds.slice(index)];
+}
+
+function removeChildId(childrenIds: string[], childId: string): string[] {
+  return childrenIds.filter((id) => id !== childId);
 }
