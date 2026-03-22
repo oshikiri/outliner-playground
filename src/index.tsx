@@ -7,11 +7,19 @@ import { createBlock } from "./block/BlockEntity";
 import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./block/data";
 import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
+import {
+  getBrowserStorage,
+  loadPersistedRootBlock,
+  persistRootBlock,
+  resolvePersistedRootBlock,
+} from "./persistence";
 import { initializeState, useEditorSession, useRootBlock } from "./state";
 
 import "./styles.css";
 
-initializeState(createBlock(initialRootBlock));
+initializeState(
+  loadPersistedRootBlock(getBrowserStorage(), createBlock(initialRootBlock)),
+);
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -22,10 +30,13 @@ if (!rootElement) {
 
 function App(): JSX.Element {
   const [rootBlock, setRootBlock] = useRootBlock();
-  const [, setEditorSession] = useEditorSession();
+  const [editorSession, setEditorSession] = useEditorSession();
   const jsonStr = useMemo(() => {
     return JSON.stringify(rootBlock.toJSON(), null, 2);
   }, [rootBlock]);
+  const persistedRootBlock = useMemo(() => {
+    return resolvePersistedRootBlock(rootBlock, editorSession);
+  }, [editorSession, rootBlock]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent): void => {
@@ -37,6 +48,10 @@ function App(): JSX.Element {
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [setEditorSession, setRootBlock]);
+
+  useEffect(() => {
+    persistRootBlock(getBrowserStorage(), persistedRootBlock);
+  }, [persistedRootBlock]);
 
   return (
     <div

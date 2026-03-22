@@ -70,6 +70,12 @@
   - `rootBlock` は初期データに置き換える
   - `caretPosition` は `null` に戻す
 
+## 永続化
+
+- [OE-STORAGE-001] 起動時に localStorage に保存済みの `rootBlock` があれば、それを初期データより優先して読み込む
+- [OE-STORAGE-002] `rootBlock` が更新されたら、その内容を localStorage に保存する
+- [OE-STORAGE-003] localStorage の保存内容が壊れている場合は、初期データへフォールバックする
+
 ## 階層操作（インデント・アウトデント）
 
 - 階層操作は編集モード時のみできるものとする。表示モードの場合は動作しない

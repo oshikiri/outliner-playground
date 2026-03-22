@@ -47,7 +47,6 @@ export const initialRootBlock = new Block("", [
     ]),
   ]),
   new Block("TODOs", [
-    new Block("Persist state to localStorage"),
     new Block("Caret movement across visual lines"),
     new Block("Copy/paste handling (rich text -> plain text)"),
     new Block("Undo/redo functionality"),
