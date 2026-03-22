@@ -69,6 +69,32 @@ describe("キー移動", () => {
     });
   });
 
+  it("[OE-IME-003] IME 変換中の Process キーでは ArrowDown のブロック移動を発火しない", async () => {
+    renderEditor(["ab\ncd", "next"]);
+
+    const editable = await beginEditing("ab\ncd", {
+      content: "ab\ncd",
+      caretOffset: 5,
+    });
+
+    const eventNotCanceled = fireEvent.keyDown(editable, {
+      key: "Process",
+      isComposing: true,
+    });
+
+    expect(eventNotCanceled).toBe(true);
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("ab\ncd");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 0,
+      });
+    });
+  });
+
   it("[OE-MOVE-006] 末尾改行の最終行で ArrowDown を押すと次のブロックを編集モードにする", async () => {
     renderEditor(["abc\n", "next"]);
 
@@ -278,6 +304,31 @@ describe("キー移動", () => {
       expect(getCaretPositionState()).toEqual({
         blockId: getRootBlockState().children[0]?.id,
         caretOffset: 5,
+      });
+    });
+  });
+
+  it("[OE-IME-004] Ctrl+[ で [[]] を挿入しキャレットを中央に配置する", async () => {
+    renderEditor(["abc"]);
+
+    const editable = await beginEditing("abc", {
+      content: "abc",
+      caretOffset: 1,
+    });
+
+    const eventNotCanceled = fireEvent.keyDown(editable, {
+      key: "[",
+      ctrlKey: true,
+    });
+
+    expect(eventNotCanceled).toBe(false);
+
+    await waitFor(() => {
+      expect(getEditableTextboxes()[0]?.textContent).toBe("a[[]]bc");
+      expect(getRootBlockState().children[0]?.content).toBe("abc");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 3,
       });
     });
   });

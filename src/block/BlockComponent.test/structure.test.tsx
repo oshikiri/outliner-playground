@@ -42,6 +42,33 @@ describe("ブロック分割", () => {
     });
   });
 
+  it("[OE-IME-001] IME 変換中の Enter ではブロック分割しない", async () => {
+    renderEditor(["hello"]);
+
+    const editable = await beginEditing("hello", {
+      content: "hello",
+      caretOffset: 2,
+    });
+
+    const eventNotCanceled = fireEvent.keyDown(editable, {
+      key: "Enter",
+      isComposing: true,
+    });
+
+    expect(eventNotCanceled).toBe(true);
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("hello");
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: 0,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("hello");
+    });
+  });
+
   it("[OE-SPLIT-001][OE-SPLIT-002][OE-SPLIT-003] Enter で前半を現在ブロックに残し子がある場合は先頭の子ブロックとして分割する", async () => {
     const child = new BlockEntity("child");
     const target = new BlockEntity("hello", [child]);
@@ -210,6 +237,36 @@ describe("階層操作", () => {
         caretOffset: 1,
       });
       expect(getEditableTextboxes()[0]?.textContent).toBe("first");
+    });
+  });
+
+  it("[OE-IME-002] IME 変換由来の keyCode 229 では Tab の階層操作を発火しない", async () => {
+    renderEditor(["first", "target"]);
+
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 2,
+    });
+
+    const eventNotCanceled = fireEvent.keyDown(editable, {
+      key: "Tab",
+      keyCode: 229,
+      which: 229,
+    });
+
+    expect(eventNotCanceled).toBe(true);
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children.map((block) => block.content)).toEqual([
+        "first",
+        "target",
+      ]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[1]?.id,
+        caretOffset: 0,
+      });
+      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
     });
   });
 

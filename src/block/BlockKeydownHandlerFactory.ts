@@ -15,6 +15,7 @@ type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
 type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
 type ActiveEditorSession = Exclude<EditorSession, null>;
+const IME_PROCESS_KEYCODE = 229;
 
 export function useBlockKeydownHandler({
   block,
@@ -66,7 +67,13 @@ function dispatchKeydownEvent(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  if (event.key === "Enter" && !event.shiftKey) {
+  if (isImeComposing(event)) {
+    return;
+  }
+
+  if (shouldInsertPageReference(event)) {
+    handleInsertPageReference(event, context);
+  } else if (event.key === "Enter" && !event.shiftKey) {
     handleEnter(event, context);
   } else if (event.key === "Tab") {
     handleTab(event, context);
@@ -95,6 +102,56 @@ function dispatchKeydownEvent(
   } else if (event.key === "Backspace") {
     handleBackspace(event, context);
   }
+}
+
+function isImeComposing(event: KeydownEvent): boolean {
+  if (event.isComposing || event.key === "Process") {
+    return true;
+  }
+
+  // Some browsers still expose ongoing IME composition via legacy keyCode/which
+  // 229 even when `key` alone is not enough to distinguish it.
+  const keyboardEvent = event as KeydownEvent & {
+    keyCode?: number;
+    which?: number;
+  };
+  return (
+    keyboardEvent.keyCode === IME_PROCESS_KEYCODE ||
+    keyboardEvent.which === IME_PROCESS_KEYCODE
+  );
+}
+
+function shouldInsertPageReference(event: KeydownEvent): boolean {
+  const keyboardEvent = event as KeydownEvent & {
+    code?: string;
+  };
+
+  return (
+    event.ctrlKey && (event.key === "[" || keyboardEvent.code === "BracketLeft")
+  );
+}
+
+function handleInsertPageReference(
+  event: KeydownEvent,
+  context: KeydownHandlerContext,
+): void {
+  event.preventDefault();
+
+  const { beforeText, afterText, caretOffset } =
+    caretDom.getTextSegmentsAroundCaret(context.getSelection());
+  const pageReference = "[[]]";
+  const nextDraftText = `${beforeText}${pageReference}${afterText}`;
+  const nextCaretOffset = caretOffset + 2;
+
+  if (context.currentElement) {
+    context.currentElement.textContent = nextDraftText;
+  }
+
+  context.setEditorSession({
+    activeBlockId: context.block.id,
+    draftText: nextDraftText,
+    caretOffset: nextCaretOffset,
+  });
 }
 
 function handleEnter(
