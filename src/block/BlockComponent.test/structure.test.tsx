@@ -193,13 +193,14 @@ describe("階層操作", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
-  it("[OE-INDENT-001] Tab で前の兄弟ブロックの子としてインデントする", async () => {
+  it("[OE-INDENT-001][OE-INDENT-003] Tab で前の兄弟ブロックの子としてインデントし編集モードと focus を維持する", async () => {
     renderEditor(["first", "target"]);
 
     const editable = await beginEditing("target", {
       content: "target",
       caretOffset: 2,
     });
+    editable.focus();
 
     fireEvent.keyDown(editable, { key: "Tab" });
 
@@ -212,7 +213,10 @@ describe("階層操作", () => {
         blockId: rootBlock.children[0]?.children[0]?.id,
         caretOffset: 2,
       });
-      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("target");
+      expect(document.activeElement).toBe(nextEditable[0]);
     });
   });
 
@@ -270,7 +274,7 @@ describe("階層操作", () => {
     });
   });
 
-  it("[OE-OUTDENT-001][OE-OUTDENT-002] Shift+Tab で親の直後へ移動し後続兄弟を子として吸収する", async () => {
+  it("[OE-OUTDENT-001][OE-OUTDENT-002][OE-OUTDENT-004] Shift+Tab で親の直後へ移動し後続兄弟を子として吸収し編集モードと focus を維持する", async () => {
     const first = new BlockEntity("first");
     const grandchild = new BlockEntity("grandchild");
     const target = new BlockEntity("target", [grandchild]);
@@ -282,6 +286,7 @@ describe("階層操作", () => {
       content: "target",
       caretOffset: 3,
     });
+    editable.focus();
 
     fireEvent.keyDown(editable, { key: "Tab", shiftKey: true });
 
@@ -301,7 +306,10 @@ describe("階層操作", () => {
         blockId: rootBlock.children[1]?.id,
         caretOffset: 3,
       });
-      expect(getEditableTextboxes()[0]?.textContent).toBe("target");
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("target");
+      expect(document.activeElement).toBe(nextEditable[0]);
     });
   });
 
