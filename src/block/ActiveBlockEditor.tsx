@@ -10,7 +10,7 @@ import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
 import type BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";
-import * as dom from "./dom";
+import * as caretDom from "./editor/caretDom";
 import { useEditorSession, useRootBlock } from "../state";
 
 type ActiveBlockEditorProps = {
@@ -184,8 +184,8 @@ function focusContentAtCaret(
   element.focus();
 
   // The editor session keeps caretOffset in plain-text coordinates.
-  const offset = dom.clampOffsetToTextLength(element, caretOffset);
-  dom.setCaretOffset(element, offset, window.getSelection());
+  const offset = caretDom.clampOffsetToTextLength(element, caretOffset);
+  caretDom.setCaretOffset(element, offset, window.getSelection());
 }
 
 function getElementText(element: HTMLDivElement): string {

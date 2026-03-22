@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getNearestCaretOffset, setCaretOffset } from "./dom";
+import { getNearestCaretOffset, setCaretOffset } from "./caretDom";
 
 afterEach(() => {
   window.getSelection()?.removeAllRanges();

@@ -1,4 +1,4 @@
-import { getNewlineRanges } from "../Range";
+import { getNewlineRanges } from "./lineRanges";
 
 type CaretTextSegments = {
   beforeText: string;
@@ -82,7 +82,7 @@ export function getCaretPositionInBlock(
 ): CursorPosition | undefined {
   if (!selection) return undefined;
 
-  const wholeText = getTextFromNote(selection.anchorNode);
+  const wholeText = getTextFromNode(selection.anchorNode);
   const anchorOffset = selection.anchorOffset;
   const newlines = Array.from(wholeText.matchAll(/\n/g));
   return { newlines, wholeText, anchorOffset };
@@ -94,7 +94,7 @@ type CursorPosition = {
   anchorOffset: number;
 };
 
-function getTextFromNote(node: Node | null): string {
+function getTextFromNode(node: Node | null): string {
   if (!node) return "";
   const isTextNode = node.nodeType === Node.TEXT_NODE;
   if (isTextNode) {

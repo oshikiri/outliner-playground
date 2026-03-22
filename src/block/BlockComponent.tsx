@@ -7,7 +7,7 @@ import {
   createEditorSession,
   commitEditorSessionToRoot,
 } from "./editorSession";
-import * as dom from "./dom";
+import * as caretDom from "./editor/caretDom";
 import MarkdownComponent from "../markdown/MarkdownComponent";
 import { useEditorSession, useRootBlock } from "../state";
 
@@ -27,7 +27,7 @@ export default function BlockComponent({
       }
 
       const caretOffset =
-        dom.getNearestCaretOffset(
+        caretDom.getNearestCaretOffset(
           event.currentTarget,
           document,
           event.clientX,

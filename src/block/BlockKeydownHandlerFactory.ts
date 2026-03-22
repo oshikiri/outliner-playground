@@ -8,10 +8,10 @@ import { useCallback } from "preact/hooks";
 import type BlockEntity from "./BlockEntity";
 import { createBlock } from "./BlockEntity";
 import { createEditorSession } from "./editorSession";
-import * as dom from "./dom";
+import * as caretDom from "./editor/caretDom";
 import type { EditorSession, UpdateEditorSession } from "../state";
 
-type CaretPosition = ReturnType<typeof dom.getCaretPositionInBlock>;
+type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
 type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
 type ActiveEditorSession = Exclude<EditorSession, null>;
@@ -83,10 +83,14 @@ function dispatchKeydownEvent(
   } else if (event.key === "ArrowRight") {
     handleArrowRight(event, context);
   } else if (event.key === "a" && event.ctrlKey) {
-    const caretPosition = dom.getCaretPositionInBlock(context.getSelection());
+    const caretPosition = caretDom.getCaretPositionInBlock(
+      context.getSelection(),
+    );
     goToLineStart(event, context, caretPosition);
   } else if (event.key === "e" && event.ctrlKey) {
-    const caretPosition = dom.getCaretPositionInBlock(context.getSelection());
+    const caretPosition = caretDom.getCaretPositionInBlock(
+      context.getSelection(),
+    );
     goToLineEnd(event, context, caretPosition);
   } else if (event.key === "Backspace") {
     handleBackspace(event, context);
@@ -98,7 +102,7 @@ function handleEnter(
   context: KeydownHandlerContext,
 ): void {
   event.preventDefault();
-  const { beforeText, afterText } = dom.getTextSegmentsAroundCaret(
+  const { beforeText, afterText } = caretDom.getTextSegmentsAroundCaret(
     context.getSelection(),
   );
   const newBlock = context.splitBlockAtCaret(
@@ -133,7 +137,7 @@ function handleArrowDown(
   const currentContent = context.currentElement?.innerText ?? "";
   if (
     !context.currentElement ||
-    !dom.isCaretAtLastLine(currentContent, context.getSelection())
+    !caretDom.isCaretAtLastLine(currentContent, context.getSelection())
   ) {
     return;
   }
@@ -174,7 +178,7 @@ function handleArrowUp(
 ): void {
   if (
     !context.currentElement ||
-    !dom.isCaretAtFirstLine(context.getSelection())
+    !caretDom.isCaretAtFirstLine(context.getSelection())
   ) {
     return;
   }
@@ -245,11 +249,12 @@ function updateBlocksById(
 }
 
 function getCurrentCaretOffset(context: KeydownHandlerContext): number {
-  return dom.getTextSegmentsAroundCaret(context.getSelection()).caretOffset;
+  return caretDom.getTextSegmentsAroundCaret(context.getSelection())
+    .caretOffset;
 }
 
 function getCurrentLineOffset(context: KeydownHandlerContext): number {
-  return dom.getCurrentLineOffset(context.getSelection());
+  return caretDom.getCurrentLineOffset(context.getSelection());
 }
 
 function getLineStartOffset(content: string, caretOffset: number): number {
@@ -329,7 +334,7 @@ function handleBackspace(
 
   if (
     context.block.children.length > 0 ||
-    !dom.caretIsAtBlockStart(context.getSelection())
+    !caretDom.caretIsAtBlockStart(context.getSelection())
   ) {
     return;
   }
@@ -365,7 +370,7 @@ function handleArrowLeft(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  if (!dom.caretIsAtBlockStart(context.getSelection())) {
+  if (!caretDom.caretIsAtBlockStart(context.getSelection())) {
     return;
   }
 
@@ -382,7 +387,7 @@ function handleArrowRight(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  const position = dom.getCaretPositionInBlock(context.getSelection());
+  const position = caretDom.getCaretPositionInBlock(context.getSelection());
   if (!position) {
     return;
   }
