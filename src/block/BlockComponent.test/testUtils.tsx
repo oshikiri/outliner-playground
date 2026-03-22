@@ -6,18 +6,17 @@ import {
   waitFor,
 } from "@testing-library/preact";
 import type { JSX } from "preact";
-import { useEffect } from "preact/hooks";
 import { afterEach, vi, expect } from "vitest";
 
+import ActiveBlockEditor from "../ActiveBlockEditor";
 import BlockComponent from "../BlockComponent";
 import BlockEntity from "../BlockEntity";
-import { useBlockInteractions } from "../useBlockInteractions";
 import { initializeState, useRootBlock } from "../../state";
 
 let rootBlockState: unknown = null;
-let caretPositionState: unknown = null;
+let editorSessionState: unknown = null;
 const rootListeners = new Set<(value: unknown) => void>();
-const caretListeners = new Set<(value: unknown) => void>();
+const editorSessionListeners = new Set<(value: unknown) => void>();
 
 vi.mock("../../state", async () => {
   const hooks = await import("preact/hooks");
@@ -35,12 +34,12 @@ vi.mock("../../state", async () => {
   return {
     initializeState(rootBlock: unknown): void {
       rootBlockState = rootBlock;
-      caretPositionState = null;
+      editorSessionState = null;
       for (const listener of rootListeners) {
         listener(rootBlockState);
       }
-      for (const listener of caretListeners) {
-        listener(caretPositionState);
+      for (const listener of editorSessionListeners) {
+        listener(editorSessionState);
       }
     },
     useRootBlock(): [
@@ -65,23 +64,23 @@ vi.mock("../../state", async () => {
 
       return [value, updateValue];
     },
-    useCaretPosition(): [
+    useEditorSession(): [
       unknown,
       (update: unknown | ((prev: unknown) => unknown)) => void,
     ] {
-      const [value, setValue] = hooks.useState(caretPositionState);
+      const [value, setValue] = hooks.useState(editorSessionState);
 
       hooks.useEffect(() => {
-        caretListeners.add(setValue);
-        return () => caretListeners.delete(setValue);
+        editorSessionListeners.add(setValue);
+        return () => editorSessionListeners.delete(setValue);
       }, []);
 
       const updateValue = (
         update: unknown | ((prev: unknown) => unknown),
       ): void => {
-        caretPositionState = applyUpdate(caretPositionState, update);
-        for (const listener of caretListeners) {
-          listener(caretPositionState);
+        editorSessionState = applyUpdate(editorSessionState, update);
+        for (const listener of editorSessionListeners) {
+          listener(editorSessionState);
         }
       };
 
@@ -93,9 +92,9 @@ vi.mock("../../state", async () => {
 afterEach(() => {
   cleanup();
   rootListeners.clear();
-  caretListeners.clear();
+  editorSessionListeners.clear();
   rootBlockState = null;
-  caretPositionState = null;
+  editorSessionState = null;
   vi.restoreAllMocks();
 });
 
@@ -128,7 +127,7 @@ function getTextboxByText(text: string): HTMLElement {
 
 export function getEditableTextboxes(): HTMLElement[] {
   return screen
-    .getAllByRole("textbox")
+    .queryAllByRole("textbox")
     .filter((element) => element.getAttribute("contenteditable") === "true");
 }
 
@@ -158,7 +157,7 @@ export async function beginEditing(
   text: string,
   options: BeginEditingOptions = {},
 ): Promise<HTMLElement> {
-  fireEvent.click(getTextboxByText(text));
+  fireEvent.click(getTextboxByText(text), options.clickEventInit);
 
   const editable = await waitForEditableTextbox(text);
   if (options.content !== undefined) {
@@ -207,10 +206,19 @@ export function getCaretPositionState(): {
   blockId: string;
   caretOffset: number;
 } | null {
-  return caretPositionState as {
-    blockId: string;
+  const editorSession = editorSessionState as {
+    activeBlockId: string;
     caretOffset: number;
+    draftText: string;
   } | null;
+  if (!editorSession) {
+    return null;
+  }
+
+  return {
+    blockId: editorSession.activeBlockId,
+    caretOffset: editorSession.caretOffset,
+  };
 }
 
 export function getRootBlockState(): BlockEntity {
@@ -223,7 +231,22 @@ export function setCaretPositionState(
     caretOffset: number;
   } | null,
 ): void {
-  caretPositionState = value;
+  if (!value) {
+    editorSessionState = null;
+    return;
+  }
+
+  const rootBlock = getRootBlockState();
+  const block = rootBlock.findBlockById(value.blockId);
+  if (!block) {
+    throw new Error(`Block "${value.blockId}" was not found.`);
+  }
+
+  editorSessionState = {
+    activeBlockId: value.blockId,
+    caretOffset: value.caretOffset,
+    draftText: block.content,
+  };
 }
 
 export function renderBlurFallbackHarness(
@@ -253,23 +276,10 @@ function BlurFallbackHarness({
   block: BlockEntity;
   onReady: (contentRef: { current: HTMLDivElement | null }) => void;
 }): JSX.Element {
-  const { contentRef, isEditing, onBlur } = useBlockInteractions(block);
-
-  useEffect(() => {
-    onReady(contentRef);
-  }, [contentRef, onReady]);
-
   return (
     <div>
       <button type="button">outside</button>
-      <div
-        ref={contentRef}
-        contentEditable={isEditing || undefined}
-        onBlur={onBlur}
-        role="textbox"
-      >
-        {block.content}
-      </div>
+      <ActiveBlockEditor block={block} onReady={onReady} />
     </div>
   );
 }
@@ -286,4 +296,5 @@ type SelectionState = {
 type BeginEditingOptions = {
   content?: string;
   caretOffset?: number;
+  clickEventInit?: MouseEventInit;
 };

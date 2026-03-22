@@ -149,6 +149,27 @@ export function setCaretOffset(
   selection.addRange(range);
 }
 
+export function getNearestCaretOffset(
+  element: HTMLElement,
+  document: Document,
+  x: number,
+  y: number,
+): number | null {
+  const target = getCaretTargetFromPoint(document, x, y);
+  if (!target) {
+    return null;
+  }
+
+  if (target.node !== element && !element.contains(target.node)) {
+    return null;
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  range.setEnd(target.node, target.offset);
+  return range.toString().length;
+}
+
 /**
  * Resolve a plain-text offset to a concrete DOM position.
  *
@@ -202,21 +223,28 @@ function resolveCaretTarget(
   };
 }
 
-export function getNearestCaretOffset(
+function getCaretTargetFromPoint(
   document: Document,
   x: number,
   y: number,
-): number | null {
+): { node: Node; offset: number } | null {
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretPositionFromPoint
   const caretPosition = document.caretPositionFromPoint?.(x, y);
   if (caretPosition) {
-    return caretPosition.offset;
+    return {
+      node: caretPosition.offsetNode,
+      offset: caretPosition.offset,
+    };
   }
 
   // https://developer.mozilla.org/ja/docs/Web/API/Document/caretRangeFromPoint
   const caretRange = document.caretRangeFromPoint?.(x, y);
   if (caretRange) {
-    return caretRange.startOffset;
+    return {
+      node: caretRange.startContainer,
+      offset: caretRange.startOffset,
+    };
   }
+
   return null;
 }

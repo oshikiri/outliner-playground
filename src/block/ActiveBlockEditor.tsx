@@ -183,6 +183,7 @@ function focusContentAtCaret(
 ): void {
   element.focus();
 
+  // The editor session keeps caretOffset in plain-text coordinates.
   const offset = dom.clampOffsetToTextLength(element, caretOffset);
   dom.setCaretOffset(element, offset, window.getSelection());
 }

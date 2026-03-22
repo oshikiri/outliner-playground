@@ -1,4 +1,4 @@
-import type { JSX } from "preact";
+import type { JSX, MouseEventHandler } from "preact";
 import { useCallback } from "preact/hooks";
 
 import BlockEntity from "./BlockEntity";
@@ -7,6 +7,7 @@ import {
   createEditorSession,
   commitEditorSessionToRoot,
 } from "./editorSession";
+import * as dom from "./dom";
 import MarkdownComponent from "../markdown/MarkdownComponent";
 import { useEditorSession, useRootBlock } from "../state";
 
@@ -19,14 +20,25 @@ export default function BlockComponent({
   const [editorSession, setEditorSession] = useEditorSession();
   const isEditing = editorSession?.activeBlockId === block.id;
 
-  const onClick = useCallback(() => {
-    if (isEditing) {
-      return;
-    }
+  const onClick: MouseEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (isEditing) {
+        return;
+      }
 
-    setRootBlock((prev) => commitEditorSessionToRoot(prev, editorSession));
-    setEditorSession(createEditorSession(block, 0));
-  }, [block, editorSession, isEditing, setEditorSession, setRootBlock]);
+      const caretOffset =
+        dom.getNearestCaretOffset(
+          event.currentTarget,
+          document,
+          event.clientX,
+          event.clientY,
+        ) ?? 0;
+
+      setRootBlock((prev) => commitEditorSessionToRoot(prev, editorSession));
+      setEditorSession(createEditorSession(block, caretOffset));
+    },
+    [block, editorSession, isEditing, setEditorSession, setRootBlock],
+  );
 
   return (
     <div className="flex">

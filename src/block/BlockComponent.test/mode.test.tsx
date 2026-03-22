@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/preact";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import BlockEntity from "../BlockEntity";
 import {
@@ -94,6 +94,36 @@ describe("編集モード/表示モード", () => {
       expect(getCaretPositionState()).toBeNull();
       expect(getRootBlockState().children[0]?.content).toBe("updated");
       expect(getEditableTextboxes()).toHaveLength(0);
+    });
+  });
+
+  it("[OE-MODE-006] 表示モードのブロックをクリックするとクリック位置に最も近い箇所へキャレットを置く", async () => {
+    renderEditor(["first"]);
+
+    const range = document.createRange();
+    const displayBlock = screen.getByText("first").closest('[role="textbox"]');
+    if (!(displayBlock instanceof HTMLDivElement)) {
+      throw new Error("display block was not found.");
+    }
+    const textNode = displayBlock.firstChild;
+    if (!textNode) {
+      throw new Error("display block text node was not found.");
+    }
+
+    range.setStart(textNode, 3);
+    range.setEnd(textNode, 3);
+    Object.defineProperty(document, "caretRangeFromPoint", {
+      configurable: true,
+      value: vi.fn(() => range),
+    });
+
+    await beginEditing("first", {
+      clickEventInit: { clientX: 12, clientY: 8 },
+    });
+
+    expect(getCaretPositionState()).toEqual({
+      blockId: getRootBlockState().children[0]?.id,
+      caretOffset: 3,
     });
   });
 });
