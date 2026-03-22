@@ -9,14 +9,23 @@ import type { JSX } from "preact";
 import { afterEach, vi, expect } from "vitest";
 
 import ActiveBlockEditor from "../ActiveBlockEditor";
+import {
+  createBlockStore,
+  createBlockTree,
+  getBlock,
+  getChildBlocks,
+  isBlockStore,
+  type BlockStore,
+} from "../blockStore";
 import BlockComponent from "../BlockComponent";
 import BlockEntity from "../BlockEntity";
+import type { EditorSession } from "../../state";
 import { initializeState, useRootBlock } from "../../state";
 
-let rootBlockState: unknown = null;
-let editorSessionState: unknown = null;
-const rootListeners = new Set<(value: unknown) => void>();
-const editorSessionListeners = new Set<(value: unknown) => void>();
+let rootBlockState: BlockStore | null = null;
+let editorSessionState: EditorSession = null;
+const rootListeners = new Set<(value: BlockStore) => void>();
+const editorSessionListeners = new Set<(value: EditorSession) => void>();
 
 vi.mock("../../state", async () => {
   const hooks = await import("preact/hooks");
@@ -32,9 +41,14 @@ vi.mock("../../state", async () => {
   };
 
   return {
-    initializeState(rootBlock: unknown): void {
-      rootBlockState = rootBlock;
+    initializeState(rootBlock: BlockStore | BlockEntity): void {
+      rootBlockState = isBlockStore(rootBlock)
+        ? rootBlock
+        : createBlockStore(rootBlock);
       editorSessionState = null;
+      if (!rootBlockState) {
+        throw new Error("rootBlockState was not initialized.");
+      }
       for (const listener of rootListeners) {
         listener(rootBlockState);
       }
@@ -42,10 +56,10 @@ vi.mock("../../state", async () => {
         listener(editorSessionState);
       }
     },
-    useRootBlock(): [
-      unknown,
-      (update: unknown | ((prev: unknown) => unknown)) => void,
-    ] {
+    useRootBlock(): [BlockStore, (update: BlockStoreUpdate) => void] {
+      if (!rootBlockState) {
+        throw new Error("rootBlockState was not initialized.");
+      }
       const [value, setValue] = hooks.useState(rootBlockState);
 
       hooks.useEffect(() => {
@@ -53,9 +67,10 @@ vi.mock("../../state", async () => {
         return () => rootListeners.delete(setValue);
       }, []);
 
-      const updateValue = (
-        update: unknown | ((prev: unknown) => unknown),
-      ): void => {
+      const updateValue = (update: BlockStoreUpdate): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
         rootBlockState = applyUpdate(rootBlockState, update);
         for (const listener of rootListeners) {
           listener(rootBlockState);
@@ -64,10 +79,7 @@ vi.mock("../../state", async () => {
 
       return [value, updateValue];
     },
-    useEditorSession(): [
-      unknown,
-      (update: unknown | ((prev: unknown) => unknown)) => void,
-    ] {
+    useEditorSession(): [EditorSession, (update: EditorSessionUpdate) => void] {
       const [value, setValue] = hooks.useState(editorSessionState);
 
       hooks.useEffect(() => {
@@ -75,9 +87,7 @@ vi.mock("../../state", async () => {
         return () => editorSessionListeners.delete(setValue);
       }, []);
 
-      const updateValue = (
-        update: unknown | ((prev: unknown) => unknown),
-      ): void => {
+      const updateValue = (update: EditorSessionUpdate): void => {
         editorSessionState = applyUpdate(editorSessionState, update);
         for (const listener of editorSessionListeners) {
           listener(editorSessionState);
@@ -206,11 +216,7 @@ export function getCaretPositionState(): {
   blockId: string;
   caretOffset: number;
 } | null {
-  const editorSession = editorSessionState as {
-    activeBlockId: string;
-    caretOffset: number;
-    draftText: string;
-  } | null;
+  const editorSession = editorSessionState;
   if (!editorSession) {
     return null;
   }
@@ -222,7 +228,10 @@ export function getCaretPositionState(): {
 }
 
 export function getRootBlockState(): BlockEntity {
-  return rootBlockState as BlockEntity;
+  if (!rootBlockState) {
+    throw new Error("rootBlockState was not initialized.");
+  }
+  return createBlockTree(rootBlockState);
 }
 
 export function setCaretPositionState(
@@ -236,8 +245,11 @@ export function setCaretPositionState(
     return;
   }
 
-  const rootBlock = getRootBlockState();
-  const block = rootBlock.findBlockById(value.blockId);
+  if (!rootBlockState) {
+    throw new Error("rootBlockState was not initialized.");
+  }
+  const rootBlock = rootBlockState;
+  const block = getBlock(rootBlock, value.blockId);
   if (!block) {
     throw new Error(`Block "${value.blockId}" was not found.`);
   }
@@ -262,8 +274,8 @@ function TestEditor(): JSX.Element {
   return (
     <div>
       <button type="button">outside</button>
-      {rootBlock.children.map((block) => (
-        <BlockComponent key={block.id} block={block} />
+      {getChildBlocks(rootBlock, rootBlock.rootId).map((block) => (
+        <BlockComponent key={block.id} blockId={block.id} />
       ))}
     </div>
   );
@@ -279,7 +291,7 @@ function BlurFallbackHarness({
   return (
     <div>
       <button type="button">outside</button>
-      <ActiveBlockEditor block={block} onReady={onReady} />
+      <ActiveBlockEditor blockId={block.id} onReady={onReady} />
     </div>
   );
 }
@@ -298,3 +310,8 @@ type BeginEditingOptions = {
   caretOffset?: number;
   clickEventInit?: MouseEventInit;
 };
+
+type BlockStoreUpdate = BlockStore | ((prev: BlockStore) => BlockStore);
+type EditorSessionUpdate =
+  | EditorSession
+  | ((prev: EditorSession) => EditorSession);

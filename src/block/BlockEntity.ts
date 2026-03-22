@@ -303,14 +303,6 @@ type BlockJSON = {
   children?: BlockJSON[];
 };
 
-export function createBlock(obj: BlockEntity | BlockJSON): BlockEntity {
-  const children = obj.children?.map(createBlock) ?? [];
-  const parent = obj instanceof BlockEntity ? obj.parent : null;
-  const block = new BlockEntity(obj.content, children).withParent(parent);
-  block.id = obj.id;
-  return block;
-}
-
 function swapChildren(
   children: BlockEntity[],
   leftIndex: number,

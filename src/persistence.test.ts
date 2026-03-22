@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import BlockEntity, { createBlock } from "./block/BlockEntity";
+import BlockEntity from "./block/BlockEntity";
+import { createBlockStore, createBlockTree } from "./block/blockStore";
 import {
   loadPersistedRootBlock,
   persistRootBlock,
@@ -15,42 +16,48 @@ describe("永続化", () => {
   });
 
   it("[OE-STORAGE-001] 起動時に保存済み rootBlock があればそれを初期データより優先して読み込む", () => {
-    const fallbackRootBlock = new BlockEntity("", [
-      new BlockEntity("fallback"),
-    ]);
-    const persistedRootBlock = createBlock(
-      new BlockEntity("", [new BlockEntity("persisted")]).toJSON(),
+    const fallbackRootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("fallback")]),
+    );
+    const persistedRootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("persisted")]),
     );
 
     const restored = loadPersistedRootBlock(
       {
         getItem: vi
           .fn()
-          .mockReturnValue(JSON.stringify(persistedRootBlock.toJSON())),
+          .mockReturnValue(
+            JSON.stringify(createBlockTree(persistedRootBlock).toJSON()),
+          ),
       },
       fallbackRootBlock,
     );
 
-    expect(restored.children[0]?.content).toBe("persisted");
-    expect(restored.id).toBe(persistedRootBlock.id);
+    expect(createBlockTree(restored).children[0]?.content).toBe("persisted");
+    expect(restored.rootId).toBe(persistedRootBlock.rootId);
   });
 
   it("[OE-STORAGE-002] rootBlock が更新されたら localStorage に保存する", () => {
     const setItem = vi.fn();
-    const rootBlock = new BlockEntity("", [new BlockEntity("persisted")]);
+    const rootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("persisted")]),
+    );
 
     persistRootBlock({ setItem }, rootBlock);
 
     expect(setItem).toHaveBeenCalledOnce();
     expect(setItem).toHaveBeenCalledWith(
       STORAGE_KEY,
-      JSON.stringify(rootBlock.toJSON()),
+      JSON.stringify(createBlockTree(rootBlock).toJSON()),
     );
   });
 
   it("編集中ドラフトがあれば保存対象に反映する", () => {
-    const rootBlock = new BlockEntity("", [new BlockEntity("committed")]);
-    const activeBlock = rootBlock.children[0];
+    const rootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("committed")]),
+    );
+    const activeBlock = createBlockTree(rootBlock).children[0];
     if (!activeBlock) {
       throw new Error("Expected an active block.");
     }
@@ -61,14 +68,14 @@ describe("永続化", () => {
       draftText: "draft",
     });
 
-    expect(persisted.children[0]?.content).toBe("draft");
-    expect(rootBlock.children[0]?.content).toBe("committed");
+    expect(createBlockTree(persisted).children[0]?.content).toBe("draft");
+    expect(createBlockTree(rootBlock).children[0]?.content).toBe("committed");
   });
 
   it("[OE-STORAGE-003] 保存内容が壊れている場合は初期データへフォールバックする", () => {
-    const fallbackRootBlock = new BlockEntity("", [
-      new BlockEntity("fallback"),
-    ]);
+    const fallbackRootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("fallback")]),
+    );
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const restored = loadPersistedRootBlock(
@@ -83,9 +90,9 @@ describe("永続化", () => {
   });
 
   it("[OE-STORAGE-003] root 用として壊れた形状なら初期データへフォールバックする", () => {
-    const fallbackRootBlock = new BlockEntity("", [
-      new BlockEntity("fallback"),
-    ]);
+    const fallbackRootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("fallback")]),
+    );
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const restored = loadPersistedRootBlock(

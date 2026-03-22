@@ -186,6 +186,34 @@ describe("ブロック結合", () => {
       expect(nextEditable[0]?.textContent).toBe("target");
     });
   });
+
+  it("先頭の子ブロックを Backspace したときは親ブロックへ結合する", async () => {
+    const target = new BlockEntity("target");
+    const parent = new BlockEntity("parent", [target]);
+    renderRootBlock(new BlockEntity("", [parent]));
+
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 0,
+    });
+
+    fireEvent.keyDown(editable, { key: "Backspace" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("parenttarget");
+      expect(rootBlock.children[0]?.children).toHaveLength(0);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: "parent".length,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("parenttarget");
+    });
+  });
 });
 
 describe("階層操作", () => {

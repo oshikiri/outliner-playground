@@ -1,10 +1,10 @@
 import type { EditorSession } from "../state";
-import BlockEntity, { createBlock } from "./BlockEntity";
+import type { BlockState } from "./blockStore";
 
 type ActiveEditorSession = Exclude<EditorSession, null>;
 
 export function createEditorSession(
-  block: BlockEntity,
+  block: Pick<BlockState, "id" | "content">,
   caretOffset: number = block.content.length,
 ): ActiveEditorSession {
   return {
@@ -12,22 +12,4 @@ export function createEditorSession(
     caretOffset,
     draftText: block.content,
   };
-}
-
-export function commitEditorSessionToRoot(
-  rootBlock: BlockEntity,
-  editorSession: EditorSession,
-): BlockEntity {
-  if (!editorSession) {
-    return rootBlock;
-  }
-
-  const currentBlock = rootBlock.findBlockById(editorSession.activeBlockId);
-  if (!currentBlock || currentBlock.content === editorSession.draftText) {
-    return rootBlock;
-  }
-
-  const updatedBlock = createBlock(currentBlock);
-  updatedBlock.content = editorSession.draftText;
-  return rootBlock.updateBlockById(updatedBlock.id, updatedBlock);
 }

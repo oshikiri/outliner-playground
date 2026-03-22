@@ -1,5 +1,10 @@
-import { commitEditorSessionToRoot } from "./block/editorSession";
-import BlockEntity, { createBlock } from "./block/BlockEntity";
+import {
+  createBlockStore,
+  createBlockTree,
+  updateBlockContent,
+  type BlockStore,
+  type BlockTreeLike,
+} from "./block/blockStore";
 import type { EditorSession } from "./state";
 
 const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
@@ -19,8 +24,8 @@ export function getBrowserStorage(): Storage | null {
 
 export function loadPersistedRootBlock(
   storage: Pick<Storage, "getItem"> | null,
-  fallbackRootBlock: BlockEntity,
-): BlockEntity {
+  fallbackRootBlock: BlockStore,
+): BlockStore {
   if (!storage) {
     return fallbackRootBlock;
   }
@@ -36,7 +41,7 @@ export function loadPersistedRootBlock(
       throw new Error("Persisted rootBlock has an invalid shape.");
     }
 
-    return createBlock(parsed);
+    return createBlockStore(parsed);
   } catch (error) {
     console.warn("Failed to load persisted rootBlock.", error);
     return fallbackRootBlock;
@@ -44,35 +49,40 @@ export function loadPersistedRootBlock(
 }
 
 export function resolvePersistedRootBlock(
-  rootBlock: BlockEntity,
+  rootBlock: BlockStore,
   editorSession: EditorSession,
-): BlockEntity {
-  return commitEditorSessionToRoot(rootBlock, editorSession);
+): BlockStore {
+  if (!editorSession) {
+    return rootBlock;
+  }
+
+  return updateBlockContent(
+    rootBlock,
+    editorSession.activeBlockId,
+    editorSession.draftText,
+  );
 }
 
 export function persistRootBlock(
   storage: Pick<Storage, "setItem"> | null,
-  rootBlock: BlockEntity,
+  rootBlock: BlockStore,
 ): void {
   if (!storage) {
     return;
   }
 
   try {
-    storage.setItem(ROOT_BLOCK_STORAGE_KEY, JSON.stringify(rootBlock.toJSON()));
+    storage.setItem(
+      ROOT_BLOCK_STORAGE_KEY,
+      JSON.stringify(createBlockTree(rootBlock).toJSON()),
+    );
   } catch (error) {
     console.warn("Failed to persist rootBlock.", error);
   }
 }
 
-type PersistedBlock = {
-  id: string;
-  content: string;
-  children?: PersistedBlock[];
-};
-
-type PersistedRootBlock = PersistedBlock & {
-  children: PersistedBlock[];
+type PersistedRootBlock = BlockTreeLike & {
+  children: BlockTreeLike[];
 };
 
 function isPersistedRootBlock(value: unknown): value is PersistedRootBlock {
@@ -83,7 +93,7 @@ function isPersistedRootBlock(value: unknown): value is PersistedRootBlock {
   return Array.isArray(value.children);
 }
 
-function isPersistedBlock(value: unknown): value is PersistedBlock {
+function isPersistedBlock(value: unknown): value is BlockTreeLike {
   if (!value || typeof value !== "object") {
     return false;
   }
