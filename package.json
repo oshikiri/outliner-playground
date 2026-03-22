@@ -11,8 +11,8 @@
     "preview": "vite preview",
     "format": "prettier --write . --list-different",
     "pretest": "prettier --check .",
-    "check:traceability": "node scripts/check-spec-test-traceability.mjs",
-    "check:traceability:strict": "node scripts/check-spec-test-traceability.mjs --strict",
+    "check:traceability": "node --experimental-strip-types scripts/check-spec-test-traceability.ts",
+    "check:traceability:strict": "node --experimental-strip-types scripts/check-spec-test-traceability.ts --strict",
     "test": "tsc --noEmit && vitest",
     "test:coverage": "tsc --noEmit && vitest run --coverage"
   },

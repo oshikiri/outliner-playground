@@ -1,10 +1,12 @@
-import { readFileSync } from "node:fs";
-import { globSync } from "node:fs";
-import path from "node:path";
+import { globSync, readFileSync } from "node:fs";
+import { relative, resolve } from "node:path";
 
-const SPEC_GLOBS = ["docs/specs/**/*.md"];
-const TEST_GLOBS = ["src/**/*.test.ts", "src/**/*.test.tsx"];
+const SPEC_GLOBS = ["docs/specs/**/*.md"] as const;
+const TEST_GLOBS = ["src/**/*.test.ts", "src/**/*.test.tsx"] as const;
 const ID_PATTERN = /\[([A-Z]{2,}-[A-Z0-9]+-\d{3})]/g;
+
+type IdMatches = Map<string, string[]>;
+type DuplicateIdEntry = [string, string[]];
 
 const strict = process.argv.includes("--strict");
 
@@ -33,8 +35,8 @@ if (hasIssues && strict) {
   process.exitCode = 1;
 }
 
-function collectIds(globs) {
-  const matches = new Map();
+function collectIds(globs: readonly string[]): IdMatches {
+  const matches: IdMatches = new Map();
 
   for (const pattern of globs) {
     const files = globSync(pattern, {
@@ -42,16 +44,16 @@ function collectIds(globs) {
     });
 
     for (const file of files) {
-      const absolutePath = path.resolve(file);
+      const absolutePath = resolve(file);
       const content = readFileSync(absolutePath, "utf8");
 
       for (const id of content.matchAll(ID_PATTERN)) {
         const value = id[1];
-        if (!value) {
+        if (value === undefined) {
           continue;
         }
         const list = matches.get(value) ?? [];
-        list.push(path.relative(process.cwd(), absolutePath));
+        list.push(relative(process.cwd(), absolutePath));
         matches.set(value, list);
       }
     }
@@ -60,17 +62,17 @@ function collectIds(globs) {
   return matches;
 }
 
-function findDuplicates(matches) {
+function findDuplicates(matches: IdMatches): DuplicateIdEntry[] {
   return [...matches.entries()]
     .filter(([, files]) => files.length > 1)
     .sort(([left], [right]) => left.localeCompare(right));
 }
 
-function printSection(label, count) {
+function printSection(label: string, count: number): void {
   console.log(`${label}: ${count}`);
 }
 
-function printIdList(label, ids, matches) {
+function printIdList(label: string, ids: string[], matches: IdMatches): void {
   console.log(`\n${label}:`);
   if (ids.length === 0) {
     console.log("- none");
@@ -83,7 +85,10 @@ function printIdList(label, ids, matches) {
   }
 }
 
-function printDuplicateList(label, duplicates) {
+function printDuplicateList(
+  label: string,
+  duplicates: DuplicateIdEntry[],
+): void {
   console.log(`\n${label}:`);
   if (duplicates.length === 0) {
     console.log("- none");
