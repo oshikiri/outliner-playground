@@ -1,14 +1,9 @@
 import { render } from "preact";
 import type { ComponentChildren, JSX } from "preact";
-import { useEffect, useMemo } from "preact/hooks";
+import { useEffect } from "preact/hooks";
 
 import BlockComponent from "./block/BlockComponent";
-import {
-  createBlockStore,
-  createBlockTree,
-  getChildBlocks,
-  updateBlockContent,
-} from "./block/blockStore";
+import { createBlockStore } from "./block/blockStore";
 import { initialRootBlock } from "./block/data";
 import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
 import {
@@ -16,7 +11,14 @@ import {
   loadPersistedRootBlock,
   persistRootBlock,
 } from "./persistence";
-import { initializeState, useEditorSession, useRootBlock } from "./state";
+import {
+  initializeState,
+  useEditorSession,
+  usePersistedRootBlock,
+  useRootBlockJson,
+  useRootChildBlockIds,
+  useSetRootBlock,
+} from "./state";
 
 import "./styles.css";
 
@@ -35,22 +37,11 @@ if (!rootElement) {
 }
 
 function App(): JSX.Element {
-  const [rootBlock, setRootBlock] = useRootBlock();
+  const setRootBlock = useSetRootBlock();
   const [editorSession, setEditorSession] = useEditorSession();
-  const jsonStr = useMemo(() => {
-    return JSON.stringify(createBlockTree(rootBlock).toJSON(), null, 2);
-  }, [rootBlock]);
-  const persistedRootBlock = useMemo(() => {
-    if (!editorSession) {
-      return rootBlock;
-    }
-
-    return updateBlockContent(
-      rootBlock,
-      editorSession.activeBlockId,
-      editorSession.draftText,
-    );
-  }, [editorSession, rootBlock]);
+  const rootChildBlockIds = useRootChildBlockIds();
+  const jsonStr = useRootBlockJson();
+  const persistedRootBlock = usePersistedRootBlock(editorSession);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent): void => {
@@ -75,8 +66,8 @@ function App(): JSX.Element {
       role="main"
     >
       <Panel>
-        {getChildBlocks(rootBlock, rootBlock.rootId).map((block) => (
-          <BlockComponent key={block.id} blockId={block.id} />
+        {rootChildBlockIds.map((blockId) => (
+          <BlockComponent key={blockId} blockId={blockId} />
         ))}
       </Panel>
       <Panel>

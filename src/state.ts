@@ -11,9 +11,11 @@ import { useMemo } from "preact/hooks";
 
 import {
   createBlockStore,
+  createBlockTree,
   createEmptyBlockStore,
   getBlock,
   isBlockStore,
+  updateBlockContent,
   type BlockState,
   type BlockStore,
   type BlockTreeLike,
@@ -58,6 +60,46 @@ export function useBlock(blockId: string): BlockState | null {
   }, [blockId]);
 
   return useAtomValue(blockAtom);
+}
+
+export function useRootChildBlockIds(): string[] {
+  const childIdsAtom = useMemo(() => {
+    return selectAtom(rootBlockAtom, (rootBlock) => {
+      return rootBlock.blocksById[rootBlock.rootId]?.childrenIds ?? [];
+    });
+  }, []);
+
+  return useAtomValue(childIdsAtom);
+}
+
+export function useRootBlockJson(): string {
+  const rootBlockJsonAtom = useMemo(() => {
+    return selectAtom(rootBlockAtom, (rootBlock) => {
+      return JSON.stringify(createBlockTree(rootBlock).toJSON(), null, 2);
+    });
+  }, []);
+
+  return useAtomValue(rootBlockJsonAtom);
+}
+
+export function usePersistedRootBlock(
+  editorSession: EditorSession,
+): BlockStore {
+  const persistedRootBlockAtom = useMemo(() => {
+    return selectAtom(rootBlockAtom, (rootBlock) => {
+      if (!editorSession) {
+        return rootBlock;
+      }
+
+      return updateBlockContent(
+        rootBlock,
+        editorSession.activeBlockId,
+        editorSession.draftText,
+      );
+    });
+  }, [editorSession]);
+
+  return useAtomValue(persistedRootBlockAtom);
 }
 
 export function useEditorSession(): [
