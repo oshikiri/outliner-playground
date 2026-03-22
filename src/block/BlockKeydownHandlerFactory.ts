@@ -130,10 +130,10 @@ function handleArrowDown(
   event: KeydownEvent,
   context: KeydownHandlerContext,
 ): void {
-  // TODO: 既知課題。判定に context.block.content を使うと同期前の内容を参照する可能性がある。currentElement.innerText を同期した値で判定する。
+  const currentContent = context.currentElement?.innerText ?? "";
   if (
     !context.currentElement ||
-    !dom.isCaretAtLastLine(context.block.content, context.getSelection())
+    !dom.isCaretAtLastLine(currentContent, context.getSelection())
   ) {
     return;
   }

@@ -90,6 +90,28 @@ describe("キー移動", () => {
     });
   });
 
+  it("[OE-MOVE-006] 編集中の DOM テキストが最新なら ArrowDown の判定は同期前 state ではなく最新内容を使う", async () => {
+    renderEditor(["first\nsecond", "next"]);
+
+    const editable = await beginEditing("first\nsecond", {
+      content: "first",
+      caretOffset: "first".length,
+    });
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("next");
+      expect(getRootBlockState().children[0]?.content).toBe("first");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: "next".length,
+      });
+    });
+  });
+
   it("[OE-MOVE-009] 次ブロック先頭行が短い場合 ArrowDown 後の caretOffset は先頭行末尾にクランプされる", async () => {
     renderEditor(["ab\ncdef", "x\nyz"]);
 
