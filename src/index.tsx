@@ -22,6 +22,9 @@ if (!rootElement) {
 function App(): JSX.Element {
   const [rootBlock, setRootBlock] = useRootBlock();
   const [, setEditorSession] = useEditorSession();
+  const jsonStr = useMemo(() => {
+    return JSON.stringify(rootBlock.toJSON(), null, 2);
+  }, [rootBlock]);
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent): void => {
@@ -42,31 +45,15 @@ function App(): JSX.Element {
         landscape:flex-row"
       role="main"
     >
-      <EditorPanel rootBlock={rootBlock} />
-      <JsonPanel rootBlock={rootBlock} />
+      <Panel>
+        {rootBlock.children.map((block: BlockEntity) => (
+          <BlockComponent key={block.id} block={block} />
+        ))}
+      </Panel>
+      <Panel>
+        <pre className="text-xs whitespace-pre-wrap break-all">{jsonStr}</pre>
+      </Panel>
     </div>
-  );
-}
-
-function EditorPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
-  return (
-    <Panel>
-      {rootBlock.children.map((block: BlockEntity) => (
-        <BlockComponent key={block.id} block={block} />
-      ))}
-    </Panel>
-  );
-}
-
-function JsonPanel({ rootBlock }: { rootBlock: BlockEntity }): JSX.Element {
-  const jsonStr = useMemo(() => {
-    return JSON.stringify(rootBlock.toJSON(), null, 2);
-  }, [rootBlock]);
-
-  return (
-    <Panel>
-      <pre className="text-xs whitespace-pre-wrap break-all">{jsonStr}</pre>
-    </Panel>
   );
 }
 
