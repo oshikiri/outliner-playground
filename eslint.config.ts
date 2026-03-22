@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-import primaryFunctionFirst from "./eslint/rules/primaryFunctionFirst.mjs";
+import primaryFunctionFirst from "./eslint/rules/primaryFunctionFirst.ts";
 
 export default tseslint.config(
   {

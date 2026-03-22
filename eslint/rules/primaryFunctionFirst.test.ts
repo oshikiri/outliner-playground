@@ -1,6 +1,6 @@
 import { RuleTester } from "eslint";
 
-import rule from "./primaryFunctionFirst.mjs";
+import rule from "./primaryFunctionFirst.ts";
 
 const ruleTester = new RuleTester({
   languageOptions: {

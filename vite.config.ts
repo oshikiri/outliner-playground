@@ -25,6 +25,6 @@ export default defineConfig({
     },
     environment: "jsdom",
     globals: true,
-    include: ["src/**/*.test.{ts,tsx}", "eslint/**/*.test.mjs"],
+    include: ["src/**/*.test.{ts,tsx}", "eslint/**/*.test.ts"],
   },
 });

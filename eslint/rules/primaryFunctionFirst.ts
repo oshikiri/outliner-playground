@@ -2,7 +2,33 @@ import path from "node:path";
 
 const MESSAGE_ID = "primaryFunctionFirst";
 
-export default {
+type TopLevelFunction = {
+  index: number;
+  name: string;
+  reportNode: unknown;
+};
+
+type ProgramStatement = {
+  declaration?: ProgramStatement | null;
+  declarations?: Array<{
+    id: { name?: string; type: string };
+    init?: { type?: string } | null;
+  }>;
+  id?: { name: string } | null;
+  type: string;
+  body?: ProgramStatement[];
+};
+
+type RuleContext = {
+  filename: string;
+  report: (descriptor: {
+    data: { name: string };
+    messageId: string;
+    node: unknown;
+  }) => void;
+};
+
+const rule = {
   meta: {
     docs: {
       description:
@@ -15,9 +41,9 @@ export default {
     schema: [],
     type: "suggestion",
   },
-  create(context) {
+  create(context: RuleContext) {
     return {
-      Program(program) {
+      Program(program: ProgramStatement & { body: ProgramStatement[] }) {
         const functions = collectTopLevelFunctions(program);
 
         if (functions.length < 2) {
@@ -30,7 +56,7 @@ export default {
           context.filename,
         );
 
-        if (primaryFunctionName == null) {
+        if (primaryFunctionName === null) {
           return;
         }
 
@@ -42,7 +68,7 @@ export default {
           (item) => item.name === primaryFunctionName,
         );
 
-        if (primaryFunction == null) {
+        if (primaryFunction === undefined) {
           return;
         }
 
@@ -56,13 +82,21 @@ export default {
   },
 };
 
-function collectTopLevelFunctions(program) {
-  const functions = [];
+export default rule;
+
+function collectTopLevelFunctions(
+  program: ProgramStatement & { body: ProgramStatement[] },
+): TopLevelFunction[] {
+  const functions: TopLevelFunction[] = [];
 
   for (const [index, statement] of program.body.entries()) {
     const declaration = unwrapTopLevelStatement(statement);
 
-    if (declaration?.type === "FunctionDeclaration" && declaration.id != null) {
+    if (
+      declaration?.type === "FunctionDeclaration" &&
+      declaration.id !== null &&
+      declaration.id !== undefined
+    ) {
       functions.push({
         index,
         name: declaration.id.name,
@@ -75,11 +109,15 @@ function collectTopLevelFunctions(program) {
       continue;
     }
 
-    for (const declarator of declaration.declarations) {
+    for (const declarator of declaration.declarations ?? []) {
       if (
         declarator.id.type !== "Identifier" ||
         !isFunctionExpression(declarator.init)
       ) {
+        continue;
+      }
+
+      if (declarator.id.name === undefined) {
         continue;
       }
 
@@ -94,7 +132,11 @@ function collectTopLevelFunctions(program) {
   return functions;
 }
 
-function findPrimaryFunctionName(program, functions, filename) {
+function findPrimaryFunctionName(
+  program: ProgramStatement & { body: ProgramStatement[] },
+  functions: TopLevelFunction[],
+  filename: string,
+): string | null {
   const names = new Set(functions.map((item) => item.name));
 
   return (
@@ -104,7 +146,10 @@ function findPrimaryFunctionName(program, functions, filename) {
   );
 }
 
-function findDefaultExportedFunctionName(program, names) {
+function findDefaultExportedFunctionName(
+  program: ProgramStatement & { body: ProgramStatement[] },
+  names: Set<string>,
+): string | null {
   for (const statement of program.body) {
     if (statement.type !== "ExportDefaultDeclaration") {
       continue;
@@ -112,11 +157,19 @@ function findDefaultExportedFunctionName(program, names) {
 
     const declaration = statement.declaration;
 
-    if (declaration.type === "FunctionDeclaration" && declaration.id != null) {
+    if (
+      declaration?.type === "FunctionDeclaration" &&
+      declaration.id !== null &&
+      declaration.id !== undefined
+    ) {
       return declaration.id.name;
     }
 
-    if (declaration.type === "Identifier" && names.has(declaration.name)) {
+    if (
+      declaration?.type === "Identifier" &&
+      declaration.name !== undefined &&
+      names.has(declaration.name)
+    ) {
       return declaration.name;
     }
   }
@@ -124,8 +177,11 @@ function findDefaultExportedFunctionName(program, names) {
   return null;
 }
 
-function findSoleExportedFunctionName(program, names) {
-  const exportedNames = [];
+function findSoleExportedFunctionName(
+  program: ProgramStatement & { body: ProgramStatement[] },
+  names: Set<string>,
+): string | null {
+  const exportedNames: string[] = [];
 
   for (const statement of program.body) {
     if (statement.type !== "ExportNamedDeclaration") {
@@ -134,7 +190,11 @@ function findSoleExportedFunctionName(program, names) {
 
     const declaration = statement.declaration;
 
-    if (declaration?.type === "FunctionDeclaration" && declaration.id != null) {
+    if (
+      declaration?.type === "FunctionDeclaration" &&
+      declaration.id !== null &&
+      declaration.id !== undefined
+    ) {
       exportedNames.push(declaration.id.name);
       continue;
     }
@@ -143,9 +203,10 @@ function findSoleExportedFunctionName(program, names) {
       continue;
     }
 
-    for (const declarator of declaration.declarations) {
+    for (const declarator of declaration.declarations ?? []) {
       if (
         declarator.id.type === "Identifier" &&
+        declarator.id.name !== undefined &&
         isFunctionExpression(declarator.init)
       ) {
         exportedNames.push(declarator.id.name);
@@ -157,10 +218,18 @@ function findSoleExportedFunctionName(program, names) {
     return null;
   }
 
-  return names.has(exportedNames[0]) ? exportedNames[0] : null;
+  const exportedName = exportedNames[0];
+  if (exportedName === undefined) {
+    return null;
+  }
+
+  return names.has(exportedName) ? exportedName : null;
 }
 
-function findFileNamedFunctionName(filename, names) {
+function findFileNamedFunctionName(
+  filename: string,
+  names: Set<string>,
+): string | null {
   if (typeof filename !== "string" || filename.length === 0) {
     return null;
   }
@@ -169,7 +238,9 @@ function findFileNamedFunctionName(filename, names) {
   return names.has(baseName) ? baseName : null;
 }
 
-function unwrapTopLevelStatement(statement) {
+function unwrapTopLevelStatement(
+  statement: ProgramStatement,
+): ProgramStatement | null {
   if (
     statement.type === "ExportDefaultDeclaration" ||
     statement.type === "ExportNamedDeclaration"
@@ -180,7 +251,9 @@ function unwrapTopLevelStatement(statement) {
   return statement;
 }
 
-function isFunctionExpression(node) {
+function isFunctionExpression(
+  node: { type?: string } | null | undefined,
+): boolean {
   return (
     node?.type === "ArrowFunctionExpression" ||
     node?.type === "FunctionExpression"
