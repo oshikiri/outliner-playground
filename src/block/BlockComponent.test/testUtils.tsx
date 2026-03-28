@@ -14,7 +14,13 @@ import {
   createBlockTree,
   getBlock,
   getChildBlocks,
+  indentBlock,
   isBlockStore,
+  joinBlockWithPreviousSibling,
+  moveBlockDown,
+  moveBlockUp,
+  outdentBlock,
+  splitBlockAtCaret,
   updateBlockContent,
   type BlockState,
   type BlockStore,
@@ -28,6 +34,16 @@ let rootBlockState: BlockStore | null = null;
 let editorSessionState: EditorSession = null;
 const rootListeners = new Set<(value: BlockStore) => void>();
 const editorSessionListeners = new Set<(value: EditorSession) => void>();
+
+function notifyRootListeners(): void {
+  if (!rootBlockState) {
+    throw new Error("rootBlockState was not initialized.");
+  }
+
+  for (const listener of rootListeners) {
+    listener(rootBlockState);
+  }
+}
 
 vi.mock("../../state", async () => {
   const hooks = await import("preact/hooks");
@@ -48,12 +64,7 @@ vi.mock("../../state", async () => {
         ? rootBlock
         : createBlockStore(rootBlock);
       editorSessionState = null;
-      if (!rootBlockState) {
-        throw new Error("rootBlockState was not initialized.");
-      }
-      for (const listener of rootListeners) {
-        listener(rootBlockState);
-      }
+      notifyRootListeners();
       for (const listener of editorSessionListeners) {
         listener(editorSessionState);
       }
@@ -74,9 +85,7 @@ vi.mock("../../state", async () => {
           throw new Error("rootBlockState was not initialized.");
         }
         rootBlockState = applyUpdate(rootBlockState, update);
-        for (const listener of rootListeners) {
-          listener(rootBlockState);
-        }
+        notifyRootListeners();
       };
 
       return [value, updateValue];
@@ -100,9 +109,7 @@ vi.mock("../../state", async () => {
           throw new Error("rootBlockState was not initialized.");
         }
         rootBlockState = applyUpdate(rootBlockState, update);
-        for (const listener of rootListeners) {
-          listener(rootBlockState);
-        }
+        notifyRootListeners();
       };
     },
     useUpdateBlockContent(): (blockId: string, content: string) => void {
@@ -111,9 +118,97 @@ vi.mock("../../state", async () => {
           throw new Error("rootBlockState was not initialized.");
         }
         rootBlockState = updateBlockContent(rootBlockState, blockId, content);
-        for (const listener of rootListeners) {
-          listener(rootBlockState);
+        notifyRootListeners();
+      };
+    },
+    useSplitBlockAtCaret(): (
+      blockId: string,
+      beforeCaretText: string,
+      afterCaretText: string,
+    ) => BlockState {
+      return (blockId, beforeCaretText, afterCaretText): BlockState => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
         }
+        const nextRootBlock = splitBlockAtCaret(
+          rootBlockState,
+          blockId,
+          beforeCaretText,
+          afterCaretText,
+        );
+        rootBlockState = nextRootBlock.rootBlock;
+        notifyRootListeners();
+        return nextRootBlock.newBlock;
+      };
+    },
+    useIndentBlock(): (blockId: string, content: string) => void {
+      return (blockId: string, content: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = indentBlock(
+          updateBlockContent(rootBlockState, blockId, content),
+          blockId,
+        );
+        notifyRootListeners();
+      };
+    },
+    useOutdentBlock(): (blockId: string, content: string) => void {
+      return (blockId: string, content: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = outdentBlock(
+          updateBlockContent(rootBlockState, blockId, content),
+          blockId,
+        );
+        notifyRootListeners();
+      };
+    },
+    useMoveBlockUp(): (blockId: string, content: string) => void {
+      return (blockId: string, content: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = moveBlockUp(
+          updateBlockContent(rootBlockState, blockId, content),
+          blockId,
+        );
+        notifyRootListeners();
+      };
+    },
+    useMoveBlockDown(): (blockId: string, content: string) => void {
+      return (blockId: string, content: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = moveBlockDown(
+          updateBlockContent(rootBlockState, blockId, content),
+          blockId,
+        );
+        notifyRootListeners();
+      };
+    },
+    useJoinBlockWithPreviousSibling(): (
+      blockId: string,
+      currentContent: string,
+    ) => {
+      rootBlock: BlockStore;
+      previousBlock: BlockState;
+      caretOffset: number;
+    } | null {
+      return (blockId: string, currentContent: string) => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        const mergedBlockResult = joinBlockWithPreviousSibling(
+          rootBlockState,
+          blockId,
+          currentContent,
+        );
+        rootBlockState = mergedBlockResult?.rootBlock ?? rootBlockState;
+        notifyRootListeners();
+        return mergedBlockResult;
       };
     },
     useBlock(blockId: string): BlockState | null {

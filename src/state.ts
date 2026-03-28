@@ -9,17 +9,8 @@ import {
 import { selectAtom } from "jotai/utils";
 import { useCallback, useMemo } from "preact/hooks";
 
-import {
-  createBlockStore,
-  createBlockTree,
-  createEmptyBlockStore,
-  getBlock,
-  isBlockStore,
-  updateBlockContent,
-  type BlockState,
-  type BlockStore,
-  type BlockTreeLike,
-} from "./block/blockStore";
+import * as blockStore from "./block/blockStore";
+import type { BlockState, BlockStore, BlockTreeLike } from "./block/blockStore";
 
 export type EditorSession = {
   activeBlockId: string;
@@ -27,13 +18,15 @@ export type EditorSession = {
   draftText: string;
 } | null;
 
-const rootBlockAtom = atom<BlockStore>(createEmptyBlockStore());
+const rootBlockAtom = atom<BlockStore>(blockStore.createEmptyBlockStore());
 const editorSessionAtom = atom<EditorSession>(null);
 
 export function initializeState(rootBlock: BlockStore | BlockTreeLike): void {
   getDefaultStore().set(
     rootBlockAtom,
-    isBlockStore(rootBlock) ? rootBlock : createBlockStore(rootBlock),
+    blockStore.isBlockStore(rootBlock)
+      ? rootBlock
+      : blockStore.createBlockStore(rootBlock),
   );
   getDefaultStore().set(editorSessionAtom, null);
 }
@@ -60,7 +53,138 @@ export function useUpdateBlockContent(): (
 
   return useCallback(
     (blockId, content) => {
-      setRootBlock((prev) => updateBlockContent(prev, blockId, content));
+      setRootBlock((prev) =>
+        blockStore.updateBlockContent(prev, blockId, content),
+      );
+    },
+    [setRootBlock],
+  );
+}
+
+export function useSplitBlockAtCaret(): (
+  blockId: string,
+  beforeCaretText: string,
+  afterCaretText: string,
+) => BlockState {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, beforeCaretText, afterCaretText) => {
+      let newBlock: BlockState | null = null;
+
+      setRootBlock((prev) => {
+        const nextRootBlock = blockStore.splitBlockAtCaret(
+          prev,
+          blockId,
+          beforeCaretText,
+          afterCaretText,
+        );
+        newBlock = nextRootBlock.newBlock;
+        return nextRootBlock.rootBlock;
+      });
+
+      if (!newBlock) {
+        throw new Error(`Failed to split block "${blockId}".`);
+      }
+
+      return newBlock;
+    },
+    [setRootBlock],
+  );
+}
+
+export function useIndentBlock(): (blockId: string, content: string) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, content) => {
+      setRootBlock((prev) =>
+        blockStore.indentBlock(
+          blockStore.updateBlockContent(prev, blockId, content),
+          blockId,
+        ),
+      );
+    },
+    [setRootBlock],
+  );
+}
+
+export function useOutdentBlock(): (blockId: string, content: string) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, content) => {
+      setRootBlock((prev) =>
+        blockStore.outdentBlock(
+          blockStore.updateBlockContent(prev, blockId, content),
+          blockId,
+        ),
+      );
+    },
+    [setRootBlock],
+  );
+}
+
+export function useMoveBlockUp(): (blockId: string, content: string) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, content) => {
+      setRootBlock((prev) =>
+        blockStore.moveBlockUp(
+          blockStore.updateBlockContent(prev, blockId, content),
+          blockId,
+        ),
+      );
+    },
+    [setRootBlock],
+  );
+}
+
+export function useMoveBlockDown(): (blockId: string, content: string) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, content) => {
+      setRootBlock((prev) =>
+        blockStore.moveBlockDown(
+          blockStore.updateBlockContent(prev, blockId, content),
+          blockId,
+        ),
+      );
+    },
+    [setRootBlock],
+  );
+}
+
+export function useJoinBlockWithPreviousSibling(): (
+  blockId: string,
+  currentContent: string,
+) => {
+  rootBlock: BlockStore;
+  previousBlock: BlockState;
+  caretOffset: number;
+} | null {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, currentContent) => {
+      let mergedBlockResult: {
+        rootBlock: BlockStore;
+        previousBlock: BlockState;
+        caretOffset: number;
+      } | null = null;
+
+      setRootBlock((prev) => {
+        mergedBlockResult = blockStore.joinBlockWithPreviousSibling(
+          prev,
+          blockId,
+          currentContent,
+        );
+        return mergedBlockResult?.rootBlock ?? prev;
+      });
+
+      return mergedBlockResult;
     },
     [setRootBlock],
   );
@@ -69,7 +193,7 @@ export function useUpdateBlockContent(): (
 export function useBlock(blockId: string): BlockState | null {
   const blockAtom = useMemo(() => {
     return selectAtom(rootBlockAtom, (rootBlock) =>
-      getBlock(rootBlock, blockId),
+      blockStore.getBlock(rootBlock, blockId),
     );
   }, [blockId]);
 
@@ -89,7 +213,11 @@ export function useRootChildBlockIds(): string[] {
 export function useRootBlockJson(): string {
   const rootBlockJsonAtom = useMemo(() => {
     return selectAtom(rootBlockAtom, (rootBlock) => {
-      return JSON.stringify(createBlockTree(rootBlock).toJSON(), null, 2);
+      return JSON.stringify(
+        blockStore.createBlockTree(rootBlock).toJSON(),
+        null,
+        2,
+      );
     });
   }, []);
 
@@ -105,7 +233,7 @@ export function usePersistedRootBlock(
         return rootBlock;
       }
 
-      return updateBlockContent(
+      return blockStore.updateBlockContent(
         rootBlock,
         editorSession.activeBlockId,
         editorSession.draftText,

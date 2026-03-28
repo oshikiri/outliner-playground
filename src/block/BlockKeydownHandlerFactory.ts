@@ -6,26 +6,25 @@ import type {
 import { useCallback } from "preact/hooks";
 
 import type { BlockState, BlockStore } from "./blockStore";
-import {
-  getNextBlock,
-  getPrevBlock,
-  indentBlock,
-  joinBlockWithPreviousSibling,
-  moveBlockDown,
-  moveBlockUp,
-  outdentBlock,
-  splitBlockAtCaret as splitBlockInStore,
-  updateBlockContent,
-} from "./blockStore";
+import { getNextBlock, getPrevBlock } from "./blockStore";
 import { createEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
-import type { EditorSession, UpdateEditorSession } from "../state";
+import {
+  useIndentBlock,
+  useJoinBlockWithPreviousSibling,
+  useMoveBlockDown,
+  useMoveBlockUp,
+  useOutdentBlock,
+  useSplitBlockAtCaret,
+  useUpdateBlockContent,
+  type EditorSession,
+  type UpdateEditorSession,
+} from "../state";
 
 type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
 type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
 type ActiveEditorSession = Exclude<EditorSession, null>;
-type UpdateRootBlock = BlockStore | ((prev: BlockStore) => BlockStore);
 const IME_PROCESS_KEYCODE = 229;
 
 export function useBlockKeydownHandler({
@@ -33,10 +32,17 @@ export function useBlockKeydownHandler({
   rootBlock,
   contentRef,
   editorSession,
-  setRootBlock,
   setEditorSession,
   getSelection,
 }: UseBlockKeydownHandlerArgs): KeydownHandler {
+  const updateBlockContent = useUpdateBlockContent();
+  const splitBlockAtCaret = useSplitBlockAtCaret();
+  const indentBlock = useIndentBlock();
+  const outdentBlock = useOutdentBlock();
+  const moveBlockUp = useMoveBlockUp();
+  const moveBlockDown = useMoveBlockDown();
+  const joinBlockWithPreviousSibling = useJoinBlockWithPreviousSibling();
+
   return useCallback(
     (event: KeydownEvent) => {
       dispatchKeydownEvent(
@@ -46,8 +52,14 @@ export function useBlockKeydownHandler({
           rootBlock,
           contentRef,
           editorSession,
-          setRootBlock,
           setEditorSession,
+          updateBlockContent,
+          splitBlockAtCaret,
+          indentBlock,
+          outdentBlock,
+          moveBlockUp,
+          moveBlockDown,
+          joinBlockWithPreviousSibling,
           getSelection,
         }),
       );
@@ -57,15 +69,21 @@ export function useBlockKeydownHandler({
       contentRef,
       editorSession,
       getSelection,
+      indentBlock,
+      joinBlockWithPreviousSibling,
+      moveBlockDown,
+      moveBlockUp,
+      outdentBlock,
       rootBlock,
       setEditorSession,
-      setRootBlock,
+      splitBlockAtCaret,
+      updateBlockContent,
     ],
   );
 }
 
 function createKeydownHandlerContext(
-  args: UseBlockKeydownHandlerArgs,
+  args: UseBlockKeydownHandlerArgs & KeydownHandlerActions,
 ): KeydownHandlerContext {
   return {
     ...args,
@@ -173,22 +191,12 @@ function handleEnter(
   const { beforeText, afterText } = caretDom.getTextSegmentsAroundCaret(
     context.getSelection(),
   );
+  const newBlock = context.splitBlockAtCaret(
+    context.block.id,
+    beforeText ?? "",
+    afterText ?? "",
+  );
 
-  let newBlock: BlockState | null = null;
-  context.setRootBlock((prev) => {
-    const nextRootBlock = splitBlockInStore(
-      prev,
-      context.block.id,
-      beforeText ?? "",
-      afterText ?? "",
-    );
-    newBlock = nextRootBlock.newBlock;
-    return nextRootBlock.rootBlock;
-  });
-
-  if (!newBlock) {
-    throw new Error(`Failed to split block "${context.block.id}".`);
-  }
   if (context.currentElement) {
     context.currentElement.innerText = beforeText ?? "";
   }
@@ -198,13 +206,19 @@ function handleEnter(
 function handleTab(event: KeydownEvent, context: KeydownHandlerContext): void {
   event.preventDefault();
 
-  syncCurrentBlockAndRestoreCaret(context, (prev) => {
-    if (event.shiftKey) {
-      return outdentBlock(prev, context.block.id);
-    }
+  const updatedBlock = getUpdatedBlock(context);
 
-    return indentBlock(prev, context.block.id);
-  });
+  if (event.shiftKey) {
+    context.outdentBlock(updatedBlock.id, updatedBlock.content);
+  } else {
+    context.indentBlock(updatedBlock.id, updatedBlock.content);
+  }
+
+  setEditorSessionForBlock(
+    context,
+    updatedBlock,
+    getCurrentCaretOffset(context),
+  );
 }
 
 function handleArrowDown(
@@ -244,8 +258,12 @@ function handleMoveBlockDown(
 ): void {
   event.preventDefault();
 
-  syncCurrentBlockAndRestoreCaret(context, (prev) =>
-    moveBlockDown(prev, context.block.id),
+  const updatedBlock = getUpdatedBlock(context);
+  context.moveBlockDown(updatedBlock.id, updatedBlock.content);
+  setEditorSessionForBlock(
+    context,
+    updatedBlock,
+    getCurrentCaretOffset(context),
   );
 }
 
@@ -288,43 +306,26 @@ function handleMoveBlockUp(
 ): void {
   event.preventDefault();
 
-  syncCurrentBlockAndRestoreCaret(context, (prev) =>
-    moveBlockUp(prev, context.block.id),
-  );
-}
-
-function syncCurrentBlockContent(context: KeydownHandlerContext): BlockState {
-  const updatedBlock: BlockState = {
-    ...context.block,
-    content: context.currentElement?.innerText ?? "",
-  };
-  context.setRootBlock((prev) =>
-    updateBlockContent(prev, updatedBlock.id, updatedBlock.content),
-  );
-  return updatedBlock;
-}
-
-function syncCurrentBlockAndRestoreCaret(
-  context: KeydownHandlerContext,
-  updateTree: (rootBlock: BlockStore) => BlockStore,
-): void {
-  const updatedBlock: BlockState = {
-    ...context.block,
-    content: context.currentElement?.innerText ?? "",
-  };
-  context.setRootBlock((prev) => {
-    const nextRootBlock = updateBlockContent(
-      prev,
-      updatedBlock.id,
-      updatedBlock.content,
-    );
-    return updateTree(nextRootBlock);
-  });
+  const updatedBlock = getUpdatedBlock(context);
+  context.moveBlockUp(updatedBlock.id, updatedBlock.content);
   setEditorSessionForBlock(
     context,
     updatedBlock,
     getCurrentCaretOffset(context),
   );
+}
+
+function syncCurrentBlockContent(context: KeydownHandlerContext): BlockState {
+  const updatedBlock = getUpdatedBlock(context);
+  context.updateBlockContent(updatedBlock.id, updatedBlock.content);
+  return updatedBlock;
+}
+
+function getUpdatedBlock(context: KeydownHandlerContext): BlockState {
+  return {
+    ...context.block,
+    content: context.currentElement?.innerText ?? "",
+  };
 }
 
 function getCurrentCaretOffset(context: KeydownHandlerContext): number {
@@ -425,8 +426,7 @@ function handleBackspace(
 
   event.preventDefault();
 
-  const merged = joinBlockWithPreviousSibling(
-    context.rootBlock,
+  const merged = context.joinBlockWithPreviousSibling(
     context.block.id,
     currentContent,
   );
@@ -434,7 +434,6 @@ function handleBackspace(
     return;
   }
 
-  context.setRootBlock(merged.rootBlock);
   setEditorSessionForBlock(context, merged.previousBlock, merged.caretOffset);
 }
 
@@ -485,12 +484,24 @@ type UseBlockKeydownHandlerArgs = {
   rootBlock: BlockStore;
   contentRef: RefObject<HTMLElement | null>;
   editorSession: ActiveEditorSession;
-  setRootBlock: (updateFn: UpdateRootBlock) => void;
   setEditorSession: (updateFn: UpdateEditorSession) => void;
   getSelection?: () => Selection | null;
 };
 
-type KeydownHandlerContext = UseBlockKeydownHandlerArgs & {
-  currentElement: HTMLElement | null;
-  getSelection: () => Selection | null;
+type KeydownHandlerActions = {
+  updateBlockContent: ReturnType<typeof useUpdateBlockContent>;
+  splitBlockAtCaret: ReturnType<typeof useSplitBlockAtCaret>;
+  indentBlock: ReturnType<typeof useIndentBlock>;
+  outdentBlock: ReturnType<typeof useOutdentBlock>;
+  moveBlockUp: ReturnType<typeof useMoveBlockUp>;
+  moveBlockDown: ReturnType<typeof useMoveBlockDown>;
+  joinBlockWithPreviousSibling: ReturnType<
+    typeof useJoinBlockWithPreviousSibling
+  >;
 };
+
+type KeydownHandlerContext = UseBlockKeydownHandlerArgs &
+  KeydownHandlerActions & {
+    currentElement: HTMLElement | null;
+    getSelection: () => Selection | null;
+  };
