@@ -193,7 +193,7 @@ export function useJoinBlockWithPreviousSibling(): (
 export function useBlock(blockId: string): BlockState | null {
   const blockAtom = useMemo(() => {
     return selectAtom(rootBlockAtom, (rootBlock) =>
-      blockStore.getBlock(rootBlock, blockId),
+      blockStore.findBlock(rootBlock, blockId),
     );
   }, [blockId]);
 

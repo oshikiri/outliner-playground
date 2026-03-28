@@ -6,7 +6,7 @@ import type {
 import { useCallback } from "preact/hooks";
 
 import type { BlockState, BlockStore } from "./blockStore";
-import { getNextBlock, getPrevBlock } from "./blockStore";
+import { findNextBlock, findPrevBlock } from "./blockStore";
 import { createEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
 import {
@@ -234,7 +234,7 @@ function handleArrowDown(
   }
 
   event.preventDefault();
-  const nextBlock = getNextBlock(context.rootBlock, context.block.id);
+  const nextBlock = findNextBlock(context.rootBlock, context.block.id);
   if (!nextBlock) {
     return;
   }
@@ -279,7 +279,7 @@ function handleArrowUp(
   }
 
   event.preventDefault();
-  const prevBlock = getPrevBlock(context.rootBlock, context.block.id);
+  const prevBlock = findPrevBlock(context.rootBlock, context.block.id);
   if (!isVisibleBlock(prevBlock)) {
     return;
   }
@@ -419,7 +419,7 @@ function handleBackspace(
     return;
   }
 
-  const previousBlock = getPrevBlock(context.rootBlock, context.block.id);
+  const previousBlock = findPrevBlock(context.rootBlock, context.block.id);
   if (!isVisibleBlock(previousBlock)) {
     return;
   }
@@ -446,7 +446,7 @@ function handleArrowLeft(
   }
 
   event.preventDefault();
-  const prevBlock = getPrevBlock(context.rootBlock, context.block.id);
+  const prevBlock = findPrevBlock(context.rootBlock, context.block.id);
   if (!isVisibleBlock(prevBlock)) {
     return;
   }
@@ -467,7 +467,7 @@ function handleArrowRight(
   }
 
   event.preventDefault();
-  const nextBlock = getNextBlock(context.rootBlock, context.block.id);
+  const nextBlock = findNextBlock(context.rootBlock, context.block.id);
   if (!nextBlock) {
     return;
   }

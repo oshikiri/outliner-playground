@@ -160,16 +160,16 @@ describe("ブロック移動の走査順", () => {
     const sibling = new BlockEntity("sibling");
     new BlockEntity("", [child, sibling]);
 
-    expect(child.getNextBlock()).toBe(grandchild);
-    expect(grandchild.getNextBlock()).toBe(sibling);
-    expect(sibling.getPrevBlock()).toBe(grandchild);
-    expect(grandchild.getPrevBlock()).toBe(child);
+    expect(child.findNextBlock()).toBe(grandchild);
+    expect(grandchild.findNextBlock()).toBe(sibling);
+    expect(sibling.findPrevBlock()).toBe(grandchild);
+    expect(grandchild.findPrevBlock()).toBe(child);
   });
 
   it("[OE-TREE-003] 最初の子 block の直前は親 block を返す", () => {
     const child = new BlockEntity("child");
     const root = new BlockEntity("", [child]);
 
-    expect(child.getPrevBlock()).toBe(root);
+    expect(child.findPrevBlock()).toBe(root);
   });
 });

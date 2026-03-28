@@ -88,7 +88,7 @@ export function createBlockTree(
   return tree;
 }
 
-export function getBlock(
+export function findBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState | null {
@@ -99,13 +99,13 @@ export function getChildBlocks(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState[] {
-  const block = getBlock(rootBlock, blockId);
+  const block = findBlock(rootBlock, blockId);
   if (!block) {
     return [];
   }
 
   return block.childrenIds
-    .map((childId) => getBlock(rootBlock, childId))
+    .map((childId) => findBlock(rootBlock, childId))
     .filter((child): child is BlockState => child !== null);
 }
 
@@ -114,7 +114,7 @@ export function updateBlockContent(
   blockId: string,
   content: string,
 ): BlockStore {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock || currentBlock.content === content) {
     return rootBlock;
   }
@@ -208,12 +208,12 @@ export function indentBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockStore {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock || currentBlock.parentId === null) {
     return rootBlock;
   }
 
-  const parentBlock = getBlock(rootBlock, currentBlock.parentId);
+  const parentBlock = findBlock(rootBlock, currentBlock.parentId);
   if (!parentBlock) {
     return rootBlock;
   }
@@ -249,12 +249,12 @@ export function outdentBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockStore {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock || currentBlock.parentId === null) {
     return rootBlock;
   }
 
-  const parentBlock = getBlock(rootBlock, currentBlock.parentId);
+  const parentBlock = findBlock(rootBlock, currentBlock.parentId);
   if (!parentBlock || parentBlock.parentId === null) {
     return rootBlock;
   }
@@ -289,7 +289,7 @@ export function outdentBlock(
   };
 
   for (const siblingId of siblingsAfter) {
-    const sibling = getBlock(rootBlock, siblingId);
+    const sibling = findBlock(rootBlock, siblingId);
     if (!sibling) {
       continue;
     }
@@ -309,7 +309,7 @@ export function moveBlockUp(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockStore {
-  const parentInfo = getParentAndIndex(rootBlock, blockId);
+  const parentInfo = findParentAndIndex(rootBlock, blockId);
   if (!parentInfo || parentInfo.index <= 0) {
     return rootBlock;
   }
@@ -325,7 +325,7 @@ export function moveBlockDown(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockStore {
-  const parentInfo = getParentAndIndex(rootBlock, blockId);
+  const parentInfo = findParentAndIndex(rootBlock, blockId);
   if (
     !parentInfo ||
     parentInfo.index >= parentInfo.parent.childrenIds.length - 1
@@ -336,45 +336,45 @@ export function moveBlockDown(
   return swapSiblingOrder(rootBlock, parentInfo.parent.id, parentInfo.index);
 }
 
-export function getNextBlock(
+export function findNextBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState | null {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock) {
     return null;
   }
 
   if (currentBlock.childrenIds.length > 0) {
-    return getBlock(rootBlock, currentBlock.childrenIds[0] ?? "");
+    return findBlock(rootBlock, currentBlock.childrenIds[0] ?? "");
   }
 
   let currentId = currentBlock.id;
   while (true) {
-    const parentInfo = getParentAndIndex(rootBlock, currentId);
+    const parentInfo = findParentAndIndex(rootBlock, currentId);
     if (!parentInfo) {
       return null;
     }
     const nextSiblingId =
       parentInfo.parent.childrenIds[parentInfo.index + 1] ?? null;
     if (nextSiblingId) {
-      return getBlock(rootBlock, nextSiblingId);
+      return findBlock(rootBlock, nextSiblingId);
     }
     currentId = parentInfo.parent.id;
   }
 }
 
-export function getPrevBlock(
+export function findPrevBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState | null {
-  const parentInfo = getParentAndIndex(rootBlock, blockId);
+  const parentInfo = findParentAndIndex(rootBlock, blockId);
   if (!parentInfo) {
     return null;
   }
 
   if (parentInfo.index === 0) {
-    return getBlock(rootBlock, parentInfo.parent.id);
+    return findBlock(rootBlock, parentInfo.parent.id);
   }
 
   const previousSiblingId = parentInfo.parent.childrenIds[parentInfo.index - 1];
@@ -394,17 +394,17 @@ export function joinBlockWithPreviousSibling(
   previousBlock: BlockState;
   caretOffset: number;
 } | null {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock || currentBlock.childrenIds.length > 0) {
     return null;
   }
 
-  const previousBlock = getPrevBlock(rootBlock, blockId);
+  const previousBlock = findPrevBlock(rootBlock, blockId);
   if (!previousBlock || previousBlock.parentId === null) {
     return null;
   }
 
-  const parentInfo = getParentAndIndex(rootBlock, blockId);
+  const parentInfo = findParentAndIndex(rootBlock, blockId);
   if (!parentInfo) {
     return null;
   }
@@ -446,26 +446,26 @@ export function joinBlockWithPreviousSibling(
 }
 
 function getBlockOrThrow(rootBlock: BlockStore, blockId: string): BlockState {
-  const block = getBlock(rootBlock, blockId);
+  const block = findBlock(rootBlock, blockId);
   if (!block) {
     throw new Error(`Block ${blockId} was not found.`);
   }
   return block;
 }
 
-function getParentAndIndex(
+function findParentAndIndex(
   rootBlock: BlockStore,
   blockId: string,
 ): {
   parent: BlockState;
   index: number;
 } | null {
-  const currentBlock = getBlock(rootBlock, blockId);
+  const currentBlock = findBlock(rootBlock, blockId);
   if (!currentBlock?.parentId) {
     return null;
   }
 
-  const parent = getBlock(rootBlock, currentBlock.parentId);
+  const parent = findBlock(rootBlock, currentBlock.parentId);
   if (!parent) {
     return null;
   }

@@ -12,7 +12,6 @@ import ActiveBlockEditor from "../ActiveBlockEditor";
 import {
   createBlockStore,
   createBlockTree,
-  getBlock,
   getChildBlocks,
   indentBlock,
   isBlockStore,
@@ -20,6 +19,7 @@ import {
   moveBlockDown,
   moveBlockUp,
   outdentBlock,
+  findBlock,
   splitBlockAtCaret,
   updateBlockContent,
   type BlockState,
@@ -216,12 +216,12 @@ vi.mock("../../state", async () => {
         throw new Error("rootBlockState was not initialized.");
       }
       const [value, setValue] = hooks.useState(
-        getBlock(rootBlockState, blockId),
+        findBlock(rootBlockState, blockId),
       );
 
       hooks.useEffect(() => {
         const listener = (nextRootBlock: BlockStore): void => {
-          setValue(getBlock(nextRootBlock, blockId));
+          setValue(findBlock(nextRootBlock, blockId));
         };
         rootListeners.add(listener);
         return () => rootListeners.delete(listener);
@@ -399,7 +399,7 @@ export function setCaretPositionState(
     throw new Error("rootBlockState was not initialized.");
   }
   const rootBlock = rootBlockState;
-  const block = getBlock(rootBlock, value.blockId);
+  const block = findBlock(rootBlock, value.blockId);
   if (!block) {
     throw new Error(`Block "${value.blockId}" was not found.`);
   }

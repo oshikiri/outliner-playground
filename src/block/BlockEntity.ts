@@ -31,7 +31,7 @@ export default class BlockEntity {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getNextBlock(): BlockEntity | null {
+  findNextBlock(): BlockEntity | null {
     // case 1: the current block has children
     //   Return the first child
     if (this.children.length > 0) {
@@ -42,9 +42,9 @@ export default class BlockEntity {
     //   Go up the tree until we find a parent that has a closest next sibling
     let current: BlockEntity | null = this;
     while (current?.parent) {
-      const [parent, currentIdx] = current.getParentAndIndex();
+      const [parent, currentIdx] = current.findParentAndIndex();
       if (!parent || currentIdx === -1) {
-        logger.debug("no parent at getNextBlock");
+        logger.debug("no parent at findNextBlock");
         return null;
       }
       // if a closest next sibling exists
@@ -53,7 +53,7 @@ export default class BlockEntity {
       }
       current = parent;
     }
-    logger.debug("no parent at getNextBlock");
+    logger.debug("no parent at findNextBlock");
     return null;
   }
 
@@ -62,8 +62,8 @@ export default class BlockEntity {
    *
    * cf. Tree traversal - Wikipedia https://en.wikipedia.org/wiki/Tree_traversal
    */
-  getPrevBlock(): BlockEntity | null {
-    const [parent, currentIdx] = this.getParentAndIndex();
+  findPrevBlock(): BlockEntity | null {
+    const [parent, currentIdx] = this.findParentAndIndex();
     if (!parent) {
       return null;
     }
@@ -84,21 +84,21 @@ export default class BlockEntity {
     if (this.children.length === 0) {
       return this;
     }
-    const lastChild = this.getLastChild();
+    const lastChild = this.findLastChild();
     if (!lastChild) {
       return this;
     }
     return lastChild.getLastDescendant();
   }
 
-  getLastChild(): BlockEntity | undefined {
+  findLastChild(): BlockEntity | undefined {
     return this.children[this.children.length - 1];
   }
 
   /**
    * Retrieve the parent block and the index of the current block in the parent's children array.
    */
-  getParentAndIndex(): [BlockEntity | null, number] {
+  findParentAndIndex(): [BlockEntity | null, number] {
     if (!this?.parent?.children) {
       logger.error("Block has no parent or parent has no children.");
       return [null, -1];
@@ -165,7 +165,7 @@ export default class BlockEntity {
     }
 
     logger.debug("appendNewByNewline", { beforeCaretText, afterCaretText });
-    const [parent, idx] = this.getParentAndIndex();
+    const [parent, idx] = this.findParentAndIndex();
     if (!parent || idx === -1) {
       logger.warn("Cannot append new block without a parent.");
       return null;
@@ -193,7 +193,7 @@ export default class BlockEntity {
   }
 
   indent(): BlockEntity | null {
-    const [parent, currentIdx] = this.getParentAndIndex();
+    const [parent, currentIdx] = this.findParentAndIndex();
     if (!parent || currentIdx === -1) {
       logger.warn("Block has no parent:", this);
       return parent;
@@ -220,7 +220,7 @@ export default class BlockEntity {
   }
 
   outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
-    const [parent, currentIdx] = this.getParentAndIndex();
+    const [parent, currentIdx] = this.findParentAndIndex();
     if (!parent || currentIdx === -1) {
       logger.warn("Block has no parent:", this);
       return { parent, grandparent: null };
@@ -230,7 +230,7 @@ export default class BlockEntity {
       return { parent, grandparent: null };
     }
 
-    const [grandparent, parentIdx] = parent.getParentAndIndex();
+    const [grandparent, parentIdx] = parent.findParentAndIndex();
     if (!grandparent || parentIdx === -1) {
       logger.warn("Parent has no parent:", parent);
       return { parent, grandparent };
@@ -252,7 +252,7 @@ export default class BlockEntity {
   }
 
   moveUp(): BlockEntity | null {
-    const [parent, currentIdx] = this.getParentAndIndex();
+    const [parent, currentIdx] = this.findParentAndIndex();
     if (!parent || currentIdx <= 0) {
       return parent;
     }
@@ -267,7 +267,7 @@ export default class BlockEntity {
   }
 
   moveDown(): BlockEntity | null {
-    const [parent, currentIdx] = this.getParentAndIndex();
+    const [parent, currentIdx] = this.findParentAndIndex();
     if (
       !parent ||
       currentIdx === -1 ||
