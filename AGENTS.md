@@ -1,6 +1,7 @@
 # AGENTS.md
 
 - Specifications are stored under `docs/specs/`.
+- Coding conventions: `docs/coding-standards.md`
 
 ## Completion Criteria
 
