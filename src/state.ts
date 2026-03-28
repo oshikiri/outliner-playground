@@ -7,7 +7,7 @@ import {
   type SetStateAction,
 } from "jotai";
 import { selectAtom } from "jotai/utils";
-import { useMemo } from "preact/hooks";
+import { useCallback, useMemo } from "preact/hooks";
 
 import {
   createBlockStore,
@@ -50,6 +50,20 @@ export function useRootBlockValue(): BlockStore {
 
 export function useSetRootBlock(): (updateFn: UpdateBlock) => void {
   return useSetAtom(rootBlockAtom);
+}
+
+export function useUpdateBlockContent(): (
+  blockId: string,
+  content: string,
+) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId, content) => {
+      setRootBlock((prev) => updateBlockContent(prev, blockId, content));
+    },
+    [setRootBlock],
+  );
 }
 
 export function useBlock(blockId: string): BlockState | null {

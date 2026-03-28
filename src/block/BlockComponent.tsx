@@ -2,18 +2,17 @@ import type { JSX, MouseEventHandler } from "preact";
 import { useCallback } from "preact/hooks";
 
 import ActiveBlockEditor from "./ActiveBlockEditor";
-import { updateBlockContent } from "./blockStore";
 import { createEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
 import MarkdownComponent from "../markdown/MarkdownComponent";
-import { useBlock, useEditorSession, useSetRootBlock } from "../state";
+import { useBlock, useEditorSession, useUpdateBlockContent } from "../state";
 
 export default function BlockComponent({
   blockId,
 }: {
   blockId: string;
 }): JSX.Element {
-  const setRootBlock = useSetRootBlock();
+  const updateBlockContent = useUpdateBlockContent();
   const [editorSession, setEditorSession] = useEditorSession();
   const block = useBlock(blockId);
   if (!block) {
@@ -35,20 +34,15 @@ export default function BlockComponent({
           event.clientY,
         ) ?? 0;
 
-      setRootBlock((prev) => {
-        if (!editorSession) {
-          return prev;
-        }
-
-        return updateBlockContent(
-          prev,
+      if (editorSession) {
+        updateBlockContent(
           editorSession.activeBlockId,
           editorSession.draftText,
         );
-      });
+      }
       setEditorSession(createEditorSession(block, caretOffset));
     },
-    [block, editorSession, isEditing, setEditorSession, setRootBlock],
+    [block, editorSession, isEditing, setEditorSession, updateBlockContent],
   );
 
   return (

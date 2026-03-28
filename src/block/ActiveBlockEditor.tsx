@@ -8,13 +8,12 @@ import type {
 import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
-import { updateBlockContent } from "./blockStore";
 import * as caretDom from "./editor/caretDom";
 import {
   useBlock,
   useEditorSession,
   useRootBlockValue,
-  useSetRootBlock,
+  useUpdateBlockContent,
 } from "../state";
 
 type ActiveBlockEditorProps = {
@@ -27,7 +26,7 @@ export default function ActiveBlockEditor({
   onReady,
 }: ActiveBlockEditorProps): JSX.Element {
   const rootBlock = useRootBlockValue();
-  const setRootBlock = useSetRootBlock();
+  const updateBlockContent = useUpdateBlockContent();
   const [editorSession, setEditorSession] = useEditorSession();
   const contentRef = useRef<HTMLDivElement>(null);
   const block = useBlock(blockId);
@@ -79,9 +78,7 @@ export default function ActiveBlockEditor({
           draftText,
         };
       });
-      setRootBlock((prev) => {
-        return updateBlockContent(prev, block.id, draftText);
-      });
+      updateBlockContent(block.id, draftText);
 
       window.requestAnimationFrame(() => {
         if (document.activeElement === currentElement) {
@@ -96,7 +93,7 @@ export default function ActiveBlockEditor({
         });
       });
     },
-    [block.id, setEditorSession, setRootBlock],
+    [block.id, setEditorSession, updateBlockContent],
   );
 
   const onInput = useCallback(
@@ -122,7 +119,6 @@ export default function ActiveBlockEditor({
     rootBlock,
     contentRef,
     editorSession,
-    setRootBlock,
     setEditorSession,
   });
 

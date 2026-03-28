@@ -15,6 +15,7 @@ import {
   getBlock,
   getChildBlocks,
   isBlockStore,
+  updateBlockContent,
   type BlockState,
   type BlockStore,
 } from "../blockStore";
@@ -99,6 +100,17 @@ vi.mock("../../state", async () => {
           throw new Error("rootBlockState was not initialized.");
         }
         rootBlockState = applyUpdate(rootBlockState, update);
+        for (const listener of rootListeners) {
+          listener(rootBlockState);
+        }
+      };
+    },
+    useUpdateBlockContent(): (blockId: string, content: string) => void {
+      return (blockId: string, content: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = updateBlockContent(rootBlockState, blockId, content);
         for (const listener of rootListeners) {
           listener(rootBlockState);
         }
