@@ -1,0 +1,1 @@
+- Use Jotai's `SetStateAction<Value>` directly in setter type signatures so setters accept both plain values and updater functions.

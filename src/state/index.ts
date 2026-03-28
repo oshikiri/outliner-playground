@@ -9,8 +9,12 @@ import {
 import { selectAtom } from "jotai/utils";
 import { useCallback, useMemo } from "preact/hooks";
 
-import * as blockStore from "./block/blockStore";
-import type { BlockState, BlockStore, BlockTreeLike } from "./block/blockStore";
+import * as blockStore from "../block/blockStore";
+import type {
+  BlockState,
+  BlockStore,
+  BlockTreeLike,
+} from "../block/blockStore";
 
 export type EditorSession = {
   activeBlockId: string;

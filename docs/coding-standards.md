@@ -13,9 +13,8 @@
 
 - Do not keep multiple conditional branches, deep JSX nesting, and list rendering logic in a single component body. Prefer extracting list item renderers and large conditional blocks first.
 
-## jotai
+## Layer
 
-- In this repository, the state layer means `src/state.ts` and `src/state/**`.
+- In this repository, the state layer means `src/state/`.
 - State-layer modules may depend on model code, but model code must not depend on the state layer.
 - Keep storage and serialization helpers in the state layer.
-- Use Jotai's `SetStateAction<Value>` directly in setter type signatures so setters accept both plain values and updater functions.
