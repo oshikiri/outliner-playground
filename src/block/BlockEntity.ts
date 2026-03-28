@@ -1,3 +1,5 @@
+import * as logger from "../logger";
+
 /**
  * Block node for the outliner tree.
  *
@@ -42,7 +44,7 @@ export default class BlockEntity {
     while (current?.parent) {
       const [parent, currentIdx] = current.getParentAndIndex();
       if (!parent || currentIdx === -1) {
-        console.debug("no parent at getNextBlock");
+        logger.debug("no parent at getNextBlock");
         return null;
       }
       // if a closest next sibling exists
@@ -51,7 +53,7 @@ export default class BlockEntity {
       }
       current = parent;
     }
-    console.debug("no parent at getNextBlock");
+    logger.debug("no parent at getNextBlock");
     return null;
   }
 
@@ -98,7 +100,7 @@ export default class BlockEntity {
    */
   getParentAndIndex(): [BlockEntity | null, number] {
     if (!this?.parent?.children) {
-      console.error("Block has no parent or parent has no children.");
+      logger.error("Block has no parent or parent has no children.");
       return [null, -1];
     }
 
@@ -158,14 +160,14 @@ export default class BlockEntity {
     afterCaretText: string,
   ): BlockEntity | null {
     if (this.parent === null) {
-      console.warn("Cannot append new block to root-level block.");
+      logger.warn("Cannot append new block to root-level block.");
       return null;
     }
 
-    console.warn("appendNewByNewline", { beforeCaretText, afterCaretText });
+    logger.debug("appendNewByNewline", { beforeCaretText, afterCaretText });
     const [parent, idx] = this.getParentAndIndex();
     if (!parent || idx === -1) {
-      console.warn("Cannot append new block without a parent.");
+      logger.warn("Cannot append new block without a parent.");
       return null;
     }
     const updatedBlock = new BlockEntity(
@@ -193,21 +195,19 @@ export default class BlockEntity {
   indent(): BlockEntity | null {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      console.warn("Block has no parent:", this);
+      logger.warn("Block has no parent:", this);
       return parent;
     }
 
     if (currentIdx === 0) {
-      console.warn(
-        "Cannot indent block that is the first child of its parent.",
-      );
+      logger.warn("Cannot indent block that is the first child of its parent.");
       return parent;
     }
 
     const siblingsBefore = parent.children.slice(0, currentIdx);
     const prevSibling = siblingsBefore[siblingsBefore.length - 1];
     if (!prevSibling) {
-      console.warn("No previous sibling to indent to.");
+      logger.warn("No previous sibling to indent to.");
       return parent;
     }
     this.parent = prevSibling;
@@ -222,17 +222,17 @@ export default class BlockEntity {
   outdent(): { parent: BlockEntity | null; grandparent: BlockEntity | null } {
     const [parent, currentIdx] = this.getParentAndIndex();
     if (!parent || currentIdx === -1) {
-      console.warn("Block has no parent:", this);
+      logger.warn("Block has no parent:", this);
       return { parent, grandparent: null };
     }
     if (!parent.parent) {
-      console.warn("Cannot outdent block that is a child of the root.");
+      logger.warn("Cannot outdent block that is a child of the root.");
       return { parent, grandparent: null };
     }
 
     const [grandparent, parentIdx] = parent.getParentAndIndex();
     if (!grandparent || parentIdx === -1) {
-      console.warn("Parent has no parent:", parent);
+      logger.warn("Parent has no parent:", parent);
       return { parent, grandparent };
     }
 

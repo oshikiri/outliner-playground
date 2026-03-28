@@ -11,6 +11,7 @@ import {
   loadPersistedRootBlock,
   persistRootBlock,
 } from "./persistence";
+import * as logger from "./logger";
 import {
   initializeState,
   useEditorSession,
@@ -31,7 +32,7 @@ initializeState(
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
-  console.warn('Root element "#root" was not found.');
+  logger.warn('Root element "#root" was not found.');
 } else {
   render(<App />, rootElement);
 }

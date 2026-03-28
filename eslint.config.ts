@@ -78,6 +78,40 @@ export default tseslint.config(
     },
   },
   {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/logger.ts", "src/**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "console",
+          property: "debug",
+          message: "Use src/logger.ts instead of calling console.* directly.",
+        },
+        {
+          object: "console",
+          property: "error",
+          message: "Use src/logger.ts instead of calling console.* directly.",
+        },
+        {
+          object: "console",
+          property: "info",
+          message: "Use src/logger.ts instead of calling console.* directly.",
+        },
+        {
+          object: "console",
+          property: "log",
+          message: "Use src/logger.ts instead of calling console.* directly.",
+        },
+        {
+          object: "console",
+          property: "warn",
+          message: "Use src/logger.ts instead of calling console.* directly.",
+        },
+      ],
+    },
+  },
+  {
     files: ["src/**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-properties": [

@@ -1,8 +1,6 @@
 # AGENTS.md
 
 - Specifications are stored under `docs/specs/`.
-- Using `console.log` and `console.warn` is allowed.
-  - Consider introducing a logging library in the future.
 
 ## Completion Criteria
 

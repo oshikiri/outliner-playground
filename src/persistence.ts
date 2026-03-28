@@ -4,6 +4,7 @@ import {
   type BlockStore,
   type BlockTreeLike,
 } from "./block/blockStore";
+import * as logger from "./logger";
 
 const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
 
@@ -15,7 +16,7 @@ export function getBrowserStorage(): Storage | null {
   try {
     return window.localStorage;
   } catch (error) {
-    console.warn("Failed to access localStorage.", error);
+    logger.warn("Failed to access localStorage.", error);
     return null;
   }
 }
@@ -41,7 +42,7 @@ export function loadPersistedRootBlock(
 
     return createBlockStore(parsed);
   } catch (error) {
-    console.warn("Failed to load persisted rootBlock.", error);
+    logger.warn("Failed to load persisted rootBlock.", error);
     return fallbackRootBlock;
   }
 }
@@ -60,7 +61,7 @@ export function persistRootBlock(
       JSON.stringify(createBlockTree(rootBlock).toJSON()),
     );
   } catch (error) {
-    console.warn("Failed to persist rootBlock.", error);
+    logger.warn("Failed to persist rootBlock.", error);
   }
 }
 
