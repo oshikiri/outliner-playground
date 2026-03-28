@@ -2,7 +2,7 @@
 
 ## Block
 
-- When updating a `Block` tree, avoid in-place mutation. Clone with the shared `createBlock` helper and replace the updated node in the parent's array.
+- When updating a `BlockStore`, avoid in-place mutation. Create replacement `BlockState` objects and return a new `BlockStore`.
 
 ## JavaScript/TypeScript
 
