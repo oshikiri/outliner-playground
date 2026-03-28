@@ -13,3 +13,5 @@
   - `npm run build`
   - `npm run test`
   - `npm run check:traceability:strict`
+- If the change is limited to Markdown files, the commands above may be skipped.
+- If the Markdown-only change includes `docs/specs/`, still run `npm run check:traceability:strict` before replying.
