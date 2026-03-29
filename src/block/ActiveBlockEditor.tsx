@@ -8,13 +8,13 @@ import type {
 import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 
 import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
-import * as caretDom from "./editor/caretDom";
 import {
   useBlock,
   useEditorSession,
   useRootBlockValue,
   useUpdateBlockContent,
 } from "../state";
+import * as caretDom from "../ui/block/caret/caretDom";
 
 type ActiveBlockEditorProps = {
   blockId: string;

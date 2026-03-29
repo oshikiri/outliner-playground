@@ -8,7 +8,6 @@ import { useCallback } from "preact/hooks";
 import type { BlockState, BlockStore } from "./blockStore";
 import { findNextBlock, findPrevBlock } from "./blockStore";
 import { createEditorSession, type ActiveEditorSession } from "./editorSession";
-import * as caretDom from "./editor/caretDom";
 import {
   useIndentBlock,
   useJoinBlockWithPreviousSibling,
@@ -19,6 +18,7 @@ import {
   useUpdateBlockContent,
   type UpdateEditorSession,
 } from "../state";
+import * as caretDom from "../ui/block/caret/caretDom";
 
 type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
