@@ -1,45 +1,61 @@
 # Architecture
 
-## Overview
+## Diagram
 
 ```text
-app entry layer
-  src/index.tsx
-  |- depends on UI layer
-  |    src/block/*.tsx
-  |    src/block/BlockKeydownHandlerFactory.ts
-  |- depends on state layer
-  |    src/state/
-  |    |- src/state/rootBlockState.ts
-  |    `- src/state/editorSessionState.ts
-  `- depends on persistence layer
-       src/persistence.ts
+                 +---------------------------+
+                 | app entry: src/index.tsx  |
+                 | wires browser startup     |
+                 +-------------+-------------+
+                               |
+        +----------------------+------+-----------------------+
+        |                      |                              |
+        v                      v                              v
++-------+--------+    +--------+--------+    +---------------+----------------+
+| ui             |    | state           |    | persistence                     |
+| src/ui/        |    | src/state/      |    | src/infra/persistence.ts        |
++-------+--------+    +--------+--------+    +---------------+----------------+
+        |                      |                              |
+        | depends on           | depends on                   | depends on
+        +----------------------+------------------------------+
+                               v
+                     +---------+---------+
+                     | core              |
+                     | src/core/         |
+                     +-------------------+
 
-state layer
-  `- depends on domain layer
+app entry also depends on:
+- src/keyboardShortcuts.ts
+- src/logger.ts
 
-persistence layer
-  `- depends on domain layer
-
-domain layer
-  src/block/blockStore.ts
-  src/block/editorSession.ts
+src/infra/persistence.ts depends on:
+- src/core/
+- src/logger.ts
 ```
 
 ## Layers
 
-- **App entry layer**: `src/index.tsx`
-  Owns startup wiring, top-level app shell rendering, and global event registration.
-  May depend on UI, state, and persistence modules, but should not own editor rules.
-- **UI layer**: runtime `.tsx` modules under `src/block/`, `src/block/BlockKeydownHandlerFactory.ts`
-  Owns rendering, DOM event handling, and mode switching.
-  May depend on the state layer.
-- **State layer**: `src/state/`
-  Owns UI-facing hooks, selectors, and update entry points.
-  May depend on domain modules, but domain modules must not depend on the state layer.
-- **Domain layer**: `src/block/blockStore.ts`, `src/block/editorSession.ts`
-  Owns UI-independent editor data and rules.
-  Must not depend on UI or state modules.
-- **Persistence layer**: `src/persistence.ts`
+- **App entry**: `src/index.tsx`
+  Owns startup wiring, top-level app shell rendering, and global browser event registration.
+  May depend on `ui`, `state`, `infra/persistence`, and top-level support modules, but should not own editor rules.
+- **UI**: `src/ui/`
+  Owns rendering, DOM event handling, caret handling, and block-level editor interaction.
+  May depend on `state` and `core`.
+- **State**: `src/state/`
+  Owns Jotai atoms, UI-facing hooks, selectors, and update entry points.
+  May depend on `core`, but `core` must not depend on `state`.
+- **Core**: `src/core/`
+  Owns UI-independent editor data, tree conversion, markdown parsing, and block rules.
+  Must not depend on `ui`, `state`, or `infra/persistence`.
+- **Persistence**: `src/infra/persistence.ts`
   Owns storage access, serialization, deserialization, and browser-specific persistence wrappers.
-  May depend on domain types and conversion rules, but should not depend on the state layer.
+  May depend on `core` and shared logging, but should not depend on `state`.
+
+## Top-Level Support Modules
+
+- **App support**: `src/keyboardShortcuts.ts`
+  Owns global shortcut interpretation used by `src/index.tsx`.
+  It stays top-level because it supports app entry wiring rather than `ui`, `state`, or `infra`.
+- **Shared logging**: `src/logger.ts`
+  Owns logging wrappers shared by app entry, persistence, and core modules.
+  It stays top-level because it is a cross-cutting utility rather than a layer of editor behavior.
