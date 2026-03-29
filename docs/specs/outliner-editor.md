@@ -14,7 +14,6 @@
 - [OE-TREE-001] この tree には、画面に表示しない hidden root が存在する。
   - エディタは hidden root 自体を表示せず、その子ブロックを表示する。
 - [OE-TREE-002] 走査順は、特に断りがない限り pre-order depth-first とする。
-- [OE-TREE-003] pre-order depth-first 走査で最初の子ブロックの直前は、その親ブロックとみなす
 
 ## モード
 
