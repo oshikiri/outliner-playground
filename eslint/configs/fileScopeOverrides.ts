@@ -5,27 +5,27 @@ const consoleRestrictions = [
   {
     object: "console",
     property: "debug",
-    message: "Use src/logger.ts instead of calling console.* directly.",
+    message: "Use src/shared/logger.ts instead of calling console.* directly.",
   },
   {
     object: "console",
     property: "error",
-    message: "Use src/logger.ts instead of calling console.* directly.",
+    message: "Use src/shared/logger.ts instead of calling console.* directly.",
   },
   {
     object: "console",
     property: "info",
-    message: "Use src/logger.ts instead of calling console.* directly.",
+    message: "Use src/shared/logger.ts instead of calling console.* directly.",
   },
   {
     object: "console",
     property: "log",
-    message: "Use src/logger.ts instead of calling console.* directly.",
+    message: "Use src/shared/logger.ts instead of calling console.* directly.",
   },
   {
     object: "console",
     property: "warn",
-    message: "Use src/logger.ts instead of calling console.* directly.",
+    message: "Use src/shared/logger.ts instead of calling console.* directly.",
   },
 ];
 
@@ -90,7 +90,7 @@ export const fileScopeOverrides: ConfigWithExtends[] = [
   },
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/logger.ts", "src/**/*.test.{ts,tsx}"],
+    ignores: ["src/shared/logger.ts", "src/**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-properties": ["error", ...consoleRestrictions],
     },

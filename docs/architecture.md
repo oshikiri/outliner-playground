@@ -25,12 +25,12 @@
                      +-------------------+
 
 app entry also depends on:
-- src/keyboardShortcuts.ts
-- src/logger.ts
+- src/app/keyboardShortcuts.ts
+- src/shared/logger.ts
 
 src/infra/persistence.ts depends on:
 - src/core/
-- src/logger.ts
+- src/shared/logger.ts
 ```
 
 ## Layers
@@ -53,9 +53,9 @@ src/infra/persistence.ts depends on:
 
 ## Top-Level Support Modules
 
-- **App support**: `src/keyboardShortcuts.ts`
+- **App support**: `src/app/keyboardShortcuts.ts`
   Owns global shortcut interpretation used by `src/index.tsx`.
-  It stays top-level because it supports app entry wiring rather than `ui`, `state`, or `infra`.
-- **Shared logging**: `src/logger.ts`
+  It lives under `src/app/` because it supports app entry wiring rather than `ui`, `state`, or `infra`.
+- **Shared logging**: `src/shared/logger.ts`
   Owns logging wrappers shared by app entry, persistence, and core modules.
-  It stays top-level because it is a cross-cutting utility rather than a layer of editor behavior.
+  It lives under `src/shared/` because it is a cross-cutting utility rather than a layer of editor behavior.

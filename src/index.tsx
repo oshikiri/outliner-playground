@@ -8,8 +8,8 @@ import {
   loadBrowserRootBlock,
   persistBrowserRootBlock,
 } from "./infra/persistence";
-import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
-import * as logger from "./logger";
+import { handleGlobalEditorKeydown } from "./app/keyboardShortcuts";
+import * as logger from "./shared/logger";
 import {
   initializeState,
   useEditorSession,

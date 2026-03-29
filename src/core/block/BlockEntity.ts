@@ -1,4 +1,4 @@
-import * as logger from "../../logger";
+import * as logger from "../../shared/logger";
 
 /**
  * Block node for the outliner tree.
