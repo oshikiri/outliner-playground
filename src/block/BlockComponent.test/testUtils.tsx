@@ -23,7 +23,7 @@ import {
   type BlockState,
   type BlockStore,
 } from "../../core/block/blockStore";
-import BlockEntity from "../BlockEntity";
+import BlockEntity from "../../core/block/BlockEntity";
 import { createBlockTree } from "../blockStoreEntity";
 import type { EditorSession } from "../../state";
 import { initializeState, useRootBlock } from "../../state";

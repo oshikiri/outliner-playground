@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 
-import BlockEntity from "../BlockEntity";
+import BlockEntity from "../../core/block/BlockEntity";
 import {
   beginEditing,
   getCaretPositionState,

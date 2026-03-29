@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import BlockEntity from "../block/BlockEntity";
+import BlockEntity from "../core/block/BlockEntity";
 import {
   createBlockStore,
   createBlockTreeLike,
