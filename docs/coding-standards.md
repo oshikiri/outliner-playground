@@ -6,7 +6,6 @@
 
 ## JavaScript/TypeScript
 
-- Prefer `find*` naming for lookup methods that may return `null` (e.g., `findBlockById`), and keep naming consistent across entities and store selectors.
 - Read `Selection` and `window` only at component or event boundaries. Pass plain values into DOM helpers so the helpers remain easy to test.
 
 ## React
