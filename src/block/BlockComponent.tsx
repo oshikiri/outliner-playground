@@ -4,8 +4,8 @@ import { useCallback } from "preact/hooks";
 import ActiveBlockEditor from "./ActiveBlockEditor";
 import { createEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
-import MarkdownComponent from "../markdown/MarkdownComponent";
 import { useBlock, useEditorSession, useUpdateBlockContent } from "../state";
+import MarkdownComponent from "../ui/markdown/MarkdownComponent";
 
 export default function BlockComponent({
   blockId,

@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import type { JSX } from "preact";
 
-import type { Segment } from "../core/markdown/Segment";
+import type { Segment } from "../../core/markdown/Segment";
 
 const ALLOWED_LINK_SCHEMES = ["http", "https"];
 

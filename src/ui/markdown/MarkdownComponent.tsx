@@ -1,7 +1,7 @@
 import type { JSX } from "preact";
 import { useMemo } from "preact/hooks";
 
-import parseInlineMarkdown from "../core/markdown/parseInlineMarkdown";
+import parseInlineMarkdown from "../../core/markdown/parseInlineMarkdown";
 import SegmentComponent from "./SegmentComponent";
 
 type MarkdownComponentProps = {
