@@ -1,6 +1,7 @@
 import {
   createBlockStore,
   createBlockTree,
+  isBlockStore,
   type BlockStore,
   type BlockTreeLike,
 } from "./block/blockStore";
@@ -8,7 +9,7 @@ import * as logger from "./logger";
 
 const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
 
-export function getBrowserStorage(): Storage | null {
+function getBrowserStorage(): Storage | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -47,6 +48,17 @@ export function loadPersistedRootBlock(
   }
 }
 
+export function loadBrowserRootBlock(
+  fallbackRootBlock: BlockStore | BlockTreeLike,
+): BlockStore {
+  return loadPersistedRootBlock(
+    getBrowserStorage(),
+    isBlockStore(fallbackRootBlock)
+      ? fallbackRootBlock
+      : createBlockStore(fallbackRootBlock),
+  );
+}
+
 export function persistRootBlock(
   storage: Pick<Storage, "setItem"> | null,
   rootBlock: BlockStore,
@@ -63,6 +75,10 @@ export function persistRootBlock(
   } catch (error) {
     logger.warn("Failed to persist rootBlock.", error);
   }
+}
+
+export function persistBrowserRootBlock(rootBlock: BlockStore): void {
+  persistRootBlock(getBrowserStorage(), rootBlock);
 }
 
 type PersistedRootBlock = BlockTreeLike & {

@@ -6,11 +6,7 @@ import BlockComponent from "./block/BlockComponent";
 import { createBlockStore } from "./block/blockStore";
 import { initialRootBlock } from "./block/data";
 import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
-import {
-  getBrowserStorage,
-  loadPersistedRootBlock,
-  persistRootBlock,
-} from "./persistence";
+import { loadBrowserRootBlock, persistBrowserRootBlock } from "./persistence";
 import * as logger from "./logger";
 import {
   initializeState,
@@ -23,12 +19,7 @@ import {
 
 import "./styles.css";
 
-initializeState(
-  loadPersistedRootBlock(
-    getBrowserStorage(),
-    createBlockStore(initialRootBlock),
-  ),
-);
+initializeState(loadBrowserRootBlock(initialRootBlock));
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -56,7 +47,7 @@ function App(): JSX.Element {
   }, [setEditorSession, setRootBlock]);
 
   useEffect(() => {
-    persistRootBlock(getBrowserStorage(), persistedRootBlock);
+    persistBrowserRootBlock(persistedRootBlock);
   }, [persistedRootBlock]);
 
   return (

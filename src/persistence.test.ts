@@ -6,7 +6,12 @@ import {
   createBlockTree,
   updateBlockContent,
 } from "./block/blockStore";
-import { loadPersistedRootBlock, persistRootBlock } from "./persistence";
+import {
+  loadBrowserRootBlock,
+  loadPersistedRootBlock,
+  persistBrowserRootBlock,
+  persistRootBlock,
+} from "./persistence";
 
 const STORAGE_KEY = "outliner-playground.rootBlock";
 
@@ -45,6 +50,42 @@ describe("永続化", () => {
     );
 
     persistRootBlock({ setItem }, rootBlock);
+
+    expect(setItem).toHaveBeenCalledOnce();
+    expect(setItem).toHaveBeenCalledWith(
+      STORAGE_KEY,
+      JSON.stringify(createBlockTree(rootBlock).toJSON()),
+    );
+  });
+
+  it("browser 用 load API は localStorage と fallback tree をまとめて扱う", () => {
+    const getItem = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockReturnValue(
+        JSON.stringify(
+          createBlockTree(
+            createBlockStore(new BlockEntity("", [new BlockEntity("saved")])),
+          ).toJSON(),
+        ),
+      );
+
+    const restored = loadBrowserRootBlock(
+      new BlockEntity("", [new BlockEntity("fallback")]),
+    );
+
+    expect(getItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(createBlockTree(restored).children[0]?.content).toBe("saved");
+  });
+
+  it("browser 用 persist API は localStorage への保存を隠蔽する", () => {
+    const setItem = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {});
+    const rootBlock = createBlockStore(
+      new BlockEntity("", [new BlockEntity("persisted")]),
+    );
+
+    persistBrowserRootBlock(rootBlock);
 
     expect(setItem).toHaveBeenCalledOnce();
     expect(setItem).toHaveBeenCalledWith(
