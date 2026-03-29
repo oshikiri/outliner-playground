@@ -5,8 +5,11 @@ import { useEffect } from "preact/hooks";
 import BlockComponent from "./block/BlockComponent";
 import { createBlockStore } from "./block/blockStore";
 import { initialRootBlock } from "./block/data";
+import {
+  loadBrowserRootBlock,
+  persistBrowserRootBlock,
+} from "./infra/persistence";
 import { handleGlobalEditorKeydown } from "./keyboardShortcuts";
-import { loadBrowserRootBlock, persistBrowserRootBlock } from "./persistence";
 import * as logger from "./logger";
 import {
   initializeState,

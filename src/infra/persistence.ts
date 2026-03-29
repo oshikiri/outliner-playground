@@ -4,8 +4,8 @@ import {
   isBlockStore,
   type BlockStore,
   type BlockTreeLike,
-} from "./block/blockStore";
-import * as logger from "./logger";
+} from "../block/blockStore";
+import * as logger from "../logger";
 
 const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
 

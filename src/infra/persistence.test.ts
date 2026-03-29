@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import BlockEntity from "./block/BlockEntity";
+import BlockEntity from "../block/BlockEntity";
 import {
   createBlockStore,
   createBlockTree,
   updateBlockContent,
-} from "./block/blockStore";
+} from "../block/blockStore";
 import {
   loadBrowserRootBlock,
   loadPersistedRootBlock,
