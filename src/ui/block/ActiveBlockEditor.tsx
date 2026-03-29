@@ -12,9 +12,9 @@ import {
   useEditorSession,
   useRootBlockValue,
   useUpdateBlockContent,
-} from "../state";
-import { useBlockKeydownHandler } from "../ui/block/BlockKeydownHandlerFactory";
-import * as caretDom from "../ui/block/caret/caretDom";
+} from "../../state";
+import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
+import * as caretDom from "./caret/caretDom";
 
 type ActiveBlockEditorProps = {
   blockId: string;

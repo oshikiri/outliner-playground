@@ -8,7 +8,6 @@ import {
 import type { JSX } from "preact";
 import { afterEach, vi, expect } from "vitest";
 
-import ActiveBlockEditor from "../ActiveBlockEditor";
 import {
   createBlockStore,
   getChildBlocks,
@@ -29,6 +28,7 @@ import BlockEntity from "../BlockEntity";
 import { createBlockTree } from "../blockStoreEntity";
 import type { EditorSession } from "../../state";
 import { initializeState, useRootBlock } from "../../state";
+import ActiveBlockEditor from "../../ui/block/ActiveBlockEditor";
 
 let rootBlockState: BlockStore | null = null;
 let editorSessionState: EditorSession = null;
