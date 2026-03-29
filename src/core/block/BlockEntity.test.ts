@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import BlockEntity from "../core/block/BlockEntity";
+import BlockEntity from "./BlockEntity";
 
 describe("ブロック分割・結合", () => {
   beforeEach(() => {
