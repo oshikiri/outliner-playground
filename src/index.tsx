@@ -2,7 +2,6 @@ import { render } from "preact";
 import type { ComponentChildren, JSX } from "preact";
 import { useEffect } from "preact/hooks";
 
-import BlockComponent from "./block/BlockComponent";
 import { initialRootBlock } from "./core/block/data";
 import { createBlockStore } from "./core/block/blockStore";
 import {
@@ -19,6 +18,7 @@ import {
   useRootChildBlockIds,
   useSetRootBlock,
 } from "./state";
+import BlockComponent from "./ui/block/BlockComponent";
 
 import "./styles.css";
 
