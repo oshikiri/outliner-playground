@@ -5,9 +5,12 @@ import type {
 } from "preact";
 import { useCallback } from "preact/hooks";
 
-import type { BlockState, BlockStore } from "../core/block/blockStore";
-import { findNextBlock, findPrevBlock } from "../core/block/blockStore";
-import { createEditorSession, type ActiveEditorSession } from "./editorSession";
+import type { BlockState, BlockStore } from "../../core/block/blockStore";
+import { findNextBlock, findPrevBlock } from "../../core/block/blockStore";
+import {
+  createEditorSession,
+  type ActiveEditorSession,
+} from "../../block/editorSession";
 import {
   useIndentBlock,
   useJoinBlockWithPreviousSibling,
@@ -17,8 +20,8 @@ import {
   useSplitBlockAtCaret,
   useUpdateBlockContent,
   type UpdateEditorSession,
-} from "../state";
-import * as caretDom from "../ui/block/caret/caretDom";
+} from "../../state";
+import * as caretDom from "./caret/caretDom";
 
 type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;

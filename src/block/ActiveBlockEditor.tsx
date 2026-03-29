@@ -7,13 +7,13 @@ import type {
 } from "preact";
 import { useCallback, useLayoutEffect, useRef } from "preact/hooks";
 
-import { useBlockKeydownHandler } from "./BlockKeydownHandlerFactory";
 import {
   useBlock,
   useEditorSession,
   useRootBlockValue,
   useUpdateBlockContent,
 } from "../state";
+import { useBlockKeydownHandler } from "../ui/block/BlockKeydownHandlerFactory";
 import * as caretDom from "../ui/block/caret/caretDom";
 
 type ActiveBlockEditorProps = {
