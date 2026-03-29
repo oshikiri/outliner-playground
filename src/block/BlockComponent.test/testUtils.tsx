@@ -11,7 +11,6 @@ import { afterEach, vi, expect } from "vitest";
 import ActiveBlockEditor from "../ActiveBlockEditor";
 import {
   createBlockStore,
-  createBlockTree,
   getChildBlocks,
   indentBlock,
   isBlockStore,
@@ -27,6 +26,7 @@ import {
 } from "../blockStore";
 import BlockComponent from "../BlockComponent";
 import BlockEntity from "../BlockEntity";
+import { createBlockTree } from "../blockStoreEntity";
 import type { EditorSession } from "../../state";
 import { initializeState, useRootBlock } from "../../state";
 

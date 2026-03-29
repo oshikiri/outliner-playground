@@ -1,5 +1,3 @@
-import BlockEntity from "./BlockEntity";
-
 export type BlockState = Readonly<{
   id: string;
   content: string;
@@ -73,19 +71,6 @@ export function createBlockStore(rootBlock: BlockTreeLike): BlockStore {
     rootId: rootBlock.id,
     blocksById,
   };
-}
-
-export function createBlockTree(
-  rootBlock: BlockStore,
-  blockId: string = rootBlock.rootId,
-): BlockEntity {
-  const block = getBlockOrThrow(rootBlock, blockId);
-  const children = block.childrenIds.map((childId) =>
-    createBlockTree(rootBlock, childId),
-  );
-  const tree = new BlockEntity(block.content, children);
-  tree.id = block.id;
-  return tree;
 }
 
 export function createBlockTreeLike(
