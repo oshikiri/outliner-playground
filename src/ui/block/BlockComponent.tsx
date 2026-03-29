@@ -1,7 +1,7 @@
 import type { JSX, MouseEventHandler } from "preact";
 import { useCallback } from "preact/hooks";
 
-import { createEditorSession } from "../../block/editorSession";
+import { createEditorSession } from "../../state/editorSession";
 import { useBlock, useEditorSession, useUpdateBlockContent } from "../../state";
 import ActiveBlockEditor from "./ActiveBlockEditor";
 import MarkdownComponent from "../markdown/MarkdownComponent";

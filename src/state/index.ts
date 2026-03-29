@@ -1,4 +1,4 @@
-export type { EditorSession } from "../block/editorSession";
+export type { EditorSession } from "./editorSession";
 export {
   initializeState,
   useRootBlock,

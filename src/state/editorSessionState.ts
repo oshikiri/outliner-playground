@@ -1,6 +1,6 @@
 import { atom, useAtom, type SetStateAction } from "jotai";
 
-import type { EditorSession } from "../block/editorSession";
+import type { EditorSession } from "./editorSession";
 
 export const editorSessionAtom = atom<EditorSession>(null);
 

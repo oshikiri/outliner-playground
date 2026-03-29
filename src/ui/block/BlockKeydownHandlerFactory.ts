@@ -10,7 +10,7 @@ import { findNextBlock, findPrevBlock } from "../../core/block/blockStore";
 import {
   createEditorSession,
   type ActiveEditorSession,
-} from "../../block/editorSession";
+} from "../../state/editorSession";
 import {
   useIndentBlock,
   useJoinBlockWithPreviousSibling,
