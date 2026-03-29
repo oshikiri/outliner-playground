@@ -3,8 +3,8 @@ import type { ComponentChildren, JSX } from "preact";
 import { useEffect } from "preact/hooks";
 
 import BlockComponent from "./block/BlockComponent";
+import { initialRootBlock } from "./core/block/data";
 import { createBlockStore } from "./block/blockStore";
-import { initialRootBlock } from "./block/data";
 import {
   loadBrowserRootBlock,
   persistBrowserRootBlock,
