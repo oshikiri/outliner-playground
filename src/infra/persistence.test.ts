@@ -6,7 +6,7 @@ import {
   createBlockTreeLike,
   updateBlockContent,
 } from "../core/block/blockStore";
-import { createBlockTree } from "../block/blockStoreEntity";
+import { createBlockTree } from "../core/block/blockStoreEntity";
 import {
   loadBrowserRootBlock,
   loadPersistedRootBlock,

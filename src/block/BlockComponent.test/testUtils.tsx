@@ -24,7 +24,7 @@ import {
   type BlockStore,
 } from "../../core/block/blockStore";
 import BlockEntity from "../../core/block/BlockEntity";
-import { createBlockTree } from "../blockStoreEntity";
+import { createBlockTree } from "../../core/block/blockStoreEntity";
 import type { EditorSession } from "../../state";
 import { initializeState, useRootBlock } from "../../state";
 import ActiveBlockEditor from "../../ui/block/ActiveBlockEditor";
