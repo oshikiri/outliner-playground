@@ -88,6 +88,22 @@ export function createBlockTree(
   return tree;
 }
 
+export function createBlockTreeLike(
+  rootBlock: BlockStore,
+  blockId: string = rootBlock.rootId,
+): BlockTreeLike {
+  const block = getBlockOrThrow(rootBlock, blockId);
+  const children = block.childrenIds.map((childId) =>
+    createBlockTreeLike(rootBlock, childId),
+  );
+
+  return {
+    id: block.id,
+    content: block.content,
+    children: children.length === 0 ? undefined : children,
+  };
+}
+
 export function findBlock(
   rootBlock: BlockStore,
   blockId: string,

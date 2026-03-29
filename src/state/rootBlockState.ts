@@ -212,11 +212,7 @@ export function useRootChildBlockIds(): readonly string[] {
 export function useRootBlockJson(): string {
   const rootBlockJsonAtom = useMemo(() => {
     return selectAtom(rootBlockAtom, (rootBlock) => {
-      return JSON.stringify(
-        blockStore.createBlockTree(rootBlock).toJSON(),
-        null,
-        2,
-      );
+      return JSON.stringify(blockStore.createBlockTreeLike(rootBlock), null, 2);
     });
   }, []);
 
