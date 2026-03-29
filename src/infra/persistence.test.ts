@@ -4,6 +4,7 @@ import BlockEntity from "../block/BlockEntity";
 import {
   createBlockStore,
   createBlockTree,
+  createBlockTreeLike,
   updateBlockContent,
 } from "../block/blockStore";
 import {
@@ -33,7 +34,7 @@ describe("永続化", () => {
         getItem: vi
           .fn()
           .mockReturnValue(
-            JSON.stringify(createBlockTree(persistedRootBlock).toJSON()),
+            JSON.stringify(createBlockTreeLike(persistedRootBlock)),
           ),
       },
       fallbackRootBlock,
@@ -54,7 +55,7 @@ describe("永続化", () => {
     expect(setItem).toHaveBeenCalledOnce();
     expect(setItem).toHaveBeenCalledWith(
       STORAGE_KEY,
-      JSON.stringify(createBlockTree(rootBlock).toJSON()),
+      JSON.stringify(createBlockTreeLike(rootBlock)),
     );
   });
 
@@ -63,9 +64,9 @@ describe("永続化", () => {
       .spyOn(Storage.prototype, "getItem")
       .mockReturnValue(
         JSON.stringify(
-          createBlockTree(
+          createBlockTreeLike(
             createBlockStore(new BlockEntity("", [new BlockEntity("saved")])),
-          ).toJSON(),
+          ),
         ),
       );
 
@@ -90,7 +91,7 @@ describe("永続化", () => {
     expect(setItem).toHaveBeenCalledOnce();
     expect(setItem).toHaveBeenCalledWith(
       STORAGE_KEY,
-      JSON.stringify(createBlockTree(rootBlock).toJSON()),
+      JSON.stringify(createBlockTreeLike(rootBlock)),
     );
   });
 

@@ -1,6 +1,6 @@
 import {
   createBlockStore,
-  createBlockTree,
+  createBlockTreeLike,
   isBlockStore,
   type BlockStore,
   type BlockTreeLike,
@@ -70,7 +70,7 @@ export function persistRootBlock(
   try {
     storage.setItem(
       ROOT_BLOCK_STORAGE_KEY,
-      JSON.stringify(createBlockTree(rootBlock).toJSON()),
+      JSON.stringify(createBlockTreeLike(rootBlock)),
     );
   } catch (error) {
     logger.warn("Failed to persist rootBlock.", error);
