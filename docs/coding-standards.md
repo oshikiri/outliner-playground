@@ -1,9 +1,5 @@
 # Coding Standards
 
-## React
-
-- Do not keep multiple conditional branches, deep JSX nesting, and list rendering logic in a single component body. Prefer extracting list item renderers and large conditional blocks first.
-
 ## Layer
 
 - In this repository, the state layer means `src/state/`.
