@@ -22,13 +22,13 @@ import {
   updateBlockContent,
   type BlockState,
   type BlockStore,
-} from "../../core/block/blockStore";
-import BlockEntity from "../../core/block/BlockEntity";
-import { createBlockTree } from "../../core/block/blockStoreEntity";
-import type { EditorSession } from "../../state";
-import { initializeState, useRootBlock } from "../../state";
-import ActiveBlockEditor from "../../ui/block/ActiveBlockEditor";
-import BlockComponent from "../../ui/block/BlockComponent";
+} from "../../../core/block/blockStore";
+import BlockEntity from "../../../core/block/BlockEntity";
+import { createBlockTree } from "../../../core/block/blockStoreEntity";
+import type { EditorSession } from "../../../state";
+import { initializeState, useRootBlock } from "../../../state";
+import ActiveBlockEditor from "../ActiveBlockEditor";
+import BlockComponent from "../BlockComponent";
 
 let rootBlockState: BlockStore | null = null;
 let editorSessionState: EditorSession = null;
@@ -45,7 +45,7 @@ function notifyRootListeners(): void {
   }
 }
 
-vi.mock("../../state", async () => {
+vi.mock("../../../state", async () => {
   const hooks = await import("preact/hooks");
 
   const applyUpdate = <T,>(
