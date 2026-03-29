@@ -62,6 +62,15 @@ const focusedTestRestrictions = [
   },
 ];
 
+const blockSelectionRestrictions = [
+  {
+    object: "document",
+    property: "getSelection",
+    message:
+      "Read Selection in components or event handlers and pass it into helpers so the helpers remain easy to test.",
+  },
+];
+
 export const fileScopeOverrides: ConfigWithExtends[] = [
   {
     files: ["eslint.config.ts", "vite.config.ts"],
@@ -84,6 +93,28 @@ export const fileScopeOverrides: ConfigWithExtends[] = [
     ignores: ["src/logger.ts", "src/**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-properties": ["error", ...consoleRestrictions],
+    },
+  },
+  {
+    files: ["src/block/**/*.ts"],
+    ignores: [
+      "src/block/**/*.test.ts",
+      "src/block/BlockKeydownHandlerFactory.ts",
+    ],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "window",
+          message:
+            "Read window in components or event handlers and pass plain values into helpers so the helpers remain easy to test.",
+        },
+      ],
+      "no-restricted-properties": [
+        "error",
+        ...consoleRestrictions,
+        ...blockSelectionRestrictions,
+      ],
     },
   },
   {

@@ -4,10 +4,6 @@
 
 - When updating a `BlockStore`, avoid in-place mutation. Create replacement `BlockState` objects and return a new `BlockStore`.
 
-## JavaScript/TypeScript
-
-- Read `Selection` and `window` only at component or event boundaries. Pass plain values into DOM helpers so the helpers remain easy to test.
-
 ## React
 
 - Do not keep multiple conditional branches, deep JSX nesting, and list rendering logic in a single component body. Prefer extracting list item renderers and large conditional blocks first.
