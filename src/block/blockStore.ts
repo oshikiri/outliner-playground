@@ -1,21 +1,21 @@
 import BlockEntity from "./BlockEntity";
 
-export type BlockState = {
+export type BlockState = Readonly<{
   id: string;
   content: string;
-  childrenIds: string[];
+  childrenIds: readonly string[];
   parentId: string | null;
-};
+}>;
 
-export type BlockStore = {
+export type BlockStore = Readonly<{
   rootId: string;
-  blocksById: Record<string, BlockState>;
-};
+  blocksById: Readonly<Record<string, BlockState>>;
+}>;
 
 export type BlockTreeLike = {
   id: string;
   content: string;
-  children?: BlockTreeLike[];
+  children?: readonly BlockTreeLike[];
 };
 
 export function createEmptyBlockStore(): BlockStore {
@@ -526,13 +526,16 @@ function withBlocks(
 }
 
 function insertChildId(
-  childrenIds: string[],
+  childrenIds: readonly string[],
   index: number,
   childId: string,
 ): string[] {
   return [...childrenIds.slice(0, index), childId, ...childrenIds.slice(index)];
 }
 
-function removeChildId(childrenIds: string[], childId: string): string[] {
+function removeChildId(
+  childrenIds: readonly string[],
+  childId: string,
+): string[] {
   return childrenIds.filter((id) => id !== childId);
 }

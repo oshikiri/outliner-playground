@@ -204,7 +204,7 @@ export function useBlock(blockId: string): BlockState | null {
   return useAtomValue(blockAtom);
 }
 
-export function useRootChildBlockIds(): string[] {
+export function useRootChildBlockIds(): readonly string[] {
   const childIdsAtom = useMemo(() => {
     return selectAtom(rootBlockAtom, (rootBlock) => {
       return rootBlock.blocksById[rootBlock.rootId]?.childrenIds ?? [];

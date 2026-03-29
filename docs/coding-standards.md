@@ -1,9 +1,5 @@
 # Coding Standards
 
-## Block
-
-- When updating a `BlockStore`, avoid in-place mutation. Create replacement `BlockState` objects and return a new `BlockStore`.
-
 ## React
 
 - Do not keep multiple conditional branches, deep JSX nesting, and list rendering logic in a single component body. Prefer extracting list item renderers and large conditional blocks first.
