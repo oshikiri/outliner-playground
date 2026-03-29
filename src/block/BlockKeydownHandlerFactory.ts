@@ -7,7 +7,7 @@ import { useCallback } from "preact/hooks";
 
 import type { BlockState, BlockStore } from "./blockStore";
 import { findNextBlock, findPrevBlock } from "./blockStore";
-import { createEditorSession } from "./editorSession";
+import { createEditorSession, type ActiveEditorSession } from "./editorSession";
 import * as caretDom from "./editor/caretDom";
 import {
   useIndentBlock,
@@ -17,14 +17,12 @@ import {
   useOutdentBlock,
   useSplitBlockAtCaret,
   useUpdateBlockContent,
-  type EditorSession,
   type UpdateEditorSession,
 } from "../state";
 
 type CaretPosition = ReturnType<typeof caretDom.getCaretPositionInBlock>;
 type KeydownEvent = TargetedKeyboardEvent<HTMLDivElement>;
 type KeydownHandler = KeyboardEventHandler<HTMLDivElement>;
-type ActiveEditorSession = Exclude<EditorSession, null>;
 const IME_PROCESS_KEYCODE = 229;
 
 export function useBlockKeydownHandler({

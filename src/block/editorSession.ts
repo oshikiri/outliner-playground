@@ -1,7 +1,12 @@
-import type { EditorSession } from "../state";
 import type { BlockState } from "./blockStore";
 
-type ActiveEditorSession = Exclude<EditorSession, null>;
+export type EditorSession = {
+  activeBlockId: string;
+  caretOffset: number;
+  draftText: string;
+} | null;
+
+export type ActiveEditorSession = Exclude<EditorSession, null>;
 
 export function createEditorSession(
   block: Pick<BlockState, "id" | "content">,

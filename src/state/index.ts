@@ -9,18 +9,14 @@ import {
 import { selectAtom } from "jotai/utils";
 import { useCallback, useMemo } from "preact/hooks";
 
+import type { EditorSession } from "../block/editorSession";
 import * as blockStore from "../block/blockStore";
 import type {
   BlockState,
   BlockStore,
   BlockTreeLike,
 } from "../block/blockStore";
-
-export type EditorSession = {
-  activeBlockId: string;
-  caretOffset: number;
-  draftText: string;
-} | null;
+export type { EditorSession } from "../block/editorSession";
 
 const rootBlockAtom = atom<BlockStore>(blockStore.createEmptyBlockStore());
 const editorSessionAtom = atom<EditorSession>(null);
