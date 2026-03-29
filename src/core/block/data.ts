@@ -1,4 +1,4 @@
-import type { BlockTreeLike } from "../../block/blockStore";
+import type { BlockTreeLike } from "./blockStore";
 
 export const initialRootBlock: BlockTreeLike = {
   id: crypto.randomUUID(),

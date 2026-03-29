@@ -23,7 +23,7 @@ import {
   updateBlockContent,
   type BlockState,
   type BlockStore,
-} from "../blockStore";
+} from "../../core/block/blockStore";
 import BlockComponent from "../BlockComponent";
 import BlockEntity from "../BlockEntity";
 import { createBlockTree } from "../blockStoreEntity";

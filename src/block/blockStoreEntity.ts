@@ -1,5 +1,5 @@
 import BlockEntity from "./BlockEntity";
-import { findBlock, type BlockStore } from "./blockStore";
+import { findBlock, type BlockStore } from "../core/block/blockStore";
 
 export function createBlockTree(
   rootBlock: BlockStore,

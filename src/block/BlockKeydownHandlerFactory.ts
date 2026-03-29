@@ -5,8 +5,8 @@ import type {
 } from "preact";
 import { useCallback } from "preact/hooks";
 
-import type { BlockState, BlockStore } from "./blockStore";
-import { findNextBlock, findPrevBlock } from "./blockStore";
+import type { BlockState, BlockStore } from "../core/block/blockStore";
+import { findNextBlock, findPrevBlock } from "../core/block/blockStore";
 import { createEditorSession, type ActiveEditorSession } from "./editorSession";
 import {
   useIndentBlock,

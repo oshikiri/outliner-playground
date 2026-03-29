@@ -5,7 +5,7 @@ import {
   createBlockStore,
   createBlockTreeLike,
   updateBlockContent,
-} from "../block/blockStore";
+} from "../core/block/blockStore";
 import { createBlockTree } from "../block/blockStoreEntity";
 import {
   loadBrowserRootBlock,

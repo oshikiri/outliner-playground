@@ -1,4 +1,4 @@
-import type { BlockState } from "./blockStore";
+import type { BlockState } from "../core/block/blockStore";
 
 export type EditorSession = {
   activeBlockId: string;

@@ -10,12 +10,12 @@ import { selectAtom } from "jotai/utils";
 import { useCallback, useMemo } from "preact/hooks";
 
 import type { EditorSession } from "../block/editorSession";
-import * as blockStore from "../block/blockStore";
+import * as blockStore from "../core/block/blockStore";
 import type {
   BlockState,
   BlockStore,
   BlockTreeLike,
-} from "../block/blockStore";
+} from "../core/block/blockStore";
 import { editorSessionAtom } from "./editorSessionState";
 
 const rootBlockAtom = atom<BlockStore>(blockStore.createEmptyBlockStore());
