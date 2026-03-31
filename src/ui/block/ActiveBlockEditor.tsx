@@ -125,6 +125,8 @@ export default function ActiveBlockEditor({
   return (
     <div
       contentEditable={true}
+      // Keep a small horizontal padding so the caret stays visible at line
+      // edges while matching the display-mode text position.
       className="
         whitespace-pre-wrap break-all px-1
         empty:after:content-['\00a0']

@@ -53,7 +53,8 @@ export default function BlockComponent({
           <ActiveBlockEditor blockId={block.id} />
         ) : (
           <div
-            // Set px-1 for visibility when the cursor is at the beginning of the line.
+            // Keep the display padding aligned with the editor so click-to-edit
+            // enters at a visually consistent horizontal position.
             className="
               whitespace-pre-wrap break-all px-1
               empty:after:content-['\00a0']
