@@ -85,6 +85,11 @@ export default function ActiveBlockEditor({
           return;
         }
 
+        if (isEditableElementForBlock(document.activeElement, block.id)) {
+          return;
+        }
+
+        // If the focus has moved outside of the block editor, end the editing session.
         setEditorSession((prev) => {
           if (prev?.activeBlockId !== block.id) {
             return prev;
@@ -138,6 +143,7 @@ export default function ActiveBlockEditor({
       role="textbox"
       aria-readonly={false}
       aria-multiline={true}
+      data-block-id={block.id}
     />
   );
 }
@@ -155,4 +161,18 @@ function focusContentAtCaret(
 
 function getElementText(element: HTMLDivElement): string {
   return element.innerText ?? element.textContent ?? "";
+}
+
+function isEditableElementForBlock(
+  element: Element | null,
+  blockId: string,
+): boolean {
+  if (!(element instanceof HTMLDivElement)) {
+    return false;
+  }
+
+  return (
+    element.getAttribute("contenteditable") === "true" &&
+    element.dataset.blockId === blockId
+  );
 }
