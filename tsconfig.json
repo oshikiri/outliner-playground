@@ -2,8 +2,6 @@
   "compilerOptions": {
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
@@ -16,8 +14,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "types": ["preact"]
+    "jsxImportSource": "preact"
   },
   "include": ["src"]
 }
