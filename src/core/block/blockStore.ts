@@ -434,7 +434,7 @@ export function joinBlockWithPreviousSibling(
             childrenIds: removeChildId(parentInfo.parent.childrenIds, blockId),
           },
   };
-  delete nextBlocksById[blockId];
+  Reflect.deleteProperty(nextBlocksById, blockId);
 
   return {
     rootBlock: {
