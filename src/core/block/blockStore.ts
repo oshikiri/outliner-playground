@@ -1,6 +1,7 @@
 export type BlockState = Readonly<{
   id: string;
   content: string;
+  collapsed: boolean;
   childrenIds: readonly string[];
   parentId: string | null;
 }>;
@@ -13,6 +14,7 @@ export type BlockStore = Readonly<{
 export type BlockTreeLike = {
   id: string;
   content: string;
+  collapsed?: boolean;
   children?: readonly BlockTreeLike[];
 };
 
@@ -24,6 +26,7 @@ export function createEmptyBlockStore(): BlockStore {
       [rootId]: {
         id: rootId,
         content: "",
+        collapsed: false,
         childrenIds: [],
         parentId: null,
       },
@@ -53,12 +56,13 @@ export function createBlockStore(rootBlock: BlockTreeLike): BlockStore {
 
   const visit = (block: BlockTreeLike, parentId: string | null): void => {
     const children = block.children ?? [];
-    blocksById[block.id] = {
+    blocksById[block.id] = normalizeBlockState({
       id: block.id,
       content: block.content,
+      collapsed: block.collapsed === true,
       childrenIds: children.map((child) => child.id),
       parentId,
-    };
+    });
 
     for (const child of children) {
       visit(child, block.id);
@@ -73,6 +77,10 @@ export function createBlockStore(rootBlock: BlockTreeLike): BlockStore {
   };
 }
 
+export function normalizeBlockStore(rootBlock: BlockStore): BlockStore {
+  return createBlockStore(createBlockTreeLike(rootBlock));
+}
+
 export function createBlockTreeLike(
   rootBlock: BlockStore,
   blockId: string = rootBlock.rootId,
@@ -85,6 +93,7 @@ export function createBlockTreeLike(
   return {
     id: block.id,
     content: block.content,
+    collapsed: block.collapsed,
     children: children.length === 0 ? undefined : children,
   };
 }
@@ -145,31 +154,27 @@ export function splitBlockAtCaret(
   const nextCurrentBlock: BlockState = {
     ...currentBlock,
     content: beforeCaretText,
+    collapsed: false,
   };
   const newBlockId = crypto.randomUUID();
-  const nextBlocksById: Record<string, BlockState> = {
-    ...rootBlock.blocksById,
-    [blockId]: nextCurrentBlock,
-  };
 
   if (currentBlock.childrenIds.length > 0) {
     const newBlock: BlockState = {
       id: newBlockId,
       content: afterCaretText,
+      collapsed: false,
       childrenIds: [],
       parentId: currentBlock.id,
     };
-    nextBlocksById[blockId] = {
-      ...nextCurrentBlock,
-      childrenIds: [newBlockId, ...currentBlock.childrenIds],
-    };
-    nextBlocksById[newBlockId] = newBlock;
 
     return {
-      rootBlock: {
-        ...rootBlock,
-        blocksById: nextBlocksById,
-      },
+      rootBlock: withBlocks(rootBlock, {
+        [blockId]: {
+          ...nextCurrentBlock,
+          childrenIds: [newBlockId, ...currentBlock.childrenIds],
+        },
+        [newBlockId]: newBlock,
+      }),
       newBlock,
     };
   }
@@ -183,26 +188,43 @@ export function splitBlockAtCaret(
   const newBlock: BlockState = {
     id: newBlockId,
     content: afterCaretText,
+    collapsed: false,
     childrenIds: [],
     parentId: parentBlock.id,
   };
-  nextBlocksById[parentBlock.id] = {
-    ...parentBlock,
-    childrenIds: insertChildId(
-      parentBlock.childrenIds,
-      currentIndex + 1,
-      newBlockId,
-    ),
-  };
-  nextBlocksById[newBlockId] = newBlock;
 
   return {
-    rootBlock: {
-      ...rootBlock,
-      blocksById: nextBlocksById,
-    },
+    rootBlock: withBlocks(rootBlock, {
+      [blockId]: nextCurrentBlock,
+      [parentBlock.id]: {
+        ...parentBlock,
+        childrenIds: insertChildId(
+          parentBlock.childrenIds,
+          currentIndex + 1,
+          newBlockId,
+        ),
+      },
+      [newBlockId]: newBlock,
+    }),
     newBlock,
   };
+}
+
+export function toggleBlockCollapsed(
+  rootBlock: BlockStore,
+  blockId: string,
+): BlockStore {
+  const block = findBlock(rootBlock, blockId);
+  if (!block || block.parentId === null || block.childrenIds.length === 0) {
+    return rootBlock;
+  }
+
+  return withBlocks(rootBlock, {
+    [blockId]: {
+      ...block,
+      collapsed: !block.collapsed,
+    },
+  });
 }
 
 export function indentBlock(
@@ -268,8 +290,7 @@ export function outdentBlock(
   }
 
   const siblingsAfter = parentBlock.childrenIds.slice(currentIndex + 1);
-  const nextBlocksById: Record<string, BlockState> = {
-    ...rootBlock.blocksById,
+  const nextBlocks: Record<string, BlockState> = {
     [parentBlock.id]: {
       ...parentBlock,
       childrenIds: parentBlock.childrenIds.slice(0, currentIndex),
@@ -294,16 +315,13 @@ export function outdentBlock(
     if (!sibling) {
       continue;
     }
-    nextBlocksById[siblingId] = {
+    nextBlocks[siblingId] = {
       ...sibling,
       parentId: blockId,
     };
   }
 
-  return {
-    ...rootBlock,
-    blocksById: nextBlocksById,
-  };
+  return withBlocks(rootBlock, nextBlocks);
 }
 
 export function moveBlockUp(
@@ -337,7 +355,7 @@ export function moveBlockDown(
   return swapSiblingOrder(rootBlock, parentInfo.parent.id, parentInfo.index);
 }
 
-export function findNextBlock(
+function findNextBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState | null {
@@ -365,7 +383,7 @@ export function findNextBlock(
   }
 }
 
-export function findPrevBlock(
+function findPrevBlock(
   rootBlock: BlockStore,
   blockId: string,
 ): BlockState | null {
@@ -386,6 +404,50 @@ export function findPrevBlock(
   return getLastDescendant(rootBlock, previousSiblingId);
 }
 
+function isBlockVisible(rootBlock: BlockStore, blockId: string): boolean {
+  let currentBlock = findBlock(rootBlock, blockId);
+  if (!currentBlock || currentBlock.parentId === null) {
+    return false;
+  }
+
+  while (currentBlock.parentId !== null) {
+    const parentBlock = findBlock(rootBlock, currentBlock.parentId);
+    if (!parentBlock) {
+      return false;
+    }
+    if (parentBlock.parentId !== null && parentBlock.collapsed) {
+      return false;
+    }
+    currentBlock = parentBlock;
+  }
+
+  return true;
+}
+
+export function findNextVisibleBlock(
+  rootBlock: BlockStore,
+  blockId: string,
+): BlockState | null {
+  let nextBlock = findNextBlock(rootBlock, blockId);
+  while (nextBlock && !isBlockVisible(rootBlock, nextBlock.id)) {
+    nextBlock = findNextBlock(rootBlock, nextBlock.id);
+  }
+
+  return nextBlock;
+}
+
+export function findPrevVisibleBlock(
+  rootBlock: BlockStore,
+  blockId: string,
+): BlockState | null {
+  let prevBlock = findPrevBlock(rootBlock, blockId);
+  while (prevBlock && !isBlockVisible(rootBlock, prevBlock.id)) {
+    prevBlock = findPrevBlock(rootBlock, prevBlock.id);
+  }
+
+  return prevBlock;
+}
+
 export function joinBlockWithPreviousSibling(
   rootBlock: BlockStore,
   blockId: string,
@@ -400,7 +462,7 @@ export function joinBlockWithPreviousSibling(
     return null;
   }
 
-  const previousBlock = findPrevBlock(rootBlock, blockId);
+  const previousBlock = findPrevVisibleBlock(rootBlock, blockId);
   if (!previousBlock || previousBlock.parentId === null) {
     return null;
   }
@@ -414,8 +476,7 @@ export function joinBlockWithPreviousSibling(
     ...previousBlock,
     content: `${previousBlock.content}${currentContent}`,
   };
-  const nextBlocksById: Record<string, BlockState> = {
-    ...rootBlock.blocksById,
+  const nextRootBlock = withBlocks(rootBlock, {
     [previousBlock.id]:
       previousBlock.id === parentInfo.parent.id
         ? {
@@ -433,15 +494,19 @@ export function joinBlockWithPreviousSibling(
             ...parentInfo.parent,
             childrenIds: removeChildId(parentInfo.parent.childrenIds, blockId),
           },
+  });
+  const nextBlocksById = {
+    ...nextRootBlock.blocksById,
   };
   Reflect.deleteProperty(nextBlocksById, blockId);
 
   return {
     rootBlock: {
-      ...rootBlock,
+      ...nextRootBlock,
       blocksById: nextBlocksById,
     },
-    previousBlock: nextPreviousBlock,
+    previousBlock:
+      nextRootBlock.blocksById[previousBlock.id] ?? nextPreviousBlock,
     caretOffset: previousBlock.content.length,
   };
 }
@@ -517,12 +582,29 @@ function withBlocks(
   rootBlock: BlockStore,
   blocks: Record<string, BlockState>,
 ): BlockStore {
+  const normalizedBlocks = Object.fromEntries(
+    Object.entries(blocks).map(([blockId, block]) => [
+      blockId,
+      normalizeBlockState(block),
+    ]),
+  );
+
   return {
     ...rootBlock,
     blocksById: {
       ...rootBlock.blocksById,
-      ...blocks,
+      ...normalizedBlocks,
     },
+  };
+}
+
+function normalizeBlockState(block: BlockState): BlockState {
+  return {
+    ...block,
+    collapsed:
+      block.collapsed &&
+      block.parentId !== null &&
+      block.childrenIds.length > 0,
   };
 }
 

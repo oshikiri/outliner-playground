@@ -1,12 +1,14 @@
 import { fireEvent, waitFor } from "@testing-library/preact";
 import { describe, expect, it } from "vitest";
 
+import BlockEntity from "../../../core/block/BlockEntity";
 import {
   beginEditing,
   getCaretPositionState,
   getEditableTextboxes,
   getRootBlockState,
   renderEditor,
+  renderRootBlock,
 } from "./testUtils";
 
 describe("キー移動", () => {
@@ -30,6 +32,32 @@ describe("キー移動", () => {
     });
   });
 
+  it("[OE-COLLAPSE-006][OE-MOVE-008] 折りたたみ block では ArrowDown が非表示の子を飛ばして次の可視 block へ移動する", async () => {
+    const parent = new BlockEntity(
+      "parent",
+      [new BlockEntity("hidden child")],
+      true,
+    );
+    const sibling = new BlockEntity("sibling");
+    renderRootBlock(new BlockEntity("", [parent, sibling]));
+
+    const editable = await beginEditing("parent", {
+      caretOffset: "parent".length,
+    });
+
+    fireEvent.keyDown(editable, { key: "ArrowDown" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("sibling");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: "parent".length,
+      });
+    });
+  });
+
   it("[OE-MOVE-005] 1行だけのブロックで ArrowUp を押すと前のブロックを編集モードにする", async () => {
     renderEditor(["first", "second"]);
 
@@ -41,6 +69,30 @@ describe("キー移動", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("first");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: 0,
+      });
+    });
+  });
+
+  it("[OE-COLLAPSE-006][OE-MOVE-005] 折りたたみ block の直後で ArrowUp を押すと非表示の子ではなく親 block へ移動する", async () => {
+    const parent = new BlockEntity(
+      "parent",
+      [new BlockEntity("hidden child")],
+      true,
+    );
+    const sibling = new BlockEntity("sibling");
+    renderRootBlock(new BlockEntity("", [parent, sibling]));
+
+    const editable = await beginEditing("sibling", { caretOffset: 0 });
+
+    fireEvent.keyDown(editable, { key: "ArrowUp" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("parent");
       expect(getCaretPositionState()).toEqual({
         blockId: getRootBlockState().children[0]?.id,
         caretOffset: 0,
@@ -271,6 +323,56 @@ describe("キー移動", () => {
       expect(getCaretPositionState()).toEqual({
         blockId: getRootBlockState().children[1]?.id,
         caretOffset: 0,
+      });
+    });
+  });
+
+  it("[OE-COLLAPSE-006][OE-MOVE-002] 折りたたみ block で ArrowRight を押すと非表示の子ではなく次の可視 block へ移動する", async () => {
+    const parent = new BlockEntity(
+      "parent",
+      [new BlockEntity("hidden child")],
+      true,
+    );
+    const sibling = new BlockEntity("sibling");
+    renderRootBlock(new BlockEntity("", [parent, sibling]));
+
+    const editable = await beginEditing("parent", {
+      caretOffset: "parent".length,
+    });
+
+    fireEvent.keyDown(editable, { key: "ArrowRight" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("sibling");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[1]?.id,
+        caretOffset: 0,
+      });
+    });
+  });
+
+  it("[OE-COLLAPSE-006][OE-MOVE-001] 折りたたみ block の直後で ArrowLeft を押すと非表示の子ではなく親 block へ移動する", async () => {
+    const parent = new BlockEntity(
+      "parent",
+      [new BlockEntity("hidden child")],
+      true,
+    );
+    const sibling = new BlockEntity("sibling");
+    renderRootBlock(new BlockEntity("", [parent, sibling]));
+
+    const editable = await beginEditing("sibling", { caretOffset: 0 });
+
+    fireEvent.keyDown(editable, { key: "ArrowLeft" });
+
+    await waitFor(() => {
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("parent");
+      expect(getCaretPositionState()).toEqual({
+        blockId: getRootBlockState().children[0]?.id,
+        caretOffset: "parent".length,
       });
     });
   });

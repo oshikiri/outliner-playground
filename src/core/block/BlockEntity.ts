@@ -9,12 +9,15 @@ import * as logger from "../../shared/logger";
 export default class BlockEntity {
   parent: BlockEntity | null = null;
   id: string = crypto.randomUUID();
+  collapsed: boolean;
 
   constructor(
     public content: string,
     public children: BlockEntity[] = [],
+    collapsed: boolean = false,
   ) {
     this.content = content;
+    this.collapsed = collapsed;
     for (const child of children) {
       child.withParent(this);
     }
@@ -124,6 +127,7 @@ export default class BlockEntity {
     const clone = new BlockEntity(this.content, nextChildren);
     clone.id = this.id;
     clone.parent = this.parent;
+    clone.collapsed = this.collapsed;
     return clone;
   }
 
@@ -173,6 +177,7 @@ export default class BlockEntity {
     const updatedBlock = new BlockEntity(
       beforeCaretText,
       this.children,
+      false,
     ).withParent(parent);
     updatedBlock.id = this.id;
     parent.children[idx] = updatedBlock;
@@ -240,10 +245,11 @@ export default class BlockEntity {
     const siblingsAfter = parent.children.slice(currentIdx + 1);
 
     parent.children = siblingsBefore;
-    const updatedCurrent = new BlockEntity(this.content, [
-      ...this.children,
-      ...siblingsAfter,
-    ]).withParent(grandparent);
+    const updatedCurrent = new BlockEntity(
+      this.content,
+      [...this.children, ...siblingsAfter],
+      this.collapsed,
+    ).withParent(grandparent);
     updatedCurrent.id = this.id;
 
     grandparent.children.splice(parentIdx + 1, 0, updatedCurrent);
@@ -289,6 +295,7 @@ export default class BlockEntity {
     return {
       id: this.id,
       content: this.content,
+      collapsed: this.collapsed,
       children:
         this.children.length === 0
           ? undefined
@@ -300,6 +307,7 @@ export default class BlockEntity {
 type BlockJSON = {
   id: string;
   content: string;
+  collapsed: boolean;
   children?: BlockJSON[];
 };
 

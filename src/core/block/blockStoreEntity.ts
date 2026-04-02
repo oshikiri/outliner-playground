@@ -13,7 +13,7 @@ export function createBlockTree(
   const children = block.childrenIds.map((childId) =>
     createBlockTree(rootBlock, childId),
   );
-  const tree = new BlockEntity(block.content, children);
+  const tree = new BlockEntity(block.content, children, block.collapsed);
   tree.id = block.id;
   return tree;
 }

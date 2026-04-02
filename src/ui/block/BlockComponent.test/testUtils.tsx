@@ -10,6 +10,7 @@ import { afterEach, vi, expect } from "vitest";
 
 import {
   createBlockStore,
+  toggleBlockCollapsed,
   getChildBlocks,
   indentBlock,
   isBlockStore,
@@ -245,6 +246,33 @@ vi.mock("../../../state", async () => {
       };
 
       return [value, updateValue];
+    },
+    useIsBlockCollapsed(blockId: string): boolean {
+      if (!rootBlockState) {
+        throw new Error("rootBlockState was not initialized.");
+      }
+      const [value, setValue] = hooks.useState(
+        findBlock(rootBlockState, blockId)?.collapsed ?? false,
+      );
+
+      hooks.useEffect(() => {
+        const listener = (nextRootBlock: BlockStore): void => {
+          setValue(findBlock(nextRootBlock, blockId)?.collapsed ?? false);
+        };
+        rootListeners.add(listener);
+        return () => rootListeners.delete(listener);
+      }, [blockId]);
+
+      return value;
+    },
+    useToggleBlockCollapsed(): (blockId: string) => void {
+      return (blockId: string): void => {
+        if (!rootBlockState) {
+          throw new Error("rootBlockState was not initialized.");
+        }
+        rootBlockState = toggleBlockCollapsed(rootBlockState, blockId);
+        notifyRootListeners();
+      };
     },
   };
 });

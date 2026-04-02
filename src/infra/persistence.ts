@@ -7,7 +7,7 @@ import {
 } from "../core/block/blockStore";
 import * as logger from "../shared/logger";
 
-const ROOT_BLOCK_STORAGE_KEY = "outliner-playground.rootBlock";
+const PERSISTED_EDITOR_STORAGE_KEY = "outliner-playground.rootBlock";
 
 function getBrowserStorage(): Storage | null {
   if (typeof window === "undefined") {
@@ -22,7 +22,7 @@ function getBrowserStorage(): Storage | null {
   }
 }
 
-export function loadPersistedRootBlock(
+export function loadPersistedEditorState(
   storage: Pick<Storage, "getItem"> | null,
   fallbackRootBlock: BlockStore,
 ): BlockStore {
@@ -30,28 +30,28 @@ export function loadPersistedRootBlock(
     return fallbackRootBlock;
   }
 
-  const serialized = storage.getItem(ROOT_BLOCK_STORAGE_KEY);
+  const serialized = storage.getItem(PERSISTED_EDITOR_STORAGE_KEY);
   if (!serialized) {
     return fallbackRootBlock;
   }
 
   try {
     const parsed = JSON.parse(serialized) as unknown;
-    if (!isPersistedRootBlock(parsed)) {
-      throw new Error("Persisted rootBlock has an invalid shape.");
+    if (!isPersistedBlock(parsed)) {
+      throw new Error("Persisted editor state has an invalid shape.");
     }
 
     return createBlockStore(parsed);
   } catch (error) {
-    logger.warn("Failed to load persisted rootBlock.", error);
+    logger.warn("Failed to load persisted editor state.", error);
     return fallbackRootBlock;
   }
 }
 
-export function loadBrowserRootBlock(
+export function loadBrowserEditorState(
   fallbackRootBlock: BlockStore | BlockTreeLike,
 ): BlockStore {
-  return loadPersistedRootBlock(
+  return loadPersistedEditorState(
     getBrowserStorage(),
     isBlockStore(fallbackRootBlock)
       ? fallbackRootBlock
@@ -59,7 +59,7 @@ export function loadBrowserRootBlock(
   );
 }
 
-export function persistRootBlock(
+export function persistEditorState(
   storage: Pick<Storage, "setItem"> | null,
   rootBlock: BlockStore,
 ): void {
@@ -69,28 +69,16 @@ export function persistRootBlock(
 
   try {
     storage.setItem(
-      ROOT_BLOCK_STORAGE_KEY,
+      PERSISTED_EDITOR_STORAGE_KEY,
       JSON.stringify(createBlockTreeLike(rootBlock)),
     );
   } catch (error) {
-    logger.warn("Failed to persist rootBlock.", error);
+    logger.warn("Failed to persist editor state.", error);
   }
 }
 
-export function persistBrowserRootBlock(rootBlock: BlockStore): void {
-  persistRootBlock(getBrowserStorage(), rootBlock);
-}
-
-type PersistedRootBlock = BlockTreeLike & {
-  children: BlockTreeLike[];
-};
-
-function isPersistedRootBlock(value: unknown): value is PersistedRootBlock {
-  if (!isPersistedBlock(value)) {
-    return false;
-  }
-
-  return Array.isArray(value.children);
+export function persistBrowserEditorState(rootBlock: BlockStore): void {
+  persistEditorState(getBrowserStorage(), rootBlock);
 }
 
 function isPersistedBlock(value: unknown): value is BlockTreeLike {
@@ -101,11 +89,18 @@ function isPersistedBlock(value: unknown): value is BlockTreeLike {
   const candidate = value as {
     id?: unknown;
     content?: unknown;
+    collapsed?: unknown;
     children?: unknown;
   };
   if (
     typeof candidate.id !== "string" ||
     typeof candidate.content !== "string"
+  ) {
+    return false;
+  }
+  if (
+    candidate.collapsed !== undefined &&
+    typeof candidate.collapsed !== "boolean"
   ) {
     return false;
   }

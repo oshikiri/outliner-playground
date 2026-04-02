@@ -48,6 +48,16 @@ describe("ブロック分割・結合", () => {
     expect(updatedBlock?.children[1]).toBe(child);
     expect(updatedBlock?.children[0]?.parent).toBe(updatedBlock);
   });
+
+  it("折りたたみ中の block を子付きで分割した場合は展開する", () => {
+    const child = new BlockEntity("child");
+    const block = new BlockEntity("hello", [child], true);
+    const root = new BlockEntity("", [block]);
+
+    block.appendNewByNewline("he", "llo");
+
+    expect(root.children[0]?.collapsed).toBe(false);
+  });
 });
 
 describe("階層操作", () => {
@@ -165,5 +175,25 @@ describe("ブロック移動の走査順", () => {
     expect(sibling.findPrevBlock()).toBe(grandchild);
     expect(grandchild.findPrevBlock()).toBe(child);
     expect(child.findPrevBlock()).toBe(root);
+  });
+});
+
+describe("シリアライズ", () => {
+  it("toJSON() は collapsed を含める", () => {
+    const child = new BlockEntity("child");
+    const block = new BlockEntity("parent", [child], true);
+
+    expect(block.toJSON()).toEqual({
+      id: block.id,
+      content: "parent",
+      collapsed: true,
+      children: [
+        {
+          id: child.id,
+          content: "child",
+          collapsed: false,
+        },
+      ],
+    });
   });
 });

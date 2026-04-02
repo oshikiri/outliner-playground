@@ -1,4 +1,4 @@
-import { fireEvent, waitFor } from "@testing-library/preact";
+import { fireEvent, screen, waitFor } from "@testing-library/preact";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import BlockEntity from "../../../core/block/BlockEntity";
@@ -85,6 +85,35 @@ describe("ブロック分割", () => {
       const rootBlock = getRootBlockState();
       expect(rootBlock.children).toHaveLength(1);
       expect(rootBlock.children[0]?.content).toBe("he");
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["llo", "child"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.children[0]?.id,
+        caretOffset: 0,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("llo");
+    });
+  });
+
+  it("[OE-COLLAPSE-007][OE-SPLIT-003] 折りたたみ中の親 block で Enter した場合は親を展開して新しい子 block を編集する", async () => {
+    const child = new BlockEntity("child");
+    const target = new BlockEntity("hello", [child], true);
+    renderRootBlock(new BlockEntity("", [target]));
+
+    const editable = await beginEditing("hello", {
+      content: "hello",
+      caretOffset: 2,
+    });
+
+    fireEvent.keyDown(editable, { key: "Enter" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children[0]?.collapsed).toBe(false);
       expect(
         rootBlock.children[0]?.children.map((block) => block.content),
       ).toEqual(["llo", "child"]);
@@ -212,6 +241,63 @@ describe("ブロック結合", () => {
       const nextEditable = getEditableTextboxes();
       expect(nextEditable).toHaveLength(1);
       expect(nextEditable[0]?.textContent).toBe("parenttarget");
+    });
+  });
+
+  it("[OE-COLLAPSE-006][OE-JOIN-002] 折りたたみ block の直後で Backspace したときは非表示の子ではなく親 block へ結合する", async () => {
+    const hiddenChild = new BlockEntity("hidden");
+    const parent = new BlockEntity("parent", [hiddenChild], true);
+    const target = new BlockEntity("target");
+    renderRootBlock(new BlockEntity("", [parent, target]));
+
+    const editable = await beginEditing("target", {
+      content: "target",
+      caretOffset: 0,
+    });
+
+    fireEvent.keyDown(editable, { key: "Backspace" });
+
+    await waitFor(() => {
+      const rootBlock = getRootBlockState();
+      expect(rootBlock.children).toHaveLength(1);
+      expect(rootBlock.children[0]?.content).toBe("parenttarget");
+      expect(rootBlock.children[0]?.collapsed).toBe(true);
+      expect(
+        rootBlock.children[0]?.children.map((block) => block.content),
+      ).toEqual(["hidden"]);
+      expect(getCaretPositionState()).toEqual({
+        blockId: rootBlock.children[0]?.id,
+        caretOffset: "parent".length,
+      });
+
+      const nextEditable = getEditableTextboxes();
+      expect(nextEditable).toHaveLength(1);
+      expect(nextEditable[0]?.textContent).toBe("parenttarget");
+    });
+  });
+});
+
+describe("折りたたみと編集セッション", () => {
+  it("[OE-COLLAPSE-008] 子孫 block を編集中に祖先 block を折りたたむと編集内容を反映して編集モードを終了する", async () => {
+    const child = new BlockEntity("child");
+    const parent = new BlockEntity("parent", [child]);
+    renderRootBlock(new BlockEntity("", [parent]));
+
+    const editable = await beginEditing("child");
+    editable.innerText = "child updated";
+    fireEvent.input(editable);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "子ブロックを折りたたむ" }),
+    );
+
+    await waitFor(() => {
+      expect(getEditableTextboxes()).toHaveLength(0);
+      expect(getRootBlockState().children[0]?.collapsed).toBe(true);
+      expect(getRootBlockState().children[0]?.children[0]?.content).toBe(
+        "child updated",
+      );
+      expect(screen.queryByText("child updated")).toBeNull();
     });
   });
 });

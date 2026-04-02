@@ -5,8 +5,8 @@ import { useEffect } from "preact/hooks";
 import { initialRootBlock } from "./core/block/data";
 import { createBlockStore } from "./core/block/blockStore";
 import {
-  loadBrowserRootBlock,
-  persistBrowserRootBlock,
+  loadBrowserEditorState,
+  persistBrowserEditorState,
 } from "./infra/persistence";
 import { handleGlobalEditorKeydown } from "./app/keyboardShortcuts";
 import * as logger from "./shared/logger";
@@ -22,7 +22,8 @@ import BlockComponent from "./ui/block/BlockComponent";
 
 import "./styles.css";
 
-initializeState(loadBrowserRootBlock(initialRootBlock));
+const initialPersistedRootBlock = loadBrowserEditorState(initialRootBlock);
+initializeState(initialPersistedRootBlock);
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -50,7 +51,7 @@ function App(): JSX.Element {
   }, [setEditorSession, setRootBlock]);
 
   useEffect(() => {
-    persistBrowserRootBlock(persistedRootBlock);
+    persistBrowserEditorState(persistedRootBlock);
   }, [persistedRootBlock]);
 
   return (

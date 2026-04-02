@@ -1,6 +1,8 @@
 export type { EditorSession } from "./editorSession";
 export {
   initializeState,
+  useIsBlockCollapsed,
+  useToggleBlockCollapsed,
   useRootBlock,
   useRootBlockValue,
   useSetRootBlock,

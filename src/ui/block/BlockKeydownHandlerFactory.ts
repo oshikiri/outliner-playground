@@ -6,7 +6,10 @@ import type {
 import { useCallback } from "preact/hooks";
 
 import type { BlockState, BlockStore } from "../../core/block/blockStore";
-import { findNextBlock, findPrevBlock } from "../../core/block/blockStore";
+import {
+  findNextVisibleBlock,
+  findPrevVisibleBlock,
+} from "../../core/block/blockStore";
 import {
   createEditorSession,
   type ActiveEditorSession,
@@ -235,7 +238,7 @@ function handleArrowDown(
   }
 
   event.preventDefault();
-  const nextBlock = findNextBlock(context.rootBlock, context.block.id);
+  const nextBlock = findNextVisibleBlock(context.rootBlock, context.block.id);
   if (!nextBlock) {
     return;
   }
@@ -280,8 +283,8 @@ function handleArrowUp(
   }
 
   event.preventDefault();
-  const prevBlock = findPrevBlock(context.rootBlock, context.block.id);
-  if (!isVisibleBlock(prevBlock)) {
+  const prevBlock = findPrevVisibleBlock(context.rootBlock, context.block.id);
+  if (!prevBlock) {
     return;
   }
 
@@ -420,8 +423,11 @@ function handleBackspace(
     return;
   }
 
-  const previousBlock = findPrevBlock(context.rootBlock, context.block.id);
-  if (!isVisibleBlock(previousBlock)) {
+  const previousBlock = findPrevVisibleBlock(
+    context.rootBlock,
+    context.block.id,
+  );
+  if (!previousBlock) {
     return;
   }
 
@@ -447,8 +453,8 @@ function handleArrowLeft(
   }
 
   event.preventDefault();
-  const prevBlock = findPrevBlock(context.rootBlock, context.block.id);
-  if (!isVisibleBlock(prevBlock)) {
+  const prevBlock = findPrevVisibleBlock(context.rootBlock, context.block.id);
+  if (!prevBlock) {
     return;
   }
 
@@ -468,16 +474,12 @@ function handleArrowRight(
   }
 
   event.preventDefault();
-  const nextBlock = findNextBlock(context.rootBlock, context.block.id);
+  const nextBlock = findNextVisibleBlock(context.rootBlock, context.block.id);
   if (!nextBlock) {
     return;
   }
 
   setEditorSessionForBlock(context, nextBlock, 0);
-}
-
-function isVisibleBlock(block: BlockState | null): block is BlockState {
-  return block !== null && block.parentId !== null;
 }
 
 type UseBlockKeydownHandlerArgs = {

@@ -23,12 +23,11 @@ const rootBlockAtom = atom<BlockStore>(blockStore.createEmptyBlockStore());
 type UpdateBlock = SetStateAction<BlockStore>;
 
 export function initializeState(rootBlock: BlockStore | BlockTreeLike): void {
-  getDefaultStore().set(
-    rootBlockAtom,
-    blockStore.isBlockStore(rootBlock)
-      ? rootBlock
-      : blockStore.createBlockStore(rootBlock),
-  );
+  const nextRootBlock = blockStore.isBlockStore(rootBlock)
+    ? blockStore.normalizeBlockStore(rootBlock)
+    : blockStore.createBlockStore(rootBlock);
+
+  getDefaultStore().set(rootBlockAtom, nextRootBlock);
   getDefaultStore().set(editorSessionAtom, null);
 }
 
@@ -197,6 +196,27 @@ export function useBlock(blockId: string): BlockState | null {
   }, [blockId]);
 
   return useAtomValue(blockAtom);
+}
+
+export function useIsBlockCollapsed(blockId: string): boolean {
+  const isCollapsedAtom = useMemo(() => {
+    return selectAtom(rootBlockAtom, (rootBlock) => {
+      return blockStore.findBlock(rootBlock, blockId)?.collapsed ?? false;
+    });
+  }, [blockId]);
+
+  return useAtomValue(isCollapsedAtom);
+}
+
+export function useToggleBlockCollapsed(): (blockId: string) => void {
+  const setRootBlock = useSetRootBlock();
+
+  return useCallback(
+    (blockId) => {
+      setRootBlock((prev) => blockStore.toggleBlockCollapsed(prev, blockId));
+    },
+    [setRootBlock],
+  );
 }
 
 export function useRootChildBlockIds(): readonly string[] {
