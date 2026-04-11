@@ -17,7 +17,7 @@
     "verify": "bash scripts/verify.sh",
     "check:traceability": "node --experimental-strip-types scripts/check-spec-test-traceability.ts",
     "check:traceability:strict": "node --experimental-strip-types scripts/check-spec-test-traceability.ts --strict",
-    "test": "tsc --noEmit && vitest",
+    "test": "tsc --noEmit && vitest run",
     "test:coverage": "tsc --noEmit && vitest run --coverage"
   },
   "author": "oshikiri",
