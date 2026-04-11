@@ -7,3 +7,6 @@ coverage/
 
 # VS Code
 .vscode/
+
+# nvm
+.nvmrc

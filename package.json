@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "A simple outliner editor",
   "type": "module",
+  "engines": {
+    "node": "24.14.1"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
