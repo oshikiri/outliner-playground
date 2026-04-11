@@ -1,8 +1,5 @@
 # AGENTS.md
 
-- Specifications are stored under `docs/specs/`.
-- Architecture and layer boundaries: `docs/architecture.md`
-
 ## Completion Criteria
 
 - After code changes, run `npm run verify` before replying.
