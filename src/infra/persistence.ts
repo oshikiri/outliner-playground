@@ -8,6 +8,29 @@ import {
 import * as logger from "../shared/logger";
 
 const PERSISTED_EDITOR_STORAGE_KEY = "outliner-playground.rootBlock";
+const INITIAL_STORAGE_VERSION = 0;
+
+type PersistedEditorState = {
+  rootBlock: BlockStore;
+  version: number;
+};
+
+type PersistEditorStateResult =
+  | {
+      status: "saved";
+      persistedState: PersistedEditorState;
+    }
+  | {
+      status: "conflict";
+      latestState: PersistedEditorState;
+    }
+  | {
+      status: "skipped";
+    };
+
+type PersistEditorStateOptions = {
+  skipConflictCheck?: boolean;
+};
 
 function getBrowserStorage(): Storage | null {
   if (typeof window === "undefined") {
@@ -25,32 +48,50 @@ function getBrowserStorage(): Storage | null {
 export function loadPersistedEditorState(
   storage: Pick<Storage, "getItem"> | null,
   fallbackRootBlock: BlockStore,
-): BlockStore {
+): PersistedEditorState {
   if (!storage) {
-    return fallbackRootBlock;
+    return {
+      rootBlock: fallbackRootBlock,
+      version: INITIAL_STORAGE_VERSION,
+    };
   }
 
   const serialized = storage.getItem(PERSISTED_EDITOR_STORAGE_KEY);
   if (!serialized) {
-    return fallbackRootBlock;
+    return {
+      rootBlock: fallbackRootBlock,
+      version: INITIAL_STORAGE_VERSION,
+    };
   }
 
   try {
     const parsed = JSON.parse(serialized) as unknown;
-    if (!isPersistedBlock(parsed)) {
-      throw new Error("Persisted editor state has an invalid shape.");
+    if (isPersistedEditorDocument(parsed)) {
+      return {
+        rootBlock: createBlockStore(parsed.rootBlock),
+        version: parsed.version,
+      };
+    }
+    if (isPersistedBlock(parsed)) {
+      return {
+        rootBlock: createBlockStore(parsed),
+        version: INITIAL_STORAGE_VERSION,
+      };
     }
 
-    return createBlockStore(parsed);
+    throw new Error("Persisted editor state has an invalid shape.");
   } catch (error) {
     logger.warn("Failed to load persisted editor state.", error);
-    return fallbackRootBlock;
+    return {
+      rootBlock: fallbackRootBlock,
+      version: INITIAL_STORAGE_VERSION,
+    };
   }
 }
 
 export function loadBrowserEditorState(
   fallbackRootBlock: BlockStore | BlockTreeLike,
-): BlockStore {
+): PersistedEditorState {
   return loadPersistedEditorState(
     getBrowserStorage(),
     isBlockStore(fallbackRootBlock)
@@ -60,25 +101,57 @@ export function loadBrowserEditorState(
 }
 
 export function persistEditorState(
-  storage: Pick<Storage, "setItem"> | null,
+  storage: Pick<Storage, "getItem" | "setItem"> | null,
   rootBlock: BlockStore,
-): void {
+  lastReadVersion: number,
+  options: PersistEditorStateOptions = {},
+): PersistEditorStateResult {
   if (!storage) {
-    return;
+    return { status: "skipped" };
   }
 
   try {
+    const latestState = loadPersistedEditorState(storage, rootBlock);
+    const shouldSkipConflictCheck = options.skipConflictCheck ?? false;
+
+    if (!shouldSkipConflictCheck && latestState.version !== lastReadVersion) {
+      return {
+        status: "conflict",
+        latestState,
+      };
+    }
+
+    const nextVersion = latestState.version + 1;
+    const persistedState = {
+      rootBlock,
+      version: nextVersion,
+    } satisfies PersistedEditorState;
+
     storage.setItem(
       PERSISTED_EDITOR_STORAGE_KEY,
-      JSON.stringify(createBlockTreeLike(rootBlock)),
+      JSON.stringify(serializePersistedEditorState(persistedState)),
     );
+    return {
+      status: "saved",
+      persistedState,
+    };
   } catch (error) {
     logger.warn("Failed to persist editor state.", error);
+    return { status: "skipped" };
   }
 }
 
-export function persistBrowserEditorState(rootBlock: BlockStore): void {
-  persistEditorState(getBrowserStorage(), rootBlock);
+export function persistBrowserEditorState(
+  rootBlock: BlockStore,
+  lastReadVersion: number,
+  options: PersistEditorStateOptions = {},
+): PersistEditorStateResult {
+  return persistEditorState(
+    getBrowserStorage(),
+    rootBlock,
+    lastReadVersion,
+    options,
+  );
 }
 
 function isPersistedBlock(value: unknown): value is BlockTreeLike {
@@ -112,4 +185,34 @@ function isPersistedBlock(value: unknown): value is BlockTreeLike {
   }
 
   return candidate.children.every((child) => isPersistedBlock(child));
+}
+
+function isPersistedEditorDocument(value: unknown): value is {
+  rootBlock: BlockTreeLike;
+  version: number;
+} {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as {
+    rootBlock?: unknown;
+    version?: unknown;
+  };
+
+  return (
+    isPersistedBlock(candidate.rootBlock) &&
+    Number.isInteger(candidate.version) &&
+    (candidate.version as number) >= INITIAL_STORAGE_VERSION
+  );
+}
+
+function serializePersistedEditorState(persistedState: PersistedEditorState): {
+  rootBlock: BlockTreeLike;
+  version: number;
+} {
+  return {
+    rootBlock: createBlockTreeLike(persistedState.rootBlock),
+    version: persistedState.version,
+  };
 }

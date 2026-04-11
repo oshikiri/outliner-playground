@@ -110,9 +110,23 @@
 
 ## 永続化
 
-- [OE-STORAGE-001] 起動時に localStorage に保存済みの `rootBlock` があれば、それを初期データより優先して読み込む
-- [OE-STORAGE-002] `rootBlock` が更新されたら、その内容を localStorage に保存する
+localStorage に永続化する。
+localStorage に保存するデータは `rootBlock` と競合判定用の `version` を含む。
+
+### 基礎保存
+
+- [OE-STORAGE-001] 起動時に localStorage に保存済みデータがあれば、`rootBlock` と `version` を初期データより優先して読み込む
+- [OE-STORAGE-002] 保存要求が成功したとき、`rootBlock` と `version` を localStorage に保存する
 - [OE-STORAGE-003] localStorage の保存内容が壊れている場合は、初期データへフォールバックする
+
+### 競合制御
+
+- [OE-STORAGE-004] 保存要求が発生したとき、保存前に localStorage の最新データを再読込する
+- [OE-STORAGE-005] 保存前に再読込した `version` が最後に読んだ値と一致する場合だけ、保存データの `version` を 1 増やして localStorage を更新する
+- [OE-STORAGE-006] 保存前に再読込した `version` が最後に読んだ値と一致しない場合は競合として localStorage を更新せず、`再読込` と `このまま続ける` を持つ banner を表示する
+- [OE-STORAGE-007] `document.visibilityState` が `visible` になったとき、たとえば別タブや別ウィンドウへ移動してからこのタブへ戻った場合を含めて、localStorage の最新 `version` が最後に読んだ値より新しければ、`再読込` と `このまま続ける` を持つ banner を表示する
+- [OE-STORAGE-008] 保存競合の banner で `再読込` を選んだとき、localStorage の最新 `rootBlock` と `version` を読み直して反映し、banner を閉じる
+- [OE-STORAGE-009] 保存競合の banner で `このまま続ける` を選んだとき、banner を閉じ、このタブで次に発生する 1 回の保存要求だけ競合チェックをスキップして保存できる状態にする
 
 ## 階層操作（インデント・アウトデント）
 
