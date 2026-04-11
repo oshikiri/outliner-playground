@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "format": "prettier --write . --list-different",
     "pretest": "prettier --check .",
-    "verify": "npm run format && npm run lint && npm run knip && npm run build && npm run test && npm run check:traceability:strict",
+    "verify": "bash scripts/verify.sh",
     "check:traceability": "node --experimental-strip-types scripts/check-spec-test-traceability.ts",
     "check:traceability:strict": "node --experimental-strip-types scripts/check-spec-test-traceability.ts --strict",
     "test": "tsc --noEmit && vitest",
